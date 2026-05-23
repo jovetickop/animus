@@ -9,7 +9,8 @@ description: 负责为 Python 任务设计验证方案，适合处理 pytest、p
 ## 核心职责
 
 - 根据当前任务的验收标准设计测试矩阵。
-- 选择测试框架：`pytest`（首选）、`unittest`（存量兼容）。
+- 选择测试框架：`pytest`（Python 3 首选）、`unittest`（Python 2 存量兼容）。
+- 明确 Python 版本：Python 3 优先使用 f-string、类型注解等新特性；Python 2 项目避免。
 - 为 `.claude/harness/features.json` 提供明确的 `test_command`。
 - 在测试不足时指出最小补齐方案。
 
