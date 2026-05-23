@@ -1,11 +1,14 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Python 2.7+ / 3.x 兼容
 
+from __future__ import print_function
 import json
+import os
 import sys
-from pathlib import Path
 
 
-def get_priority(task: dict) -> int:
+def get_priority(task):
     value = task.get("priority", 0)
     try:
         return int(value)
@@ -13,72 +16,81 @@ def get_priority(task: dict) -> int:
         return 0
 
 
-def get_depends_on(task: dict) -> list[str]:
+def get_depends_on(task):
     depends_on = task.get("depends_on", [])
     if isinstance(depends_on, list):
         return [str(item) for item in depends_on if str(item).strip()]
     return []
 
 
-def can_run(task: dict, status_by_id: dict[str, str]) -> bool:
+def can_run(task, status_by_id):
     for dep_id in get_depends_on(task):
         if status_by_id.get(dep_id) != "passed":
             return False
     return True
 
 
-def main() -> int:
+def read_json(path):
+    """读取 JSON 文件，兼容 Python 2/3。"""
+    with open(path, "rb") as f:
+        return json.load(f)
+
+
+def main():
     if len(sys.argv) > 1:
-        harness_root = Path(sys.argv[1])
+        harness_root = sys.argv[1]
     else:
-        # Prefer repo-root invocation: python .claude/harness/show-status.py
-        default_root = Path(".claude/harness")
-        if default_root.exists():
+        default_root = os.path.join(".claude", "harness")
+        if os.path.exists(default_root):
             harness_root = default_root
         else:
-            harness_root = Path(__file__).resolve().parent
+            harness_root = os.path.dirname(os.path.abspath(__file__))
 
-    features_path = harness_root / "features.json"
+    features_path = os.path.join(harness_root, "features.json")
 
-    if not features_path.exists():
-        print(f"未找到 features.json: {features_path}")
+    if not os.path.exists(features_path):
+        print(u"未找到 features.json: {0}".format(features_path))
         return 1
 
-    tasks = json.loads(features_path.read_text(encoding="utf-8"))
+    tasks = read_json(features_path)
     status_by_id = {str(task.get("id", "")): str(task.get("status", "")) for task in tasks}
 
     total = len(tasks)
     passed = sum(1 for task in tasks if task.get("status") == "passed")
     failed_tasks = [task for task in tasks if task.get("status") == "failed"]
-    in_progress = next((task for task in tasks if task.get("status") == "in_progress"), None)
+    in_progress = None
+    for task in tasks:
+        if task.get("status") == "in_progress":
+            in_progress = task
+            break
     pending_tasks = [task for task in tasks if task.get("status") == "pending"]
 
     executable_pending = [task for task in pending_tasks if can_run(task, status_by_id)]
     executable_pending.sort(key=lambda task: (-get_priority(task), str(task.get("id", ""))))
     next_pending = executable_pending[0] if executable_pending else None
 
-    print(f"任务总数: {total}")
-    print(f"已通过: {passed}")
-    print(f"失败: {len(failed_tasks)}")
+    print(u"任务总数: {0}".format(total))
+    print(u"已通过: {0}".format(passed))
+    print(u"失败: {0}".format(len(failed_tasks)))
 
     if in_progress:
         task_id = in_progress.get("id", "UNKNOWN")
         task_name = in_progress.get("name", "")
         updated_at = in_progress.get("updated_at", "")
-        print(f"进行中: {task_id} {task_name}")
+        print(u"进行中: {0} {1}".format(task_id, task_name))
         if updated_at:
-            print(f"进行中更新时间: {updated_at}")
+            print(u"进行中更新时间: {0}".format(updated_at))
     elif next_pending:
         task_id = next_pending.get("id", "UNKNOWN")
         task_name = next_pending.get("name", "")
         priority = get_priority(next_pending)
-        print(f"下一个可执行任务: {task_id} {task_name} (priority={priority})")
+        print(u"下一个可执行任务: {0} {1} (priority={2})".format(task_id, task_name, priority))
 
         blocked = len(pending_tasks) - len(executable_pending)
         if blocked > 0:
-            print(f"被依赖阻塞的 pending 任务: {blocked}")
+            print(u"被依赖阻塞的 pending 任务: {0}".format(blocked))
     else:
-        print("所有任务均已完成。")
+        print(u"所有任务均已完成。")
 
     if failed_tasks:
         failed_tasks.sort(key=lambda task: (-get_priority(task), str(task.get("id", ""))))
@@ -86,12 +98,12 @@ def main() -> int:
         err = str(top_failed.get("last_error", "")).strip()
         task_id = top_failed.get("id", "UNKNOWN")
         task_name = top_failed.get("name", "")
-        print(f"待处理失败任务: {task_id} {task_name}")
+        print(u"待处理失败任务: {0} {1}".format(task_id, task_name))
         if err:
-            print(f"最近失败原因: {err}")
+            print(u"最近失败原因: {0}".format(err))
 
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main())

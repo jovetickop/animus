@@ -1,5 +1,12 @@
 # Python 编码最佳实践
 
+## Python 版本选择
+
+- 新项目默认使用 **Python 3**，不再支持 Python 2（已于 2020 年 EOL）。
+- 存量 Python 2 项目逐步迁移，迁移期间避免混用版本不兼容语法。
+- 需 Python 2/3 双兼容的脚本使用 `from __future__ import print_function` 等兼容层。
+- 系统级工具脚本建议兼容 Python 2.7+ 和 3.x，shebang 使用 `#!/usr/bin/env python`。
+
 ## PEP 8 风格指南
 
 - 缩进统一使用 4 空格，禁止 Tab。
