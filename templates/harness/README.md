@@ -27,7 +27,7 @@
 
 ## 项目接入说明
 
-目标工程执行 `/code-setup` 后，需要对以下内容做适配：
+目标工程执行 `/harness-code-setup` 后，需要对以下内容做适配：
 
 - 确认构建命令和测试命令已正确填入 CLAUDE.md
 - 用实际需求替换 `features.json` 中的示例任务，补全 `depends_on`、`priority` 等字段

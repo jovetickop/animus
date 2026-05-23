@@ -2,7 +2,7 @@
 description: 检测项目类型并复制对应工作流资产到目标工程
 ---
 
-# /code-setup
+# /harness-code-setup
 
 ## 目标
 

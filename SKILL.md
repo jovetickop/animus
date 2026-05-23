@@ -42,7 +42,7 @@ Get-Content .claude/harness/claude-progress.txt -Tail 20
 
 - 优先继续 `in_progress` 任务
 - 否则选择依赖已满足且 priority 最高的 `pending` 任务
-- 无任务时执行 `/code-plan` 从 PRD/方案拆解（/code-plan 内部使用 `agents/universal/feature-planner.md` 生成 features.json）
+- 无任务时执行 `/harness-code-plan` 从 PRD/方案拆解（/harness-code-plan 内部使用 `agents/universal/feature-planner.md` 生成 features.json）
 
 ### Step 3: 标记任务开始
 
@@ -83,7 +83,7 @@ Get-Content .claude/harness/claude-progress.txt -Tail 20
 
 ### Step 7: 验收
 
-执行 `/code-check`：通用检查（构建+测试+代码质量）+ 语言专项检查。
+执行 `/harness-code-review`：通用检查（构建+测试+代码质量）+ 语言专项检查。
 
 ### Step 8: 完成或失败
 

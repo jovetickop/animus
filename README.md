@@ -28,10 +28,10 @@ git clone https://github.com/jovetickop/CodeHarness.git ~/.claude/skills/code-ha
 
 ```
 人工: 输入 PRD/需求
-  → AI: /code-plan 生成 features.json
+  → AI: /harness-code-plan 生成 features.json
     → AI: 选任务并标记 in_progress
       → AI: 实现 + 构建/测试
-        → AI: /code-check 验收
+        → AI: /harness-code-review 验收
           → 通过 → 标记 passed → 提交 → 下一个
           → 失败 → 标记 failed → 重试
 ```

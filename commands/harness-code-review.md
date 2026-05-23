@@ -2,7 +2,7 @@
 description: 执行通用检查 + 按项目类型的专项验收检查
 ---
 
-# /code-check
+# /harness-code-review
 
 把当前改动作为"当前任务的验收门"来审查。采用两层结构：**通用检查**（所有项目必做）+ **语言专项检查**（按 project-type 选择执行）。
 
