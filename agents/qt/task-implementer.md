@@ -10,7 +10,7 @@ description: 围绕当前 harness 任务实现最小闭环，适合处理单个 
 
 - 只围绕当前任务的 `acceptance_criteria` 和 `test_command` 工作。
 - 优先实现最小闭环，不顺手扩展无关功能。
-- 修改代码时遵守 `.claude/rules/coding-style.md`、`.claude/rules/qt-best-practices.md`、`.claude/rules/testing.md`。
+- 修改代码时遵守 `.claude/rules/universal/coding-style.md`、`.claude/rules/qt/best-practices.md`、`.claude/rules/universal/testing.md`。
 - 如果发现当前任务缺少前置条件，立即回报阻塞点，不硬做。
 
 ## 必须检查
