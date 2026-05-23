@@ -99,24 +99,25 @@ CodeHarness/
 │   ├── skills/                             # Skill 技能
 │   │   └── tdd-workflow/
 │   └── templates/                          # 初始化模板
-│       ├── CLAUDE.md
 │       ├── .clang-format
 │       ├── .mcp.json
 │       ├── existing_project/               # 存量工程接入通用模板
 │       │   ├── CLAUDE.md
 │       │   ├── review-checklist.md
-│       │   ├── cmake-adapter.md
-│       │   └── harness/
+│       │   └── cmake-adapter.md
 │       └── harness/                        # 长任务自动化执行约束
 │           ├── README.md                   # 执行约束说明
 │           ├── features.json               # 任务状态机
 │           ├── project-config.json         # 项目类型配置
 │           ├── claude-progress.txt         # 进度日志
 │           ├── update-progress.ps1         # 状态流转与报告落盘
+│           ├── update-progress.bat         # 状态流转（CMD 包装）
 │           ├── show-status.py              # 可执行任务与失败任务概览
 │           ├── coding-session.ps1          # 会话入口（状态扫描）
+│           ├── coding-session.bat          # 会话入口（CMD 包装）
 │           ├── run-regression.ps1          # 构建 + 回归测试
 │           ├── init.ps1                    # harness 初始化
+│           └── init.bat                    # harness 初始化（CMD 包装）
 └── README.md
 ```
 
@@ -347,7 +348,7 @@ failed ──→ pending (仅人工确认后可重排)
 |------|------|
 | Agent 定义 | 16（5 universal + 4 qt + 2 python + 3 node + 2 rust） |
 | 斜杠命令 | 3 |
-| 规则文件 | 10（3 universal + 2 qt + 1 python + 1 node + 1 rust） |
+| 规则文件 | 8（3 universal + 2 qt + 1 python + 1 node + 1 rust） |
 | 钩子规则 | 1（PostToolUse） |
 | Skill | 1（TDD） |
 | MCP 服务器默认配置 | 3 |

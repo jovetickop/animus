@@ -75,7 +75,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 位于 `.claude/templates/`，供 `/code-setup` 使用的资产：
 
-- **`CLAUDE.md`** — 目标工程的根 CLAUDE.md 模板，包含会话初始化、状态流转、开发与验收、Git 提交等 MUST 规则
+- **`existing_project/CLAUDE.md`** — 存量工程接入的根 CLAUDE.md 模板，包含会话初始化、状态流转、开发与验收、Git 提交等 MUST 规则
 - **`.clang-format`** — C++ 代码格式化配置
 - **`.mcp.json`** — MCP 工具配置
 - **`existing_project/`** — 通用存量工程接入模板（CLAUDE.md、review-checklist.md、cmake-adapter.md）
