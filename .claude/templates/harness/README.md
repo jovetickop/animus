@@ -22,3 +22,22 @@
 - 失败任务默认保持 `failed`，不要自动回退到 `pending`。
 - `depends_on` 只写直接依赖；依赖任务必须先 `passed`，当前任务才能进入 `in_progress`。
 - `updated_at` 与 `last_error` 由 `update-progress.ps1` 自动维护，不要手工批量改写。
+
+---
+
+## 项目接入说明
+
+目标工程执行 `/code-setup` 后，需要对以下内容做适配：
+
+- 确认构建命令和测试命令已正确填入 CLAUDE.md
+- 用实际需求替换 `features.json` 中的示例任务，补全 `depends_on`、`priority` 等字段
+- 在 `claude-progress.txt` 补一条初始化记录，说明接入背景
+- 首次编码前运行 `show-status.py`，确认状态文件可读
+
+### 最低要求
+
+- Claude Code 能明确找到当前任务
+- 每个任务都有可执行的验证命令
+- 构建失败时能回写进度日志
+- 每次状态流转后自动生成/更新 `docs/reports/<任务编号>-描述.md`
+- 现有源码目录和架构不被模板误改

@@ -48,6 +48,12 @@ description: 检测项目类型并复制对应工作流资产到目标工程
 | `rules/universal/` → | `.claude/rules/universal/` | 通用规范（coding-style, testing, git-workflow） |
 | `commands/` → | `.claude/commands/` | 斜杠命令（code-plan, code-check, code-setup） |
 | `skills/tdd-workflow/` → | `.claude/skills/tdd-workflow/` | TDD 工作流 skill |
+| `hooks/` → | `.claude/hooks/` | 自动化钩子（hooks.json + clang-format 脚本） |
+| `templates/existing_project/CLAUDE.md` → | `/CLAUDE.md` | 根 CLAUDE.md 模板（填入实际命令） |
+| `templates/existing_project/review-checklist.md` → | `/review-checklist.md` | 验收清单 |
+| `templates/existing_project/cmake-adapter.md` → | `/cmake-adapter.md` | CMake 接入说明 |
+| `templates/.clang-format` → | `/.clang-format` | C++ 格式化配置 |
+| `templates/.mcp.json` → | `/.mcp.json` | MCP 服务器配置 |
 
 ### 按类型复制（目录存在时复制）
 
