@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /b /s D:\\\\code\\\\ty-qt-ai-plugin\\\\.claude\\\\worktrees\\\\unruffled-allen-1d5daf\\\\src)",
+      "Bash(dir /b /s D:\\\\code\\\\ty-qt-ai-plugin\\\\.claude\\\\worktrees\\\\unruffled-allen-1d5daf\\\\include)",
+      "Bash(rm -rf D:/code/ty-qt-ai-plugin/.claude/worktrees/unruffled-allen-1d5daf/.claude/templates/new_project)",
+      "Bash(rm -rf /d/test-setup-verify)",
+      "Bash(mkdir -p /d/test-setup-verify/src /d/test-setup-verify/include /d/test-setup-verify/tests /d/test-setup-verify/ui /d/test-setup-verify/resources /d/test-setup-verify/build)",
+      "Bash(cat)",
+      "Bash(echo \"int main\\(\\) { return 0; }\")",
+      "Bash(echo \"# TestProject\")",
+      "Read(//d/test-setup-verify/**)",
+      "Bash(cmake -S /d/test-setup-verify -B /d/test-setup-verify/build -G \"MinGW Makefiles\")",
+      "Bash(cmake --build /d/test-setup-verify/build)",
+      "Bash(ctest --test-dir /d/test-setup-verify/build --output-on-failure)",
+      "Bash(git -C /d/test-setup-verify rev-parse --is-inside-work-tree)",
+      "Bash(cd D:\\\\\\\\code\\\\\\\\ty-qt-ai-plugin\\\\\\\\.claude\\\\\\\\worktrees\\\\\\\\unruffled-allen-1d5daf)",
+      "Bash(mkdir -p \"D:/code/ty-qt-ai-plugin/.claude/worktrees/unruffled-allen-1d5daf/.claude/agents/node\")",
+      "Bash(mkdir -p \"D:/code/ty-qt-ai-plugin/.claude/worktrees/unruffled-allen-1d5daf/.claude/rules/node\")",
+      "Bash(mkdir -p .claude/agents/rust .claude/rules/rust)",
+      "Bash(mkdir -p \"D:\\\\code\\\\ty-qt-ai-plugin\\\\.claude\\\\worktrees\\\\unruffled-allen-1d5daf\\\\.claude\\\\agents\\\\universal\")"
+    ]
+  }
+}

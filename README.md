@@ -1,6 +1,6 @@
-# code-harness
+# CodeHarness
 
-`code-harness` 是一套面向多技术栈（C++/Qt、Python、Node.js、Rust）的 Claude Code 长任务开发工作流插件。它参考 Anthropic 提出的 [effective harnesses](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) 概念，把任务推进的高频研发动作固化为可复用闭环，核心目标：
+`CodeHarness` 是一套面向多技术栈（C++/Qt、Python、Node.js、Rust）的 Claude Code 长任务开发工作流插件。它参考 Anthropic 提出的 [effective harnesses](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) 概念，把任务推进的高频研发动作固化为可复用闭环，核心目标：
 
 - **配置即代码**：用清晰、可维护的工程化插件配置，解决 AI 长任务的失控问题。
 - **状态化执行**：将任务的推进与严格的闭环验证深度绑定，确保每一步都有据可循、有源可溯。
@@ -8,7 +8,7 @@
 
 ## 操作手册
 
-1. 将整个 `code-harness/.claude` 目录下的所有内容拷贝到目标仓库的根目录；
+1. 将整个 `CodeHarness/.claude` 目录下的所有内容拷贝到目标仓库的根目录；
 2. 在目标仓库根目录启动 Claude Code；
 3. 直接执行：`/code-setup`，自动检测项目类型（C++/Qt、Python、Node.js、Rust 等），复制对应插件资产，不覆盖业务代码。
 
@@ -49,7 +49,7 @@ flowchart TD
 当前仓库是模板源目录，核心结构如下：
 
 ```text
-code-harness/
+CodeHarness/
 ├── .claude/                                # 插件主目录
 │   ├── agents/                             # 智能体角色（按目录分组）
 │   │   ├── universal/                      # 跨项目通用智能体

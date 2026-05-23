@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-`code-harness` 是一个插件化的长任务开发工作流资产仓库，供 Claude Code 在各种类型项目中使用（C++/Qt、Python、Node.js、Rust 等）。本仓库本身**不包含业务源代码**，而是提供一套按技术栈分组、可复用的工作流资产（agents、commands、rules、hooks、templates），通过 `.claude/` 目录注入目标工程。
+`CodeHarness` 是一个插件化的长任务开发工作流资产仓库，供 Claude Code 在各种类型项目中使用（C++/Qt、Python、Node.js、Rust 等）。本仓库本身**不包含业务源代码**，而是提供一套按技术栈分组、可复用的工作流资产（agents、commands、rules、hooks、templates），通过 `.claude/` 目录注入目标工程。
 
 核心设计原则：
 - **配置即代码**：用工程化配置解决 AI 长任务的失控问题。
@@ -111,4 +111,4 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 本仓库无构建/测试
 
-`code-harness` 本身是模板仓库，不包含业务代码，因此**无本地构建和测试命令**。它产出 `.claude/` 资产用于目标工程，由 `/code-setup` 在目标仓库中自动检测项目类型并写入对应的构建/测试命令。
+`CodeHarness` 本身是模板仓库，不包含业务代码，因此**无本地构建和测试命令**。它产出 `.claude/` 资产用于目标工程，由 `/code-setup` 在目标仓库中自动检测项目类型并写入对应的构建/测试命令。
