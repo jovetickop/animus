@@ -6,23 +6,19 @@
 
 | 类型     | 规则                       | 示例                   |
 | -------- | -------------------------- | ---------------------- |
-| 类名     | `PascalCase`             | `UserManager`        |
-| 函数名   | `PascalCase`             | `LoadProject()`      |
-| 成员变量 | 小驼峰                     | `projectPath`        |
-| 局部变量 | `snake_case`             | `current_index`      |
-| 函数入参 | `snake_case`             | `file_path`          |
-| 文件名   | `snake_case`             | `main_window.cpp`    |
-| 宏       | `UPPER_SNAKE_CASE`       | `DEFAULT_TIMEOUT_MS` |
-| 枚举值   | `UPPER_SNAKE_CASE`       | `STATE_IDLE`         |
-| 命名空间 | 小写或小写下划线           | `project_core`       |
-| 模板参数 | 语义化名称，`snake_case` | `widget_type`        |
+| 类型/类/接口 | `PascalCase` | `UserManager` |
+| 函数/方法 | `camelCase` 或 `snake_case`（遵循项目既有风格） | `loadProject()` |
+| 局部变量 | `snake_case` 或 `camelCase`（遵循项目既有风格） | `current_index` |
+| 函数入参 | `snake_case` 或 `camelCase` | `file_path` |
+| 常量/枚举 | `UPPER_SNAKE_CASE` | `MAX_RETRY_COUNT` |
+| 文件名 | `snake_case` 或 `kebab-case`（遵循项目既有风格） | `user_manager` / `user-manager` |
+| 私有成员 | 前导下划线（`_private`）或其他语言约定 | `_cache` |
 
 ## 2. 文件与目录组织
 
 - 一个文件尽量只定义一个主要 public 类型。
-- 头文件统一使用 `#pragma once`。
-- 源文件和头文件命名要一一对应。
-- 目录组织优先按模块划分，不要把无关类堆在同一目录。
+- 模块/包内文件职责清晰，避免单文件承载多种不相关逻辑。
+- 目录组织优先按功能/领域划分，而非按文件类型堆砌。
 
 ## 3. 文件结构
 
@@ -76,7 +72,7 @@
 - 避免深层嵌套；嵌套超过 4 层时优先提前返回、拆函数或抽策略。
 - 避免带副作用的全局变量和静态初始化对象。
 - 禁止魔法数字，改用常量、枚举或具名配置。
-- 能用 `const` / `final` / `readonly` 的地方明确标记。
+- 凡是不可变/只读的值，明确标记（语言对应的 const / final / readonly 等机制）。
 - 优先使用 RAII 和智能指针管理资源。
 - 裸指针只用于"不拥有对象"的场景，并保证生命周期清晰。
 
