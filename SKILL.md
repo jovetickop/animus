@@ -64,15 +64,26 @@ Get-Content .claude/harness/claude-progress.txt -Tail 20
 
 构建失败时使用 `agents/universal/build-doctor.md`。UI 改动使用对应语言的 `ui-reviewer`。
 
-### Step 5: 验证
+### Step 5: 代码审查
+
+在构建/测试之前，使用 `agents/universal/code-reviewer.md` 对本次变更进行审查：
+
+- 代码质量：命名、嵌套深度、错误处理、魔法数字
+- 测试覆盖：新增行为是否有对应测试
+- 安全性：硬编码密钥、输入校验
+- 变更影响：是否波及无关模块
+
+按输出严重级别处理：**critical/high** 必须修复后才能继续，**medium/low** 记录待办后可继续。
+
+### Step 6: 验证
 
 执行 CLAUDE.md 中的构建命令和 features.json 中的 test_command。
 
-### Step 6: 验收
+### Step 7: 验收
 
 执行 `/code-check`：通用检查（构建+测试+代码质量）+ 语言专项检查。
 
-### Step 7: 完成或失败
+### Step 8: 完成或失败
 
 - 通过：`.\.claude\harness\update-progress.ps1 <TaskId> passed "说明"`
 - 失败：`.\.claude\harness\update-progress.ps1 <TaskId> failed "原因"`
