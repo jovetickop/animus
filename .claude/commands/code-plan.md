@@ -1,13 +1,13 @@
 ---
-description: 将 PRD 转为 harness 任务列表，并更新 .claude/harness/features.json
+description: 将 PRD 或方案文档转为 harness 任务列表，并更新 .claude/harness/features.json
 ---
 
-请把当前 PRD 或需求整理成可执行任务列表。
+请把当前 PRD（及方案文档，如有）整理成可执行任务列表。
 
 ## 目标
 
-- 以 PRD 作为唯一范围依据。
-- 产出可支撑“一次一个任务”执行的任务列表。
+- 以 PRD 作为范围依据，有方案文档时优先参考方案设计。
+- 产出可支撑”一次一个任务”执行的任务列表。
 - 让结果与 `.claude/harness/features.json` 保持同步。
 - 为每个任务补齐显式验收与测试命令。
 
@@ -45,8 +45,7 @@ description: 将 PRD 转为 harness 任务列表，并更新 .claude/harness/fea
 6. `depends_on` 只填写直接前置任务 ID，禁止引用不存在的任务。
 7. `priority` 使用整数，数值越大优先级越高；同优先级按任务 ID 顺序执行。
 8. 初始化 `last_error` 为空字符串，`updated_at` 为空字符串；由 `update-progress.ps1` 在流转时自动维护。
-9. 当 Qt UI 是前置条件时，先安排 UI 任务，再安排逻辑任务。
-10. 任务一旦生成就尽量保持 ID 稳定；新增任务追加，不要重排已通过项。
+9. 任务一旦生成就尽量保持 ID 稳定；新增任务追加，不要重排已通过项。
 
 ## 响应中必须包含
 

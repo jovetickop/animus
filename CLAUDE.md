@@ -16,7 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 1. 将本仓库 `.claude/` 目录复制到目标仓库根目录
 2. 在目标仓库启动 Claude Code
 3. 执行 `/code-setup` 初始化（自动检测项目类型，接入对应插件资产）
-4. 后续开发流程：`/code-plan` → 依次实现任务 → `/code-check` 验收
+4. 后续开发流程：`/code-plan`（简单任务直接规划，复杂任务先准备 PRD+方案） → 依次实现任务 → `/code-check` 验收
 
 ## 架构总览
 
