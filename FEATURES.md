@@ -41,18 +41,50 @@ failed ──→ pending (仅人工确认后可重排)
 
 ---
 
-## 三、Agent 角色（6 个）
+## 三、Agent 角色（16 个）
 
-每个 Agent 是独立的 `.md` 定义文件，位于 `.claude/agents/`：
+每个 Agent 是独立的 `.md` 定义文件，位于 `.claude/agents/`，按目录分组：
+
+### universal/（5 个，跨项目通用）
 
 | Agent | 职责 | 解决什么问题 |
 |-------|------|-------------|
-| `harness-feature-planner` | 把 PRD 拆成可执行的小任务 | 需求 → features.json |
-| `qt-architect` | 编码前评估类设计、生命周期、线程风险 | "这么做会踩什么坑" |
-| `qt-task-implementer` | 单任务最小闭环实现 | 一次只做一个任务，不越界 |
-| `qt-test-engineer` | 设计测试矩阵、补 test_command | 测试覆盖不够怎么办 |
-| `qt-ui-reviewer` | 审查布局、sizePolicy、反馈、文案 | 界面可用性把关 |
-| `cmake-build-doctor` | 诊断 CMake/Qt 构建失败 | 构建挂了怎么办 |
+| `feature-planner` | 把 PRD 拆成可执行的小任务 | 需求 → features.json |
+| `task-implementer` | 单任务最小闭环实现 | 一次只做一个任务，不越界 |
+| `test-engineer` | 设计测试矩阵、补 test_command | 测试覆盖不够怎么办 |
+| `build-doctor` | 诊断构建失败 | 构建挂了怎么办 |
+| `code-reviewer` | 代码审查 | 代码质量把关 |
+
+### qt/（4 个，C++/Qt 专用）
+
+| Agent | 职责 | 解决什么问题 |
+|-------|------|-------------|
+| `architect` | 编码前评估类设计、生命周期、线程风险 | "这么做会踩什么坑" |
+| `task-implementer` | Qt 专用实现 | Qt 编码任务 |
+| `test-engineer` | Qt 测试方案 | Qt 测试覆盖 |
+| `ui-reviewer` | 审查布局、sizePolicy、反馈、文案 | 界面可用性把关 |
+
+### python/（2 个，Python 专用）
+
+| Agent | 职责 | 解决什么问题 |
+|-------|------|-------------|
+| `architect` | Python 方案设计 | Python 项目架构 |
+| `test-engineer` | Python 测试方案 | Python 测试覆盖 |
+
+### node/（3 个，Node.js 专用）
+
+| Agent | 职责 | 解决什么问题 |
+|-------|------|-------------|
+| `architect` | Node.js 方案设计 | Node.js 项目架构 |
+| `test-engineer` | Node.js 测试方案 | Node.js 测试覆盖 |
+| `ui-reviewer` | Web UI 审查 | Web UI 可用性 |
+
+### rust/（2 个，Rust 专用）
+
+| Agent | 职责 | 解决什么问题 |
+|-------|------|-------------|
+| `architect` | Rust 方案设计 | Rust 项目架构 |
+| `test-engineer` | Rust 测试方案 | Rust 测试覆盖 |
 
 ---
 
@@ -61,39 +93,65 @@ failed ──→ pending (仅人工确认后可重排)
 位于 `.claude/commands/`：
 
 ### `/code-setup`
-- 自动识别 **新工程** / **存量工程** 两种模式
+- 自动检测项目类型（cpp-qt / python / node / rust）
 - 新工程：复制模板骨架、替换占位符
 - 存量工程：只补 `.claude/` 配置，不改已有源码
-- 自动探测：`cmake -S . -B build` → `cmake --build build` → `ctest`
+- 自动探测：配置命令 → 构建命令 → 测试命令
 - 将探测结果写入根目录 `CLAUDE.md`
 
 ### `/code-plan`
 - 将 PRD 转为 `features.json` 任务列表
 - 自动包含：`id`、`name`、`depends_on`、`priority`、`test_command`、`acceptance_criteria`
-- 规则：Qt UI 优先、依赖链正确、粒度够小
+- 规则：UI 优先、依赖链正确、粒度够小
 
 ### `/code-check`
-- 四类验收检查：
+- 通用验收检查：
   - 构建正确性
   - 测试覆盖
-  - Qt 风险（QObject 所有权、线程、信号槽、MOC/UIC/RCC）
-  - UI 质量（布局、sizePolicy、反馈、文案）
+  - 代码规范合规
+  - 调试代码残留
+  - harness 状态一致性
+- 按项目类型的专项验收（Qt: QObject 所有权、线程、信号槽、MOC/UIC/RCC；Node: NPM 依赖等）
 - 输出严重级别：high / medium / low
-- 验证 harness 状态一致性
 
 ---
 
-## 五、编码规范（5 份规则文件）
+## 五、编码规范（10 份规则文件）
 
-位于 `.claude/rules/`：
+位于 `.claude/rules/`，按目录分组：
+
+### universal/（3 份，跨项目通用）
 
 | 规则文件 | 覆盖内容 |
 |----------|---------|
-| `coding-style.md` | PascalCase/蛇形命名、4 空格、头文件结构、include 顺序、中文注释、`const` 约束、immutability |
-| `testing.md` | 80% 基线、四类用例（正常/空/无效/边界）、构建+测试通过才标记完成 |
-| `git-workflow.md` | Conventional Commits、中文描述、提交前检查清单 |
-| `qt-best-practices.md` | QObject 父子关系、新式信号槽语法、非主线程不操作 UI、RAII |
+| `coding-style.md` | 通用命名、文件组织、注释、格式、immutability |
+| `testing.md` | 测试基线、验证命令、任务通过规则 |
+| `git-workflow.md` | Conventional Commits、提交前检查清单 |
+
+### qt/（2 份，C++/Qt 专用）
+
+| 规则文件 | 覆盖内容 |
+|----------|---------|
+| `best-practices.md` | QObject 父子关系、新式信号槽语法、非主线程不操作 UI、RAII |
 | `ui-architecture.md` | 布局优先、面板边界、按钮位置和反馈、无歧义文案 |
+
+### python/（1 份）
+
+| 规则文件 | 覆盖内容 |
+|----------|---------|
+| `best-practices.md` | Python 最佳实践 |
+
+### node/（1 份）
+
+| 规则文件 | 覆盖内容 |
+|----------|---------|
+| `best-practices.md` | Node.js 最佳实践 |
+
+### rust/（1 份）
+
+| 规则文件 | 覆盖内容 |
+|----------|---------|
+| `best-practices.md` | Rust 最佳实践 |
 
 ---
 
@@ -114,9 +172,12 @@ failed ──→ pending (仅人工确认后可重排)
 
 | 类别 | 文件 | 说明 |
 |------|------|------|
-| **构建入口** | `existing_project/CLAUDE.md` | 存量工程适配模板 |
-| **存量工程** | `existing_project/code-check-checklist.md` | 验收检查清单 |
+| **构建入口** | `CLAUDE.md` | 根 CLAUDE.md 通用模板 |
+| **存量工程** | `existing_project/CLAUDE.md` | 存量工程适配模板（通用版，/code-setup 按 project-type 回填） |
+| **存量工程** | `existing_project/review-checklist.md` | 通用验收检查清单 |
 | **存量工程** | `existing_project/cmake-adapter.md` | 接入原则说明 |
+| **格式配置** | `.clang-format` | C++ 格式化规则 |
+| **MCP** | `.mcp.json` | MCP 服务器配置 |
 
 ---
 
@@ -126,8 +187,8 @@ failed ──→ pending (仅人工确认后可重排)
 
 | 文件 | 说明 |
 |------|------|
-| `CLAUDE.md` | 会话初始化、状态流转、开发验收、Git 提交的完整约束 |
-| `review-checklist.md` | 6 条验收检查项 |
+| `CLAUDE.md` | 通用模板，会话初始化、状态流转、开发验收、Git 提交，/code-setup 按 project-type 动态回填 |
+| `review-checklist.md` | 6 条通用检查项 |
 | `cmake-adapter.md` | 核心原则：工作流适配工程，不是工程适配工作流 |
 
 ---
@@ -173,12 +234,12 @@ failed ──→ pending (仅人工确认后可重排)
 
 | 类别 | 数量 |
 |------|------|
-| Agent 定义 | 6 |
+| Agent 定义 | 16（5 universal + 4 qt + 2 python + 3 node + 2 rust） |
 | 斜杠命令 | 3 |
-| 规则文件 | 5 |
+| 规则文件 | 10（3 universal + 2 qt + 1 python + 1 node + 1 rust） |
 | 钩子规则 | 1（PostToolUse） |
 | 模板文件（existing_project） | 3 |
 | 模板文件（harness） | 10（PS1 + BAT + py） |
 | Skill | 1（TDD） |
 | MCP 服务器默认配置 | 3 |
-| **总计资产文件** | **~35+** |
+| **总计资产文件** | **~45+** |

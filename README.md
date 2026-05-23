@@ -1,15 +1,16 @@
 # ty-qt-ai-plugin
 
-`ty-qt-ai-plugin` 是同元整理的一套面向 C++/Qt 项目的 Claude Code 长任务开发工作流。它参考 Anthropic 提出的 [effective harnesses](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) 概念，把任务推进的高频研发动作固化固化为可复用闭环，核心目标：
+`ty-qt-ai-plugin` 是同元整理的一套面向多技术栈（C++/Qt、Python、Node.js、Rust）的 Claude Code 长任务开发工作流插件。它参考 Anthropic 提出的 [effective harnesses](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) 概念，把任务推进的高频研发动作固化为可复用闭环，核心目标：
 
 - **配置即代码**：用清晰、可维护的工程化插件配置，解决 AI 长任务的失控问题。
 - **状态化执行**：将任务的推进与严格的闭环验证深度绑定，确保每一步都有据可循、有源可溯。
+- **插件化架构**：按技术栈（qt / python / node / rust）分组资产，自动检测项目类型并接入对应插件。
 
 ## 操作手册
 
 1. 将整个 `ty-qt-ai-plugin/.claude` 目录下的所有内容拷贝到目标仓库的根目录；
 2. 在目标仓库根目录启动 Claude Code；
-3. 直接执行：`/code-setup`，自动识别现有构建与目录结构（如 CMake、测试目录、Qt 模块），生成或补齐 `.claude` 配置，不覆盖业务代码。
+3. 直接执行：`/code-setup`，自动检测项目类型（C++/Qt、Python、Node.js、Rust 等），复制对应插件资产，不覆盖业务代码。
 
 ## 长任务自动执行Agent原理
 
@@ -50,33 +51,62 @@ flowchart TD
 ```text
 ty-qt-ai-plugin/
 ├── .claude/                                # 插件主目录
-│   ├── agents/                             # 智能体角色
-│   │   ├── harness-feature-planner.md
-│   │   ├── qt-architect.md
-│   │   ├── qt-task-implementer.md
-│   │   ├── cmake-build-doctor.md
-│   │   ├── qt-test-engineer.md
-│   │   └── qt-ui-reviewer.md
+│   ├── agents/                             # 智能体角色（按目录分组）
+│   │   ├── universal/                      # 跨项目通用智能体
+│   │   │   ├── feature-planner.md
+│   │   │   ├── task-implementer.md
+│   │   │   ├── test-engineer.md
+│   │   │   ├── build-doctor.md
+│   │   │   └── code-reviewer.md
+│   │   ├── qt/                             # C++/Qt 专用智能体
+│   │   │   ├── architect.md
+│   │   │   ├── task-implementer.md
+│   │   │   ├── test-engineer.md
+│   │   │   └── ui-reviewer.md
+│   │   ├── python/                         # Python 专用智能体
+│   │   │   ├── architect.md
+│   │   │   └── test-engineer.md
+│   │   ├── node/                           # Node.js 专用智能体
+│   │   │   ├── architect.md
+│   │   │   ├── test-engineer.md
+│   │   │   └── ui-reviewer.md
+│   │   └── rust/                           # Rust 专用智能体
+│   │       ├── architect.md
+│   │       └── test-engineer.md
 │   ├── commands/                           # /code-setup /code-plan /code-check 命令
-│   │   ├── setup.md
-│   │   ├── plan.md
-│   │   └── review.md
-│   ├── rules/                              # 研发规范
-│   │   ├── coding-style.md
-│   │   ├── testing.md
-│   │   ├── git-workflow.md
-│   │   ├── qt-best-practices.md
-│   │   └── ui-architecture.md
+│   │   ├── code-setup.md
+│   │   ├── code-plan.md
+│   │   └── code-check.md
+│   ├── rules/                              # 研发规范（按目录分组）
+│   │   ├── universal/                      # 跨项目通用规范
+│   │   │   ├── coding-style.md
+│   │   │   ├── testing.md
+│   │   │   └── git-workflow.md
+│   │   ├── qt/                             # C++/Qt 专用规范
+│   │   │   ├── best-practices.md
+│   │   │   └── ui-architecture.md
+│   │   ├── python/                         # Python 专用规范
+│   │   │   └── best-practices.md
+│   │   ├── node/                           # Node.js 专用规范
+│   │   │   └── best-practices.md
+│   │   └── rust/                           # Rust 专用规范
+│   │       └── best-practices.md
 │   ├── hooks/                              # 自动化钩子
 │   │   ├── hooks.json
 │   │   └── scripts/
 │   │       ├── clang-format.sh
 │   │       └── clang-format.ps1
+│   ├── skills/                             # Skill 技能
+│   │   └── tdd-workflow/
 │   └── templates/                          # 初始化模板
 │       ├── CLAUDE.md
 │       ├── .clang-format
 │       ├── .mcp.json
-│       ├── existing_project/
+│       ├── existing_project/               # 存量工程接入通用模板
+│       │   ├── CLAUDE.md
+│       │   ├── review-checklist.md
+│       │   ├── cmake-adapter.md
+│       │   └── harness/
 │       └── harness/                        # 长任务自动化执行约束
 │           ├── README.md                   # 执行约束说明
 │           ├── features.json               # 任务状态机
@@ -117,7 +147,7 @@ ty-qt-ai-plugin/
 │       ├── update-progress.bat
 │       ├── coding-session.bat
 │       └── init.bat
-├── CLAUDE.md                               # 写入自动识别出的构建/测试/运行命令
+├── CLAUDE.md                               # 写入自动识别出的命令和项目类型
 ├── review-checklist.md
 └── cmake-adapter.md
 ```

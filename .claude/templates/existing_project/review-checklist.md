@@ -1,8 +1,9 @@
 # 已有工程验收清单
 
-- 改动是否保持了当前 Qt 架构选择？
-- MOC、UIC、RCC 和资源路径是否仍然正确？
-- 相关目标是否已经重新构建？
-- 对应测试或 smoke test 是否已执行？
-- 当前任务状态是否已更新到 `.claude/harness/features.json`？
-- 结果是否已记录到 `.claude/harness/claude-progress.txt`？
+通用检查项：
+- 改动是否编译/构建通过？
+- 相关测试是否执行并通过？
+- 代码是否符合项目编码规范？
+- 是否有未处理的错误路径？
+- 是否有调试代码或临时日志残留？
+- harness 状态是否已更新？（features.json + claude-progress.txt）
