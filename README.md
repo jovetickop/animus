@@ -67,6 +67,7 @@ CodeHarness/
 | 类型 | 检测方式 | 激活的插件 |
 |------|---------|-----------|
 | C++/Qt | CMakeLists.txt + find_package(Qt | agents/qt/ + rules/qt/ |
+| C++ (纯 CMake) | CMakeLists.txt 不含 Qt | rules/cpp-cmake/ |
 | Python | pyproject.toml / requirements.txt | agents/python/ + rules/python/ |
 | Node.js | package.json | agents/node/ + rules/node/ |
 | Rust | Cargo.toml | agents/rust/ + rules/rust/ |

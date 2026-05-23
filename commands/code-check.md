@@ -54,6 +54,15 @@ description: 执行通用检查 + 按项目类型的专项验收检查
 | UI 布局与 sizePolicy | 主结构是否使用 Qt Layout；是否存在不必要的固定尺寸；文本输入/表格/日志区是否设置了合适的 sizePolicy |
 | 用户可见文案 | 是否使用了 `tr()` 包裹用户可见字符串；文案是否中性明确 |
 
+### cpp-cmake
+
+| 检查项 | 说明 |
+|--------|------|
+| C++ 标准 | CMakeLists.txt 中是否显式声明了 C++ 标准（`CMAKE_CXX_STANDARD`） |
+| 编译器警告 | 是否启用了合理的警告级别（MSVC: /W4, GCC/Clang: -Wall -Wextra） |
+| 资源管理 | 是否使用了 RAII/智能指针，避免裸 new/delete |
+| 构建配置 | CMake 是否使用 target_* 命令而非全局设置 |
+
 ### python
 
 | 检查项 | 说明 |
