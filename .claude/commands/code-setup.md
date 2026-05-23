@@ -2,7 +2,7 @@
 description: 把工作流资产接入已有 C++/Qt 仓库
 ---
 
-请用 /setup 初始化当前工作目录。
+请用 /code-setup 初始化当前工作目录。
 
 ## 目标
 

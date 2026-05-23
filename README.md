@@ -9,7 +9,7 @@
 
 1. 将整个 `ty-qt-ai-plugin/.claude` 目录下的所有内容拷贝到目标仓库的根目录；
 2. 在目标仓库根目录启动 Claude Code；
-3. 直接执行：`/setup`，自动识别现有构建与目录结构（如 CMake、测试目录、Qt 模块），生成或补齐 `.claude` 配置，不覆盖业务代码。
+3. 直接执行：`/code-setup`，自动识别现有构建与目录结构（如 CMake、测试目录、Qt 模块），生成或补齐 `.claude` 配置，不覆盖业务代码。
 
 ## 长任务自动执行Agent原理
 
@@ -24,14 +24,14 @@
 流程图如下，核心是 AI **每一轮都先弄清现状，再只推进一个可验证的小目标，并在离开前把现场收拾干净：**
 
 - 人工节点：`输入 PRD/需求`、`最终整体验收`
-- AI 自动节点：`/plan`、`update-progress.ps1` 状态流转、`CLAUDE.md` 中构建/测试命令、`/review`
+- AI 自动节点：`/code-plan`、`update-progress.ps1` 状态流转、`CLAUDE.md` 中构建/测试命令、`/code-check`
 
 ```mermaid
 flowchart TD
-    H1[人工: 输入 PRD/需求] --> A1[AI: /plan 生成 features.json]
+    H1[人工: 输入 PRD/需求] --> A1[AI: /code-plan 生成 features.json]
     A1 --> A2[AI: 选任务并标记 in_progress<br/>update-progress.ps1]
     A2 --> A3[AI: 实现 + 构建/测试<br/>CLAUDE.md 中命令]
-    A3 --> A4[AI: /review 任务验收]
+    A3 --> A4[AI: /code-check 任务验收]
     A4 --> A5{当前任务通过?}
     A5 -- 否 --> A6[AI: 标记 failed 并记录进度<br/>update-progress.ps1]
     A6 --> A2
@@ -57,7 +57,7 @@ ty-qt-ai-plugin/
 │   │   ├── cmake-build-doctor.md
 │   │   ├── qt-test-engineer.md
 │   │   └── qt-ui-reviewer.md
-│   ├── commands/                           # /setup /plan /review 命令
+│   ├── commands/                           # /code-setup /code-plan /code-check 命令
 │   │   ├── setup.md
 │   │   ├── plan.md
 │   │   └── review.md
@@ -91,7 +91,7 @@ ty-qt-ai-plugin/
 
 ### 初始化后的仓库分布
 
-执行 `/setup` 后，目标仓库落位为以下结构。
+执行 `/code-setup` 后，目标仓库落位为以下结构。
 
 #### 存量工程接入
 

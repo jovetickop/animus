@@ -14,8 +14,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 1. 将本仓库 `.claude/` 目录复制到目标 C++/Qt 仓库根目录
 2. 在目标仓库启动 Claude Code
-3. 执行 `/setup` 初始化（自动探测构建/测试命令并写入目标仓库的 CLAUDE.md）
-4. 后续开发流程：`/plan` → 依次实现任务 → `/review` 验收
+3. 执行 `/code-setup` 初始化（自动探测构建/测试命令并写入目标仓库的 CLAUDE.md）
+4. 后续开发流程：`/code-plan` → 依次实现任务 → `/code-check` 验收
 
 ## 架构总览
 
@@ -36,9 +36,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 位于 `.claude/commands/`：
 
-- **`/setup`** — 把工作流资产接入已有 C++/Qt 仓库。自动探测构建/测试/运行命令，复制 harness 资产。
-- **`/plan`** — 将 PRD 或需求转为 features.json 任务列表，每个任务包含验收标准和 test_command。
-- **`/review`** — 围绕当前任务执行四类验收检查：构建正确性、测试覆盖、Qt 风险、UI 质量。
+- **`/code-setup`** — 把工作流资产接入已有 C++/Qt 仓库。自动探测构建/测试/运行命令，复制 harness 资产。
+- **`/code-plan`** — 将 PRD 或需求转为 features.json 任务列表，每个任务包含验收标准和 test_command。
+- **`/code-check`** — 围绕当前任务执行四类验收检查：构建正确性、测试覆盖、Qt 风险、UI 质量。
 
 ### 3. Rules（研发规范）
 
@@ -57,7 +57,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 5. Templates（初始化模板）
 
-位于 `.claude/templates/`，供 `/setup` 使用的资产：
+位于 `.claude/templates/`，供 `/code-setup` 使用的资产：
 
 - **`CLAUDE.md`** — 目标工程的根 CLAUDE.md 模板，包含会话初始化、状态流转、开发与验收、Git 提交等 MUST 规则
 - **`.clang-format`** — C++ 代码格式化配置
@@ -88,11 +88,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. **开始任务** — `update-progress.ps1 <TaskId> in_progress "说明"`
 4. **实现** — 使用对应 agent 完成最小闭环
 5. **验证** — `cmake --build build --config Debug` + `ctest ...`
-6. **验收** — 执行 `/review` 审查
+6. **验收** — 执行 `/code-check` 审查
 7. **完成任务** — `update-progress.ps1 <TaskId> passed "说明"`
 8. **提交** — `git add` + `git commit` + `git push`
 9. **重复** — 处理下一个任务
 
 ## 本仓库无构建/测试
 
-`ty-qt-ai-plugin` 本身是模板仓库，不包含 C++ 业务代码，因此**无本地构建和测试命令**。它产出 `.claude/` 资产用于目标工程，由 `/setup` 在目标仓库中自动探测和写入构建/测试命令。
+`ty-qt-ai-plugin` 本身是模板仓库，不包含 C++ 业务代码，因此**无本地构建和测试命令**。它产出 `.claude/` 资产用于目标工程，由 `/code-setup` 在目标仓库中自动探测和写入构建/测试命令。

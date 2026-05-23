@@ -60,19 +60,19 @@ failed ──→ pending (仅人工确认后可重排)
 
 位于 `.claude/commands/`：
 
-### `/setup`
+### `/code-setup`
 - 自动识别 **新工程** / **存量工程** 两种模式
 - 新工程：复制模板骨架、替换占位符
 - 存量工程：只补 `.claude/` 配置，不改已有源码
 - 自动探测：`cmake -S . -B build` → `cmake --build build` → `ctest`
 - 将探测结果写入根目录 `CLAUDE.md`
 
-### `/plan`
+### `/code-plan`
 - 将 PRD 转为 `features.json` 任务列表
 - 自动包含：`id`、`name`、`depends_on`、`priority`、`test_command`、`acceptance_criteria`
 - 规则：Qt UI 优先、依赖链正确、粒度够小
 
-### `/review`
+### `/code-check`
 - 四类验收检查：
   - 构建正确性
   - 测试覆盖
@@ -115,7 +115,7 @@ failed ──→ pending (仅人工确认后可重排)
 | 类别 | 文件 | 说明 |
 |------|------|------|
 | **构建入口** | `existing_project/CLAUDE.md` | 存量工程适配模板 |
-| **存量工程** | `existing_project/review-checklist.md` | 验收检查清单 |
+| **存量工程** | `existing_project/code-check-checklist.md` | 验收检查清单 |
 | **存量工程** | `existing_project/cmake-adapter.md` | 接入原则说明 |
 
 ---
@@ -163,7 +163,7 @@ failed ──→ pending (仅人工确认后可重排)
 | 资产 | 文件 | 说明 |
 |------|------|------|
 | **格式配置** | `.clang-format` | C++ 格式化规则 |
-| **Git 忽略** | （建议 `build/`、`bin/`、`CMakeUserPresets.json`） | 随 `/setup` 补充 |
+| **Git 忽略** | （建议 `build/`、`bin/`、`CMakeUserPresets.json`） | 随 `/code-setup` 补充 |
 | **Settings** | `.claude/settings.local.json` | 项目级权限白名单 |
 | **README** | 仓库根 `README.md` | 插件架构和使用说明 |
 
