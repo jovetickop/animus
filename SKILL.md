@@ -1,0 +1,115 @@
+---
+name: code-harness
+description: 复杂任务的编码工作流技能。输入 PRD+方案文档，自动拆解为可执行任务列表，按状态机逐个推进，验收后提交。支持 C++/Qt、Python、Node.js、Rust。
+---
+
+# CodeHarness — 编码工作流技能
+
+## 适用场景
+
+- 需要多轮编码会话的复杂功能开发
+- 跨上下文的任务持久化（今天做完，明天继续）
+- 需要严格验收流程的项目（构建+测试+审查+提交）
+
+## 首次使用
+
+在目标项目中执行 `/code-harness`，技能会自动检测状态：
+
+### 如果目标项目没有 `.claude/harness/`
+
+技能从自身目录复制 harness 模板到目标项目：
+
+1. 复制 `templates/harness/` → `.claude/harness/`（状态引擎脚本）
+2. 检测项目类型（CMakeLists.txt / Cargo.toml / package.json / pyproject.toml）
+3. 在目标项目创建 `.claude/agents/`、`.claude/commands/`、`.claude/rules/` 目录，按需复制插件
+4. 将合适的 CLAUDE.md 模板写入目标项目根目录
+5. 将检测到的构建/测试命令写入 target CLAUDE.md
+
+### 如果目标项目已有 `.claude/harness/`
+
+直接进入工作流。
+
+## 工作流
+
+### Step 1: 读取状态
+
+```
+python .claude/harness/show-status.py
+Get-Content .claude/harness/claude-progress.txt -Tail 20
+```
+
+### Step 2: 选择任务
+
+- 优先继续 `in_progress` 任务
+- 否则选择依赖已满足且 priority 最高的 `pending` 任务
+- 无任务时执行 `/code-plan` 从 PRD/方案拆解
+
+### Step 3: 标记任务开始
+
+```
+.\.claude\harness\update-progress.ps1 <TaskId> in_progress "说明"
+```
+
+### Step 4: 实现
+
+根据 `project-type` 选择 agent：
+
+| 语言 | 架构 agent | 实现 agent | 测试 agent |
+|------|-----------|-----------|-----------|
+| C++/Qt | `agents/qt/architect.md` | `agents/qt/task-implementer.md` | `agents/qt/test-engineer.md` |
+| Python | `agents/python/architect.md` | `agents/universal/task-implementer.md` | `agents/python/test-engineer.md` |
+| Node | `agents/node/architect.md` | `agents/universal/task-implementer.md` | `agents/node/test-engineer.md` |
+| Rust | `agents/rust/architect.md` | `agents/universal/task-implementer.md` | `agents/rust/test-engineer.md` |
+| 其他 | — | `agents/universal/task-implementer.md` | `agents/universal/test-engineer.md` |
+
+构建失败时使用 `agents/universal/build-doctor.md`。UI 改动使用对应语言的 `ui-reviewer`。
+
+### Step 5: 验证
+
+执行 CLAUDE.md 中的构建命令和 features.json 中的 test_command。
+
+### Step 6: 验收
+
+执行 `/code-check`：通用检查（构建+测试+代码质量）+ 语言专项检查。
+
+### Step 7: 完成或失败
+
+- 通过：`.\.claude\harness\update-progress.ps1 <TaskId> passed "说明"`
+- 失败：`.\.claude\harness\update-progress.ps1 <TaskId> failed "原因"`
+- 每个任务完成后提交：按 `rules/universal/git-workflow.md` 执行
+
+## 状态规则
+
+- 状态仅允许：`pending | in_progress | passed | failed`
+- 同时只能有一个 `in_progress` 任务
+- depends_on 必须满足才能开始
+- 没有构建和测试结果，不得标记 `passed`
+- 每轮必须更新 `claude-progress.txt`
+
+## 核心文件
+
+| 文件 | 用途 |
+|------|------|
+| `.claude/harness/features.json` | 任务清单与状态 |
+| `.claude/harness/claude-progress.txt` | 进度日志 |
+| `.claude/harness/project-config.json` | 项目类型配置 |
+| `SKILL.md` | 本文件 |
+
+## 项目类型检测
+
+按优先级检测：
+
+1. `CMakeLists.txt` 含 `find_package(Qt` → `cpp-qt`
+2. `CMakeLists.txt` 不含 Qt → `cpp-cmake`
+3. `Cargo.toml` → `rust`
+4. `package.json` → `node`
+5. `pyproject.toml` / `requirements.txt` → `python`
+6. 以上都无 → `generic`
+
+## 编码规范
+
+参见：
+- 通用规范：`rules/universal/coding-style.md`
+- 测试规范：`rules/universal/testing.md`
+- Git 规范：`rules/universal/git-workflow.md`
+- 各语言最佳实践：`rules/{qt,python,node,rust}/best-practices.md`
