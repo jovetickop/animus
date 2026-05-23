@@ -9,9 +9,7 @@
 
 1. 将整个 `ty-qt-ai-plugin/.claude` 目录下的所有内容拷贝到目标仓库的根目录；
 2. 在目标仓库根目录启动 Claude Code；
-3. 直接执行：`/setup`，完成配置，自动适配以下两种场景：
-   1. 存量工程：识别现有构建与目录结构（如 CMake、测试目录、Qt 模块），生成或补齐 `.claude` 配置，不覆盖业务代码。
-   2. 新建工程：按模板初始化推荐目录、基础规则等 `.claude` 配置，默认启用“计划 -> 实现 -> 构建/测试 -> 评审”闭环。
+3. 直接执行：`/setup`，自动识别现有构建与目录结构（如 CMake、测试目录、Qt 模块），生成或补齐 `.claude` 配置，不覆盖业务代码。
 
 ## 长任务自动执行Agent原理
 
@@ -78,7 +76,6 @@ ty-qt-ai-plugin/
 │       ├── CLAUDE.md
 │       ├── .clang-format
 │       ├── .mcp.json
-│       ├── new_project/
 │       ├── existing_project/
 │       └── harness/                        # 长任务自动化执行约束
 │           ├── README.md                   # 执行约束说明
@@ -94,40 +91,7 @@ ty-qt-ai-plugin/
 
 ### 初始化后的仓库分布
 
-执行 `/setup` 后，目标仓库会按模式落位为以下结构。
-
-#### 新建工程
-
-```text
-<your-repo>/
-├── .claude/                                # 工作流配置
-│   ├── agents/
-│   ├── commands/
-│   ├── rules/
-│   ├── hooks/
-│   ├── harness/                            # 长任务状态存储
-│   │   ├── features.json                   # 任务清单
-│   │   ├── claude-progress.txt             # 进度日志
-│   │   ├── update-progress.ps1             # 状态流转与报告更新
-│   │   ├── show-status.py                  # 状态概览
-│   │   ├── coding-session.ps1              # 会话入口
-│   │   ├── run-regression.ps1              # 构建 + 回归测试
-│   │   ├── init.ps1                        # harness 初始化
-│   │   ├── update-progress.bat
-│   │   ├── coding-session.bat
-│   │   └── init.bat
-│   └── templates/
-├── src/                                    # 源码
-├── include/
-├── ui/
-├── tests/
-├── cmake/
-├── resources/
-├── CLAUDE.md                               # 自动识别命令写入位置
-├── .clang-format
-├── .mcp.json
-└── CMakeLists.txt                          # 构建入口
-```
+执行 `/setup` 后，目标仓库落位为以下结构。
 
 #### 存量工程接入
 
