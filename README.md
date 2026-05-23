@@ -1,6 +1,6 @@
-# CodeHarness
+# harness-cc
 
-`CodeHarness` 是一个 Claude Code 技能（/harness-cc），面向**需要多轮编码会话的复杂任务**。它不是一个普通模板，而是一个**编码工作流引擎**——输入 PRD+方案文档，自动拆解为可执行任务列表，按状态机逐个推进，验收后提交。支持 C++/Qt、Python、Node.js、Rust。
+`harness-cc` 是一个 Claude Code 技能，面向**需要多轮编码会话的复杂任务**。它不是一个普通模板，而是一个**编码工作流引擎**——输入 PRD+方案文档，自动拆解为可执行任务列表，按状态机逐个推进，验收后提交。支持 C++/Qt、Python、Node.js、Rust。
 
 ---
 
@@ -10,7 +10,8 @@
 
 Claude Code 在长周期开发中有几个固有问题：
 
-| 问题 | CodeHarness 的解法 |
+| 问题 | harness-cc 的解法 |
+| 问题 | harness-cc 的解法 |
 |------|-------------------|
 | **跨会话失忆** | 每次启动先读 `features.json` + `progress.txt`，恢复现场 |
 | **一口气改太多** | 每轮只推进一个任务，不越界 |
@@ -209,14 +210,14 @@ pending ──→ in_progress ──→ passed
 
 目标项目已有 CLAUDE.md 时：
 - **不覆盖**原有内容
-- **追加** CodeHarness 区块到文件末尾（`---` 分隔）
-- 如已有 CodeHarness 区块，则更新而非重复
+- **追加** `harness-cc` 区块到文件末尾（`---` 分隔）
+- 如已有 `harness-cc` 区块，则更新而非重复
 
 ---
 
 ## 与 tdd-workflow 技能的关系
 
-CodeHarness 是一个**工作流引擎**，tdd-workflow 是一个**编码方法论**。两者可组合使用：
+`harness-cc` 是一个**工作流引擎**，tdd-workflow 是一个**编码方法论**。
 
 ```
 /harness-cc → 启动工作流 → 选择任务 → /tdd-workflow → RED → GREEN → IMPROVE → 验收
