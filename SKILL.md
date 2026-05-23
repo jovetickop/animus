@@ -42,7 +42,7 @@ Get-Content .claude/harness/claude-progress.txt -Tail 20
 
 - 优先继续 `in_progress` 任务
 - 否则选择依赖已满足且 priority 最高的 `pending` 任务
-- 无任务时执行 `/code-plan` 从 PRD/方案拆解
+- 无任务时执行 `/code-plan` 从 PRD/方案拆解（/code-plan 内部使用 `agents/universal/feature-planner.md` 生成 features.json）
 
 ### Step 3: 标记任务开始
 
@@ -79,6 +79,7 @@ Get-Content .claude/harness/claude-progress.txt -Tail 20
 ### Step 6: 验证
 
 执行 CLAUDE.md 中的构建命令和 features.json 中的 test_command。
+可用 `run-regression.ps1` 一键执行构建+测试。
 
 ### Step 7: 验收
 
