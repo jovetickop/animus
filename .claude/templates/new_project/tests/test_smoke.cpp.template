@@ -1,0 +1,23 @@
+#include <QtTest/QtTest>
+
+#include "mainwindow.h"
+
+class MainWindowSmokeTest : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void LaunchesWindow();
+};
+
+void MainWindowSmokeTest::LaunchesWindow()
+{
+    MainWindow window;
+    window.show();
+
+    QVERIFY(window.isVisible());
+    QCOMPARE(window.windowTitle(), QStringLiteral("<PROJECT_NAME>"));
+}
+
+QTEST_MAIN(MainWindowSmokeTest)
+#include "test_smoke.moc"

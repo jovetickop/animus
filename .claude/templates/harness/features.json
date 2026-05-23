@@ -1,0 +1,17 @@
+[
+  {
+    "id": "T001",
+    "name": "初始化主窗口骨架",
+    "status": "pending",
+    "depends_on": [],
+    "priority": 100,
+    "test_command": "ctest --test-dir build -R T001_MainWindowSmoke --output-on-failure",
+    "last_error": "",
+    "updated_at": "",
+    "acceptance_criteria": [
+      "工程可以成功配置并构建",
+      "主窗口可以正常启动",
+      "Smoke test 通过"
+    ]
+  }
+]

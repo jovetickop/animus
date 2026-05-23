@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>&lt;PROJECT_NAME&gt;</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QLabel" name="pageTitleLabel">
+     <property name="text">
+       <string>工作区</string>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font-size: 20px; font-weight: 600;</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QSplitter" name="workspaceSplitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QTreeWidget" name="navigationTree">
+       <property name="minimumSize">
+        <size>
+         <width>220</width>
+         <height>0</height>
+        </size>
+       </property>
+       <column>
+        <property name="text">
+         <string>导航</string>
+        </property>
+       </column>
+      </widget>
+      <widget class="QTextEdit" name="logTextEdit">
+       <property name="placeholderText">
+        <string>这里显示构建、测试和工作流日志。</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar"/>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

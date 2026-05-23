@@ -1,0 +1,12 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "windows-msvc-local",
+      "inherits": "windows-msvc",
+      "cacheVariables": {
+        "Qt6_DIR": "<QT_DIR>/lib/cmake/Qt6"
+      }
+    }
+  ]
+}
