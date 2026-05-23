@@ -1,6 +1,6 @@
 # code-harness
 
-`code-harness` 是同元整理的一套面向多技术栈（C++/Qt、Python、Node.js、Rust）的 Claude Code 长任务开发工作流插件。它参考 Anthropic 提出的 [effective harnesses](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) 概念，把任务推进的高频研发动作固化为可复用闭环，核心目标：
+`code-harness` 是一套面向多技术栈（C++/Qt、Python、Node.js、Rust）的 Claude Code 长任务开发工作流插件。它参考 Anthropic 提出的 [effective harnesses](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) 概念，把任务推进的高频研发动作固化为可复用闭环，核心目标：
 
 - **配置即代码**：用清晰、可维护的工程化插件配置，解决 AI 长任务的失控问题。
 - **状态化执行**：将任务的推进与严格的闭环验证深度绑定，确保每一步都有据可循、有源可溯。
