@@ -57,7 +57,7 @@ Get-Content .claude/harness/claude-progress.txt -Tail 20
 | 语言 | 架构 agent | 实现 agent | 测试 agent |
 |------|-----------|-----------|-----------|
 | C++/Qt | `.claude/agents/qt/architect.md` | `.claude/agents/qt/task-implementer.md` | `.claude/agents/qt/test-engineer.md` |
-| C++ (纯 CMake) | — | `.claude/agents/universal/task-implementer.md` | `.claude/agents/universal/test-engineer.md` |
+| C++ (纯 CMake) | `.claude/agents/cpp-cmake/architect.md` | `.claude/agents/universal/task-implementer.md` | `.claude/agents/universal/test-engineer.md` |
 | Python | `.claude/agents/python/architect.md` | `.claude/agents/universal/task-implementer.md` | `.claude/agents/python/test-engineer.md` |
 | Node | `.claude/agents/node/architect.md` | `.claude/agents/universal/task-implementer.md` | `.claude/agents/node/test-engineer.md` |
 | Rust | `.claude/agents/rust/architect.md` | `.claude/agents/universal/task-implementer.md` | `.claude/agents/rust/test-engineer.md` |

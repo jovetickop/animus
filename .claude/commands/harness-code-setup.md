@@ -52,7 +52,7 @@ description: 检测项目类型并复制对应工作流资产到目标工程
 | project-type | agents 源 | rules 源 |
 |---|---|---|
 | `cpp-qt` | `agents/qt/` → `.claude/agents/qt/` | `rules/qt/` → `.claude/rules/qt/` |
-| `cpp-cmake` | 无专项 agent | `rules/cpp-cmake/` → `.claude/rules/cpp-cmake/` |
+| `cpp-cmake` | `agents/cpp-cmake/` → `.claude/agents/cpp-cmake/` | `rules/cpp-cmake/` → `.claude/rules/cpp-cmake/` |
 | `python` | `agents/python/` → `.claude/agents/python/` | `rules/python/` → `.claude/rules/python/` |
 | `node` | `agents/node/` → `.claude/agents/node/` | `rules/node/` → `.claude/rules/node/` |
 | `rust` | `agents/rust/` → `.claude/agents/rust/` | `rules/rust/` → `.claude/rules/rust/` |

@@ -133,7 +133,7 @@ git clone https://github.com/jovetickop/Harness-CC.git ~/.claude/skills/harness-
 | 项目类型 | 架构设计 | 编码实现 | 测试 | UI 审查 |
 |---------|---------|---------|------|--------|
 | C++/Qt | `agents/qt/architect` | `agents/qt/task-implementer` | `agents/qt/test-engineer` | `agents/qt/ui-reviewer` |
-| C++ (纯 CMake) | 通用 | `agents/universal/task-implementer` | `agents/universal/test-engineer` | — |
+| C++ (纯 CMake) | `agents/cpp-cmake/architect` | `agents/universal/task-implementer` | `agents/universal/test-engineer` | — |
 | Python | `agents/python/architect` | `agents/universal/task-implementer` | `agents/python/test-engineer` | — |
 | Node | `agents/node/architect` | `agents/universal/task-implementer` | `agents/node/test-engineer` | `agents/node/ui-reviewer` |
 | Rust | `agents/rust/architect` | `agents/universal/task-implementer` | `agents/rust/test-engineer` | — |
@@ -155,6 +155,7 @@ harness-cc/                              ← 仓库根目录
 │   │   ├── test-engineer.md              ← 通用测试设计
 │   │   ├── build-doctor.md               ← 构建诊断（支持 CMake、Cargo、npm 等）
 │   │   └── code-reviewer.md              ← 代码审查（命名、错误处理、安全性）
+│   ├── cpp-cmake/                         ← 纯 C++/CMake 插件（仅 cpp-cmake 项目激活）
 │   ├── qt/                               ← C++/Qt 插件（仅 cpp-qt 项目激活）
 │   ├── python/                           ← Python 插件（仅 python 项目激活）
 │   ├── node/                             ← Node/Web 插件（仅 node 项目激活）
