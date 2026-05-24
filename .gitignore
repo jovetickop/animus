@@ -1,4 +1,5 @@
 .vscode/changelists.json
 worktrees/
 CLAUDE.md
+.claude/settings.local.json
 

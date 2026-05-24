@@ -41,11 +41,23 @@ Claude Code 在长周期开发中有几个固有问题：
 
 ---
 
-## 安装
+## 安装（插件模式，推荐）
+
+将 `.claude/` 目录复制到目标项目根目录：
+
+```bash
+cp -r .claude/ /path/to/your-project/
+```
+
+所有命令（`/harness-cc`、`/harness-code-setup`、`/harness-code-plan`、`/harness-code-review`）自动可用。
+
+## 安装（技能模式）
 
 ```bash
 git clone https://github.com/jovetickop/CodeHarness.git ~/.claude/skills/harness-cc
 ```
+
+仅 `/harness-cc` 可用，命令需要配合插件模式使用。
 
 安装后，在任意项目目录中执行 `/harness-cc` 即可激活。
 
@@ -125,11 +137,12 @@ git clone https://github.com/jovetickop/CodeHarness.git ~/.claude/skills/harness
 ## 目录结构详解
 
 ```
-CodeHarness/                              ← 技能安装到 ~/.claude/skills/harness-cc/
-├── SKILL.md                              ← 技能入口。/harness-cc 激活后执行此文件
-│
-├── agents/                               ← Agent 定义（纯 markdown，供 Claude 读取）
-│   ├── universal/                        ← 所有项目类型共同使用的通用 agent
+harness-cc/                              ← 仓库根目录
+├── .claude/                              ← 插件主目录（复制到项目）
+│   ├── SKILL.md                          ← 技能入口。/harness-cc 激活
+│   │
+│   ├── agents/                           ← Agent 定义（纯 markdown）
+│   │   ├── universal/                    ← 所有项目类型共同使用的通用 agent
 │   │   ├── feature-planner.md            ← PRD/方案 → 任务列表（/harness-code-plan 内部使用）
 │   │   ├── task-implementer.md           ← 单任务最小闭环实现
 │   │   ├── test-engineer.md              ← 通用测试设计
@@ -140,12 +153,12 @@ CodeHarness/                              ← 技能安装到 ~/.claude/skills/h
 │   ├── node/                             ← Node/Web 插件（仅 node 项目激活）
 │   └── rust/                             ← Rust 插件（仅 rust 项目激活）
 │
-├── commands/                             ← 斜杠命令定义
+│   ├── commands/                           ← 斜杠命令定义
 │   ├── harness-code-setup.md             ← /harness-code-setup：初始化 + 项目类型检测
 │   ├── harness-code-plan.md              ← /harness-code-plan：PRD → 可执行任务
 │   └── harness-code-review.md            ← /harness-code-review：通用 + 语言专项验收
 │
-├── rules/                                ← 研发规范
+│   ├── rules/                              ← 研发规范
 │   ├── universal/                        ← 通用规范（所有项目）
 │   │   ├── coding-style.md              ← 命名、注释、文件组织、格式
 │   │   ├── testing.md                   ← 测试基线、验证策略
@@ -156,14 +169,14 @@ CodeHarness/                              ← 技能安装到 ~/.claude/skills/h
 │   ├── node/                             ← Node.js 规范
 │   └── rust/                             ← Rust 规范
 │
-├── hooks/                                ← 自动化钩子
+│   ├── hooks/                              ← 自动化钩子
 │   ├── hooks.json                        ← PostToolUse：Write/Edit 后自动 clang-format
 │   └── scripts/                          ← clang-format.sh + clang-format.ps1
 │
-├── skills/
+│   ├── skills/
 │   └── tdd-workflow/SKILL.md             ← 子技能：TDD 工作流，/tdd-workflow 激活
 │
-└── templates/
+│   └── templates/
     ├── harness/                          ← 复制到目标项目 .claude/harness/ 的运行时
     │   ├── features.json                ← 任务清单与状态（核心数据）
     │   ├── project-config.json          ← 项目类型配置（/harness-code-setup 写入）
