@@ -11,7 +11,6 @@
 Claude Code 在长周期开发中有几个固有问题：
 
 | 问题 | harness-cc 的解法 |
-| 问题 | harness-cc 的解法 |
 |------|-------------------|
 | **跨会话失忆** | 每次启动先读 `features.json` + `progress.txt`，恢复现场 |
 | **一口气改太多** | 每轮只推进一个任务，不越界 |
@@ -20,23 +19,31 @@ Claude Code 在长周期开发中有几个固有问题：
 
 ### 三层架构
 
-```
-┌────────────────────────────────────────────────────┐
-│                    技能入口                         │
-│          SKILL.md  (/harness-cc)                  │
-├────────────────────────────────────────────────────┤
-│                 编排层（Commands）                   │
-│  /harness-code-setup  /harness-code-plan  /harness-code-review │
-├────────────────────────────────────────────────────┤
-│              执行层（Agents + Rules）               │
-│  agents/universal/   agents/qt/   agents/python/   │
-│  agents/node/   agents/rust/                       │
-│  rules/universal/   rules/qt/   rules/python/...   │
-├────────────────────────────────────────────────────┤
-│              持久化层（Harness）                    │
-│  features.json  /  project-config.json  /  progress.txt  │
-│  update-progress.ps1  /  show-status.py  /  coding-session.ps1  │
-└────────────────────────────────────────────────────┘
+```mermaid
+flowchart RL
+    subgraph 技能入口
+        SKILL[/"/harness-cc"/]
+    end
+    subgraph 编排层[编排层 · Commands]
+        C1[/"/harness-code-setup"/]
+        C2[/"/harness-code-plan"/]
+        C3[/"/harness-code-review"/]
+    end
+    subgraph 执行层[执行层 · Agents + Rules]
+        A1["agents/universal/"]
+        A2["agents/{qt,python,node,rust}/"]
+        R["rules/{universal,qt,python,node,rust}/"]
+    end
+    subgraph 持久化层[持久化层 · Harness]
+        F["features.json"]
+        P["project-config.json"]
+        L["claude-progress.txt"]
+    end
+
+    SKILL --> C1 & C2 & C3
+    C1 & C2 & C3 --> A1 & A2 & R
+    A1 & A2 --> F & L
+    C1 --> P
 ```
 
 ---
