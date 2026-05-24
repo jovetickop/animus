@@ -48,21 +48,13 @@ flowchart TB
 
 ---
 
-## 安装（插件模式，推荐）
-
-将 `.claude/` 目录复制到目标项目根目录：
+## 安装
 
 ```bash
-cp -r .claude/ /path/to/your-project/
+git clone https://github.com/jovetickop/Harness-CC.git ~/.claude/skills/harness-cc
 ```
 
-所有命令（`/harness-cc`、`/harness-code-setup`、`/harness-code-plan`、`/harness-code-review`）自动可用。
-
-## 安装（技能模式）
-
-```bash
-git clone https://github.com/jovetickop/CodeHarness.git ~/.claude/skills/harness-cc
-```
+安装后，在任意项目目录中执行 `/harness-cc`，技能会自动检测状态并初始化。
 
 仅 `/harness-cc` 可用，命令需要配合插件模式使用。
 
