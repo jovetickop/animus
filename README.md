@@ -54,11 +54,20 @@ flowchart TB
 git clone https://github.com/jovetickop/Harness-CC.git ~/.claude/skills/harness-cc
 ```
 
-安装后，在任意项目目录中执行 `/harness-cc`，技能会自动检测状态并初始化。
-
-仅 `/harness-cc` 可用，命令需要配合插件模式使用。
-
 安装后，在任意项目目录中执行 `/harness-cc` 即可激活。
+
+## 可用命令
+
+安装 `harness-cc` 后，以下命令在所有项目中可用：
+
+| 命令 | 什么时候用 | 作用 |
+|------|-----------|------|
+| `/harness-cc` | **首次接入**，或每天开始编码时 | 总控入口。自动检测项目状态：首次使用时初始化 harness，已有进度时读取状态引导下一步 |
+| `/harness-code-setup` | 首次接入，或需要重新检测项目类型时 | 初始化项目：检测项目类型（C++/Qt、Python、Node、Rust）、创建 `.claude/harness/`、回填 CLAUDE.md |
+| `/harness-code-plan` | 有新需求/任务需要拆解时 | 将 PRD（及方案文档，如有）转为 `features.json` 任务列表，每个任务含验收标准和测试命令 |
+| `/harness-code-review` | 实现完成后验收 | 执行通用检查（构建+测试+代码质量）+ 按项目类型的专项验收检查。输出严重级别（high/medium/low）|
+
+> 日常开发流程：`/harness-cc`（读状态）→ `/harness-code-plan`（拆任务）→ 实现 → `/harness-code-review`（验收）
 
 ---
 
