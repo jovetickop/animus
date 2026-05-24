@@ -62,8 +62,7 @@ git clone https://github.com/jovetickop/Harness-CC.git ~/.claude/skills/harness-
 
 | 命令 | 什么时候用 | 作用 |
 |------|-----------|------|
-| `/harness-cc` | **首次接入**，或每天开始编码时 | 总控入口。自动检测项目状态：首次使用时初始化 harness，已有进度时读取状态引导下一步 |
-| `/harness-code-setup` | 首次接入，或需要重新检测项目类型时 | 初始化项目：检测项目类型（C++/Qt、Python、Node、Rust）、创建 `.claude/harness/`、回填 CLAUDE.md |
+| `/harness-cc` | **首次接入**，或每天开始编码时 | 总控入口。自动检测项目状态。首次使用时内部调用初始化流程，已有进度时读取状态引导下一步 |
 | `/harness-code-plan` | 有新需求/任务需要拆解时 | 将 PRD（及方案文档，如有）转为 `features.json` 任务列表，每个任务含验收标准和测试命令 |
 | `/harness-code-review` | 实现完成后验收 | 执行通用检查（构建+测试+代码质量）+ 按项目类型的专项验收检查。输出严重级别（high/medium/low）|
 
