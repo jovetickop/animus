@@ -20,7 +20,7 @@ Claude Code 在长周期开发中有几个固有问题：
 ### 三层架构
 
 ```mermaid
-flowchart RL
+flowchart TB
     subgraph 技能入口
         SKILL[/"/harness-cc"/]
     end
