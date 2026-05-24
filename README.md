@@ -51,7 +51,13 @@ flowchart TB
 ## 安装
 
 ```cmd
+:: CMD
 git clone https://github.com/jovetickop/Harness-CC.git %USERPROFILE%/.claude/skills/harness-cc
+```
+
+```powershell
+# PowerShell
+git clone https://github.com/jovetickop/Harness-CC.git $env:USERPROFILE/.claude/skills/harness-cc
 ```
 
 安装后，在任意项目目录中执行 `/harness-cc` 即可激活。
