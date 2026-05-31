@@ -2,7 +2,7 @@ param(
     [Parameter(Position = 0)]
     [string]$TaskId,
     [Parameter(Position = 1)]
-    [ValidateSet("pending", "in_progress", "passed", "failed")]
+    [ValidateSet("pending", "in_progress", "passed", "completed", "failed")]
     [string]$Status,
     [Parameter(Position = 2)]
     [string]$Message = "",
@@ -163,7 +163,22 @@ if (-not (Test-Path $FeaturesPath)) {
 
 $features = Get-Content -Raw -LiteralPath $FeaturesPath | ConvertFrom-Json
 
-foreach ($task in @($features)) {
+# 支持新格式（包含 initial_tasks 或 tasks 字段）和旧格式（直接是数组）
+$tasks = @()
+if ($features -is [PSCustomObject]) {
+    if ($features.initial_tasks) {
+        $tasks = @($features.initial_tasks)
+    } elseif ($features.tasks) {
+        $tasks = @($features.tasks)
+    } else {
+        # 单个对象没有任务数组，可能是单任务配置
+        $tasks = @($features)
+    }
+} elseif ($features -is [Array]) {
+    $tasks = $features
+}
+
+foreach ($task in $tasks) {
     Ensure-TaskField -Task $task -Name "depends_on" -Value @()
     Ensure-TaskField -Task $task -Name "priority" -Value 0
     Ensure-TaskField -Task $task -Name "last_error" -Value ""
@@ -193,7 +208,7 @@ if (-not $targetTask) {
 }
 
 $taskById = @{}
-foreach ($task in @($features)) {
+foreach ($task in $tasks) {
     $taskById[[string]$task.id] = $task
 }
 
@@ -201,13 +216,13 @@ $currentStatus = [string]$targetTask.status
 
 switch ($Status) {
     "in_progress" {
-        if ($currentStatus -notin @("pending", "failed", "in_progress")) {
+        if ($currentStatus -notin @("pending", "failed", "in_progress", "completed")) {
             Write-Host "非法状态流转: $TaskId 不允许从 $currentStatus 变为 in_progress"
             exit 1
         }
 
         if ($currentStatus -ne "in_progress") {
-            $otherInProgress = @($features | Where-Object { $_.id -ne $TaskId -and $_.status -eq "in_progress" })
+            $otherInProgress = @($tasks | Where-Object { $_.id -ne $TaskId -and $_.status -eq "in_progress" })
             if ($otherInProgress.Count -gt 0) {
                 $otherIds = ($otherInProgress | ForEach-Object { $_.id }) -join ", "
                 Write-Host "状态冲突: 已存在进行中任务 ($otherIds)。请先处理完成或回退后再切换 $TaskId。"
@@ -222,7 +237,7 @@ switch ($Status) {
                     continue
                 }
 
-                if ([string]$taskById[$depId].status -ne "passed") {
+                if ([string]$taskById[$depId].status -notin @("passed", "completed")) {
                     $unmetDeps += $depId
                 }
             }
@@ -239,19 +254,29 @@ switch ($Status) {
         }
     }
     "passed" {
-        if ($currentStatus -ne "in_progress") {
-            Write-Host "非法状态流转: $TaskId 只能从 in_progress 变为 passed"
+        if ($currentStatus -notin @("in_progress", "completed")) {
+            Write-Host "非法状态流转: $TaskId 只能从 in_progress 或 completed 变为 passed"
+            exit 1
+        }
+    }
+    "completed" {
+        if ($currentStatus -eq "pending") {
+            # completed 可以直接从 pending 开始（手动标记）
+        } elseif ($currentStatus -notin @("in_progress", "passed", "completed")) {
+            Write-Host "非法状态流转: $TaskId 不允许从 $currentStatus 变为 completed"
             exit 1
         }
     }
     "failed" {
-        if ($currentStatus -ne "in_progress") {
+        if ($currentStatus -eq "pending") {
+            # failed 可以直接从 pending 开始（标记为不可行）
+        } elseif ($currentStatus -ne "in_progress") {
             Write-Host "非法状态流转: $TaskId 只能从 in_progress 变为 failed"
             exit 1
         }
     }
     "pending" {
-        if ($currentStatus -notin @("failed", "in_progress", "pending")) {
+        if ($currentStatus -notin @("failed", "in_progress", "pending", "completed")) {
             Write-Host "非法状态流转: $TaskId 不允许从 $currentStatus 变为 pending"
             exit 1
         }

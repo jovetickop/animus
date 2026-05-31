@@ -36,6 +36,21 @@ def read_json(path):
         return json.load(f)
 
 
+def get_tasks(data):
+    """从 features.json 中提取任务列表，支持新旧两种格式"""
+    if isinstance(data, list):
+        # 旧格式：直接是任务数组
+        return data
+    elif isinstance(data, dict):
+        # 新格式：有 initial_tasks 字段
+        if "initial_tasks" in data:
+            return data["initial_tasks"]
+        # 也支持 tasks 字段
+        if "tasks" in data:
+            return data["tasks"]
+    return []
+
+
 def main():
     if len(sys.argv) > 1:
         harness_root = sys.argv[1]
@@ -52,11 +67,14 @@ def main():
         print(u"未找到 features.json: {0}".format(features_path))
         return 1
 
-    tasks = read_json(features_path)
+    data = read_json(features_path)
+    tasks = get_tasks(data)
     status_by_id = {str(task.get("id", "")): str(task.get("status", "")) for task in tasks}
 
     total = len(tasks)
     passed = sum(1 for task in tasks if task.get("status") == "passed")
+    completed = sum(1 for task in tasks if task.get("status") == "completed")
+    passed = passed + completed  # 合并计算
     failed_tasks = [task for task in tasks if task.get("status") == "failed"]
     in_progress = None
     for task in tasks:

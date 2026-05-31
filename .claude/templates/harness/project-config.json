@@ -1,8 +1,32 @@
 {
-  "project-type": "",
+  "project-type": "auto-detect",
   "detected-at": "",
-  "configure-command": "",
-  "build-command": "",
-  "test-command": "",
-  "run-command": ""
+  "architecture": "auto-detect",
+  "backend": {
+    "framework": "",
+    "root": "backend/",
+    "configure-command": "cd backend && pip install -r requirements.txt",
+    "build-command": "cd backend && python -m pytest tests/ -v",
+    "test-command": "cd backend && python -m pytest tests/ -v",
+    "run-command": "cd backend && uvicorn app.main:app --reload"
+  },
+  "frontend": {
+    "framework": "",
+    "root": "frontend/",
+    "configure-command": "cd frontend && npm install",
+    "build-command": "cd frontend && npm run build",
+    "test-command": "cd frontend && npm run test",
+    "run-command": "cd frontend && npm run dev"
+  },
+  "common": {
+    "lint-command": "",
+    "typecheck-command": ""
+  },
+  "_backward-compatibility": {
+    "legacyFields": {
+      "framework": "",
+      "build-command": "",
+      "test-command": ""
+    }
+  }
 }
