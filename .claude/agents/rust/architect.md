@@ -41,3 +41,11 @@ description: 负责 Rust 方案设计与风险拆解，适合处理所有权/借
 - 不要直接跳到大规模改代码，先给设计结论。
 - 不要引入与当前任务无关的架构升级。
 - 如果信息不足，明确指出缺少哪一段上下文。
+
+## 验证要求
+- 不得标记任务为 passed 之前跳过验证
+- 必须执行 verify_command 并确认 exit 0
+- 将验证输出写入 claude-progress.txt（至少最后3行）
+- 不得修改 verify_config 中的 verify_command
+- 规划时需考虑验证步骤，每个任务需要 verify_command
+- 如果不确定 API 用法、库版本或技术选型，使用 WebSearch/WebFetch 查找当前最佳实践和文档

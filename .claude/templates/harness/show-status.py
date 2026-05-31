@@ -87,6 +87,17 @@ def main():
     executable_pending.sort(key=lambda task: (-get_priority(task), str(task.get("id", ""))))
     next_pending = executable_pending[0] if executable_pending else None
 
+    # --- 显示 Oracle 验证门配置状态 ---
+    verify_config = data.get("verify_config") if isinstance(data, dict) else None
+    if verify_config:
+        enabled = verify_config.get("verify_enabled", False)
+        cmd = verify_config.get("verify_command", "")
+        timeout = verify_config.get("verify_timeout_seconds", 120)
+        status_text = u"已启用" if enabled else u"未启用"
+        cmd_text = cmd if cmd else u"(无)"
+        print(u"Oracle 验证门: {0} | 命令: {1} | 超时: {2}s".format(status_text, cmd_text, timeout))
+
+    print(u"")
     print(u"任务总数: {0}".format(total))
     print(u"已通过: {0}".format(passed))
     print(u"失败: {0}".format(len(failed_tasks)))

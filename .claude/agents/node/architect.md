@@ -44,3 +44,11 @@ description: 负责 Node.js/Web 项目架构设计与技术选型，适合处理
 - 不要一次引入过多新依赖。
 - 不要做与当前任务无关的架构升级。
 - 信息不足时，明确给出缺少的上下文。
+
+## 验证要求
+- 不得标记任务为 passed 之前跳过验证
+- 必须执行 verify_command 并确认 exit 0
+- 将验证输出写入 claude-progress.txt（至少最后3行）
+- 不得修改 verify_config 中的 verify_command
+- 规划时需考虑验证步骤，每个任务需要 verify_command
+- 如果不确定 API 用法、库版本或技术选型，使用 WebSearch/WebFetch 查找当前最佳实践和文档

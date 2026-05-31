@@ -2,4 +2,8 @@
 worktrees/
 CLAUDE.md
 .claude/settings.local.json
+__pycache__/
+*.pyc
+.codegraph/
+temp_utf8.ps1
 

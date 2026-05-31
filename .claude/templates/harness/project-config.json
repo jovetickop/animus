@@ -1,6 +1,7 @@
 {
   "project-type": "auto-detect",
   "detected-at": "",
+  "encoding": "",
   "architecture": "auto-detect",
   "backend": {
     "framework": "",
@@ -21,6 +22,11 @@
   "common": {
     "lint-command": "",
     "typecheck-command": ""
+  },
+  "verify": {
+    "verify_enabled": false,
+    "verify_command": "",
+    "verify_timeout_seconds": 120
   },
   "_backward-compatibility": {
     "legacyFields": {
