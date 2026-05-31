@@ -1,4 +1,4 @@
----
+﻿---
 name: harness-cc
 description: 复杂任务的编码工作流技能。输入 PRD+方案文档，自动拆解为可执行任务列表，按状态机逐个推进，验收后提交。支持 C++/Qt、Python、Node.js、Rust。
 ---
@@ -126,3 +126,4 @@ Get-Content .claude/state/claude-progress.txt -Tail 20
 - 测试规范：`.claude/rules/universal/testing.md`
 - Git 规范：`.claude/rules/universal/git-workflow.md`
 - 各语言最佳实践：`.claude/rules/{qt,python,node,rust}/best-practices.md`
+
