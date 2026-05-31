@@ -12,7 +12,7 @@ Claude Code 在长周期开发中有几个固有问题：
 
 | 问题 | harness-cc 的解法 |
 |------|-------------------|
-| **跨会话失忆** | 每次启动先读 `features.json` + `progress.txt`，恢复现场 |
+| **跨会话失忆** | 每次启动先读 `state/features.json` + `state/claude-progress.txt`，恢复现场 |
 | **一口气改太多** | 每轮只推进一个任务，不越界 |
 | **过早宣布完成** | 硬规则：没有构建/测试证据，不得标记 `passed` |
 | **缺少验证闭环** | 8 步工作流固化验收流程，不可跳过 |
@@ -34,16 +34,21 @@ flowchart TB
         A2["agents/{qt,python,node,rust}/"]
         R["rules/{universal,qt,python,node,rust}/"]
     end
-    subgraph 持久化层[持久化层 · Harness]
-        F["features.json"]
-        P["project-config.json"]
-        L["claude-progress.txt"]
+    subgraph 持久化层[持久化层 · State]
+        F["state/features.json"]
+        L["state/claude-progress.txt"]
+    end
+    subgraph 运行时引擎[运行时引擎 · Harness]
+        H["harness/ 脚本（状态机、会话入口...）"]
+        P["harness/project-config.json"]
     end
 
     SKILL --> C1 & C2 & C3
     C1 & C2 & C3 --> A1 & A2 & R
     A1 & A2 --> F & L
     C1 --> P
+    F --> H
+    L --> H
 ```
 
 ---
@@ -81,7 +86,7 @@ git clone https://github.com/jovetickop/Harness-CC.git $env:USERPROFILE/.claude/
 技能被 `/harness-cc` 激活后，执行 8 步闭环：
 
 ### Step 1: 读取状态
-读取 `.claude/harness/features.json` 和 `claude-progress.txt`，判断当前阶段。
+读取 `.claude/state/features.json` 和 `state/claude-progress.txt`，判断当前阶段。
 
 ### Step 2: 选择任务
 - 优先继续 `in_progress` 任务
@@ -191,15 +196,17 @@ harness-cc/                              ← 仓库根目录
 │   └── tdd-workflow/SKILL.md             ← 子技能：TDD 工作流，/tdd-workflow 激活
 │
 │   └── templates/
-    ├── harness/                          ← 复制到目标项目 .claude/harness/ 的运行时
-    │   ├── features.json                ← 任务清单与状态（核心数据）
-    │   ├── project-config.json          ← 项目类型配置（/harness-code-setup 写入）
-    │   ├── claude-progress.txt          ← 进度日志（追加写入，不可篡改）
-    │   ├── update-progress.ps1          ← 状态流转（含依赖检查 + 冲突检测 + 自动报告）
+    ├── harness/                          ← 复制到目标项目 .claude/harness/ 的运行时引擎
+    │   ├── update-progress.ps1          ← 状态流转引擎（含依赖检查 + 冲突检测 + 报告生成）
     │   ├── coding-session.ps1           ← 会话入口（扫描状态）
     │   ├── run-regression.ps1           ← 一键构建+测试
     │   ├── init.ps1                     ← 首次初始化
-    │   └── show-status.py               ← 状态概览（Python 2/3 双兼容）
+    │   ├── show-status.py               ← 状态概览（Python 2/3 双兼容）
+    │   ├── project-config.json          ← 项目类型配置（/harness-code-setup 写入）
+    │   └── README.md                    ← harness 运行时说明
+    ├── state/                            ← 复制到目标项目 .claude/state/ 的项目状态
+    │   ├── features.json                ← 任务清单与状态（核心数据，动态更新）
+    │   └── claude-progress.txt          ← 进度日志（追加写入，不可篡改）
     └── existing_project/                ← 回填到目标项目根目录
         ├── CLAUDE.md                    ← 项目 CLAUDE.md 模板（追加合并）
         ├── review-checklist.md          ← 验收清单
