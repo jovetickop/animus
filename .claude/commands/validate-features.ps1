@@ -1,5 +1,5 @@
 param(
-    [string]$FeaturesPath = ".claude/harness/features.json"
+    [string]$FeaturesPath = ".claude/state/features.json"
 )
 
 $ErrorActionPreference = "Stop"

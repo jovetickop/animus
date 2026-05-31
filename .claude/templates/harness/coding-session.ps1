@@ -2,7 +2,9 @@ param(
     [string]$ProjectRoot = "."
 )
 
-$HarnessRoot = Join-Path $ProjectRoot ".claude\harness"
+$ClaudeRoot = Join-Path $ProjectRoot ".claude"
+$HarnessRoot = Join-Path $ClaudeRoot "harness"
+$StateRoot = Join-Path $ClaudeRoot "state"
 $ShowStatus = Join-Path $HarnessRoot "show-status.py"
 
 if (-not (Test-Path $ShowStatus)) {
@@ -10,4 +12,4 @@ if (-not (Test-Path $ShowStatus)) {
     exit 1
 }
 
-python $ShowStatus $HarnessRoot
+python $ShowStatus $StateRoot

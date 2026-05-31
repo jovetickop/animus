@@ -3,7 +3,7 @@ param(
 )
 
 $ConfigPath = Join-Path $ProjectRoot ".claude\harness\project-config.json"
-$FeaturesPath = Join-Path $ProjectRoot ".claude\harness\features.json"
+$FeaturesPath = Join-Path $ProjectRoot ".claude\state\features.json"
 
 # 优先从 project-config.json 读取构建/测试命令
 if (Test-Path $ConfigPath) {

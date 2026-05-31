@@ -72,8 +72,8 @@ foreach ($item in $alwaysCopy) {
 
 # 仅首次安装时创建 features.json 和 claude-progress.txt
 $stateFiles = @(
-    @{Name="features.json"; Src=".claude/templates/harness/features.json"; Dst="harness/features.json"}
-    @{Name="claude-progress.txt"; Src=".claude/templates/harness/claude-progress.txt"; Dst="harness/claude-progress.txt"}
+    @{Name="features.json"; Src=".claude/templates/state/features.json"; Dst="state/features.json"}
+    @{Name="claude-progress.txt"; Src=".claude/templates/state/claude-progress.txt"; Dst="state/claude-progress.txt"}
 )
 foreach ($item in $stateFiles) {
     $src = Join-Path $SkillDir $item.Src
@@ -202,7 +202,31 @@ Get-Content .claude/harness/claude-progress.txt -Tail 20 -Encoding UTF8
     }
 }
 
-# === 7. Done ===
+# === 7. Migration: 检测旧路径状态文件并迁移 ===
+Write-Progress -Activity "CodeHarness Setup" -Status "Migrating old state files" -PercentComplete 95
+
+$oldFeatures = Join-Path $targetClaude "harness/features.json"
+$oldProgress = Join-Path $targetClaude "harness/claude-progress.txt"
+$stateDir = Join-Path $targetClaude "state"
+$needsMigration = $false
+
+if ((Test-Path $oldFeatures) -and -not (Test-Path (Join-Path $stateDir "features.json"))) {
+    if (-not (Test-Path $stateDir)) { New-Item -ItemType Directory -Path $stateDir -Force | Out-Null }
+    Move-Item $oldFeatures (Join-Path $stateDir "features.json") -Force
+    Write-Host "[harness]   Migrated: harness/features.json -> state/features.json"
+    $needsMigration = $true
+}
+if ((Test-Path $oldProgress) -and -not (Test-Path (Join-Path $stateDir "claude-progress.txt"))) {
+    if (-not (Test-Path $stateDir)) { New-Item -ItemType Directory -Path $stateDir -Force | Out-Null }
+    Move-Item $oldProgress (Join-Path $stateDir "claude-progress.txt") -Force
+    Write-Host "[harness]   Migrated: harness/claude-progress.txt -> state/claude-progress.txt"
+    $needsMigration = $true
+}
+if ($needsMigration) {
+    Write-Host "[harness]   状态文件迁移完成。请更新 CLAUDE.md 中的路径引用。"
+}
+
+# === 8. Done ===
 $elapsed = [DateTime](Get-Date) - [DateTime]$startTime
 Write-Host ""
 Write-Host "============================================"

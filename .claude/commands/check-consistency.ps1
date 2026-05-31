@@ -1,12 +1,12 @@
 param(
-    [string]$HarnessDir = ".claude/harness"
+    [string]$StateDir = ".claude/state"
 )
 
 $ErrorActionPreference = "Stop"
 $warnings = @()
 
-$featuresPath = Join-Path $HarnessDir "features.json"
-$progressPath = Join-Path $HarnessDir "claude-progress.txt"
+$featuresPath = Join-Path $StateDir "features.json"
+$progressPath = Join-Path $StateDir "claude-progress.txt"
 
 if (-not (Test-Path $featuresPath)) {
     Write-Host "FAILED: features.json not found: $featuresPath"

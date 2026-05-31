@@ -2,13 +2,16 @@ param(
     [string]$ProjectRoot = "."
 )
 
-$HarnessRoot = Join-Path $ProjectRoot ".claude\harness"
+$ClaudeRoot = Join-Path $ProjectRoot ".claude"
+$StateRoot = Join-Path $ClaudeRoot "state"
+$HarnessRoot = Join-Path $ClaudeRoot "harness"
 $BuildDir = Join-Path $ProjectRoot "build"
 
+New-Item -ItemType Directory -Force -Path $StateRoot | Out-Null
 New-Item -ItemType Directory -Force -Path $HarnessRoot | Out-Null
 
-if (-not (Test-Path (Join-Path $HarnessRoot "features.json"))) {
-    Write-Host "未在 $HarnessRoot 中找到 features.json"
+if (-not (Test-Path (Join-Path $StateRoot "features.json"))) {
+    Write-Host "未在 $StateRoot 中找到 features.json"
     exit 1
 }
 

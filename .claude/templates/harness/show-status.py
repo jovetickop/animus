@@ -53,15 +53,15 @@ def get_tasks(data):
 
 def main():
     if len(sys.argv) > 1:
-        harness_root = sys.argv[1]
+        state_root = sys.argv[1]
     else:
-        default_root = os.path.join(".claude", "harness")
+        default_root = os.path.join(".claude", "state")
         if os.path.exists(default_root):
-            harness_root = default_root
+            state_root = default_root
         else:
-            harness_root = os.path.dirname(os.path.abspath(__file__))
+            state_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "state")
 
-    features_path = os.path.join(harness_root, "features.json")
+    features_path = os.path.join(state_root, "features.json")
 
     if not os.path.exists(features_path):
         print(u"未找到 features.json: {0}".format(features_path))

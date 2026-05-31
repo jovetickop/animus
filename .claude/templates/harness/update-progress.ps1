@@ -152,9 +152,10 @@ if ([string]::IsNullOrWhiteSpace($TaskId) -or [string]::IsNullOrWhiteSpace($Stat
     exit 1
 }
 
-$HarnessRoot = Join-Path $ProjectRoot ".claude\harness"
-$FeaturesPath = Join-Path $HarnessRoot "features.json"
-$ProgressPath = Join-Path $HarnessRoot "claude-progress.txt"
+$ClaudeRoot = Join-Path $ProjectRoot ".claude"
+$FeaturesPath = Join-Path $ClaudeRoot "state\features.json"
+$ProgressPath = Join-Path $ClaudeRoot "state\claude-progress.txt"
+$HarnessRoot = Join-Path $ClaudeRoot "harness"
 
 if (-not (Test-Path $FeaturesPath)) {
     Write-Host "未在 $HarnessRoot 中找到 features.json"
