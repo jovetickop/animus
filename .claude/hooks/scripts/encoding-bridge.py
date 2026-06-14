@@ -48,27 +48,30 @@ def to_utf8(file_path, encoding):
     """
     将指定编码（如 GBK）的文件转换为 UTF-8。
     以二进制读取，按指定编码解码后写回 UTF-8。
+
+    返回 True 表示转换成功，False 表示失败。
     """
     try:
         with open(file_path, 'rb') as f:
             raw = f.read()
-        # 尝试解码，失败则静默跳过（可能已是 UTF-8）
         try:
             text = raw.decode(encoding)
         except UnicodeDecodeError:
-            return
-        # 以 UTF-8 写回
+            return False
         with open(file_path, 'wb') as f:
             f.write(text.encode('utf-8'))
-    except Exception:
-        # 静默失败，不阻塞调用方
-        pass
+        return True
+    except (IOError, OSError) as e:
+        print(u"[encoding-bridge] 转换失败 {0}: {1}".format(file_path, e), file=sys.stderr)
+        return False
 
 
 def to_gbk(file_path, encoding):
     """
     将 UTF-8 文件转换为指定编码（如 GBK）。
     以二进制读取 UTF-8，解码后按目标编码写回。
+
+    返回 True 表示转换成功，False 表示失败。
     """
     try:
         with open(file_path, 'rb') as f:
@@ -76,11 +79,13 @@ def to_gbk(file_path, encoding):
         try:
             text = raw.decode('utf-8')
         except UnicodeDecodeError:
-            return
+            return False
         with open(file_path, 'wb') as f:
             f.write(text.encode(encoding))
-    except Exception:
-        pass
+        return True
+    except (IOError, OSError) as e:
+        print(u"[encoding-bridge] 转换失败 {0}: {1}".format(file_path, e), file=sys.stderr)
+        return False
 
 
 def main():

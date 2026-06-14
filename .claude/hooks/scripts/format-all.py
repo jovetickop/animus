@@ -4,7 +4,7 @@
 format-all.py — 多语言代码格式化工具
 
 根据文件扩展名自动分发到语言特定的格式化工具。
-Python 2.7+ / 3.x 兼容，始终以 exit 0 退出。
+Python 3.3+ required（依赖 subprocess.communicate 的 timeout 参数），始终以 exit 0 退出。
 """
 
 from __future__ import print_function

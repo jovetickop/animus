@@ -24,7 +24,12 @@ $filePath = $matches[1] -replace '\\\\', '\'
 $encDir = Split-Path $filePath -Parent
 $projectConfig = $null
 while ($encDir -and (Test-Path $encDir)) {
+    # 优先在用户项目的 .claude/harness/ 下查找
     $candidate = Join-Path $encDir ".claude\harness\project-config.json"
+    # 回退到源仓库的 templates/harness/（用于在 harness-cc 源仓库内开发）
+    if (-not (Test-Path $candidate)) {
+        $candidate = Join-Path $encDir ".claude\templates\harness\project-config.json"
+    }
     if (Test-Path $candidate) {
         $projectConfig = $candidate
         break
@@ -35,7 +40,7 @@ while ($encDir -and (Test-Path $encDir)) {
 }
 if ($projectConfig) {
     try {
-        $configObj = Get-Content $projectConfig -Raw | ConvertFrom-Json
+        $configObj = Get-Content $projectConfig -Raw -Encoding UTF8 | ConvertFrom-Json
         if ($configObj.encoding -eq "gbk" -and $filePath -match '\.(cpp|cc|cxx|c|h|hpp|hxx)$') {
             $bridgeScript = "$PSScriptRoot\encoding-bridge.py"
             if (Test-Path $bridgeScript) {

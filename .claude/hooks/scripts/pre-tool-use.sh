@@ -18,7 +18,7 @@ case "$operation" in
 esac
 
 # 提取被写入的文件路径
-file_path=$(echo "$input" | sed -n 's/.*"file_path":"\([^"]*\)".*/\1/p')
+file_path=$(echo "$input" | sed -n 's/.*"file_path":"\([^"]*\)".*/\1/p' | head -1)
 [ -z "$file_path" ] && exit 0
 
 # 将 Windows 反斜杠路径转换为 Unix 正斜杠

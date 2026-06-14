@@ -17,7 +17,12 @@ if (Get-Command clang-format -ErrorAction SilentlyContinue) {
         $encDir = Split-Path $filePath -Parent
         $projectConfig = $null
         while ($encDir -and (Test-Path $encDir)) {
+            # 优先在用户项目的 .claude/harness/ 下查找
             $candidate = Join-Path $encDir ".claude\harness\project-config.json"
+            # 回退到源仓库的 templates/harness/（用于在 harness-cc 源仓库内开发）
+            if (-not (Test-Path $candidate)) {
+                $candidate = Join-Path $encDir ".claude\templates\harness\project-config.json"
+            }
             if (Test-Path $candidate) {
                 $projectConfig = $candidate
                 break
@@ -27,7 +32,7 @@ if (Get-Command clang-format -ErrorAction SilentlyContinue) {
             $encDir = $parent
         }
         if ($projectConfig) {
-            $configObj = Get-Content $projectConfig -Raw | ConvertFrom-Json
+            $configObj = Get-Content $projectConfig -Raw -Encoding UTF8 | ConvertFrom-Json
             if ($configObj.encoding -eq "gbk") {
                 $bridgeScript = "$PSScriptRoot\encoding-bridge.py"
                 if (Test-Path $bridgeScript) {

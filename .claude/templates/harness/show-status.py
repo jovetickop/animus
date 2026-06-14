@@ -24,8 +24,13 @@ def get_depends_on(task):
 
 
 def can_run(task, status_by_id):
+    """判断任务依赖是否已满足。
+
+    状态机契约：依赖任务状态为 passed 或 completed 时，依赖视为满足。
+    与 PowerShell 版 pre-compact.ps1:43 和 pre-compact.sh:30 保持一致。
+    """
     for dep_id in get_depends_on(task):
-        if status_by_id.get(dep_id) != "passed":
+        if status_by_id.get(dep_id) not in ("passed", "completed"):
             return False
     return True
 

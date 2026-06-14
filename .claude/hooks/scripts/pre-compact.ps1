@@ -12,9 +12,19 @@ $projectRoot = if ($env:CLAUDE_PROJECT_ROOT) {
     Resolve-Path "$PSScriptRoot/../../.."
 }
 
-$stateDir = Join-Path $projectRoot ".claude" "state"
-$progressPath = Join-Path $stateDir "claude-progress.txt"
-$featuresPath = Join-Path $stateDir "features.json"
+# 同时支持 .claude/harness/（init-project.ps1 复制位置）和 .claude/state/（约定位置）
+$featuresPath = $null
+foreach ($sub in @("harness", "state")) {
+    $candidate = Join-Path $projectRoot ".claude" $sub "features.json"
+    if (Test-Path -LiteralPath $candidate) {
+        $featuresPath = $candidate
+        break
+    }
+}
+$progressPath = Join-Path $projectRoot ".claude" "state" "claude-progress.txt"
+if (-not (Test-Path -LiteralPath $progressPath)) {
+    $progressPath = Join-Path $projectRoot ".claude" "harness" "claude-progress.txt"
+}
 
 # 1) 如果 claude-progress.txt 存在，追加时间戳 [COMPACT] 标记行
 if (Test-Path -LiteralPath $progressPath) {

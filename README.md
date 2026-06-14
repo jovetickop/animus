@@ -113,8 +113,6 @@ git clone https://github.com/jovetickop/Harness-CC.git $env:USERPROFILE/.claude/
 
 ### Step 3: 标记开始
 ```bash
-python .claude/scripts/update-progress.py --task-id T001 --status in_progress --message "开始..."
-# 或使用 PowerShell 版本:
 .\.claude\harness\update-progress.ps1 T001 in_progress "开始..."
 ```
 
@@ -127,16 +125,16 @@ python .claude/scripts/update-progress.py --task-id T001 --status in_progress --
 - **medium/low**：记录待办后继续
 
 ### Step 6: 验证
-执行构建命令和测试命令。可用 `run-regression.py` 一键执行。
+执行构建命令和测试命令。可用 `.\.claude\harness\run-regression.ps1` 一键执行。
 
 ### Step 7: 验收
 执行 `/harness-code-review`：通用检查（构建+测试+代码质量）+ 语言专项检查。
 
 ### Step 8: 完成或失败
 ```bash
-python .claude/scripts/update-progress.py --task-id T001 --status passed --message "说明"
+.\.claude\harness\update-progress.ps1 T001 passed "说明"
 # 或
-python .claude/scripts/update-progress.py --task-id T001 --status failed --message "失败原因"
+.\.claude\harness\update-progress.ps1 T001 failed "失败原因"
 ```
 
 通过后按 `rules/universal/git-workflow.md` 提交代码。然后重复 Step 1。
@@ -230,11 +228,8 @@ harness-cc/                              ← 仓库根目录
 │   │       └── encoding-bridge.py        ← GBK/UTF-8 编码桥接
 │   │
 │   ├── scripts/                            ← 技能自带 Python 脚本（Phase 2 新增）
-│   │   ├── update-progress.py             ← 核心状态机（替代 PS 版）
-│   │   ├── run-regression.py              ← 回归测试运行器
-│   │   ├── validate-features.py           ← 结构校验 + 循环依赖检测
-│   │   ├── show-status.py                 ← 状态显示增强版
-│   │   └── session-catchup.py             ← 会话恢复工具
+│   │   ├── session-catchup.py             ← 会话恢复工具（唯一保留）
+│   │   └── （其余 Python 脚本已迁移到 harness/，使用 PowerShell 版本）
 │   │
 │   ├── skills/
 │   │   └── tdd-workflow/SKILL.md          ← 子技能：TDD 工作流
@@ -335,9 +330,9 @@ pending ──→ in_progress ──→ passed ──→ completed（别名）
 ### 3. 查看当前状态
 
 ```bash
-python .claude/scripts/show-status.py
+.\.claude\harness\show-status.ps1
 # 输出示例:
-# Oracle 验证门: 已启用 | 命令: python .claude/scripts/run-regression.py | 超时: 120s
+# Oracle 验证门: 已启用 | 命令: .\harness\run-regression.ps1 | 超时: 120s
 # 任务总数: 6 | 已通过: 2 | 失败: 0 | 待处理: 3
 # 进行中: T003 实现登录模块 (持续 15 分钟)
 # 下一个可执行任务: T004 用户注册功能 (priority=90)
@@ -348,19 +343,19 @@ python .claude/scripts/show-status.py
 
 ```bash
 # Step 1: 标记开始
-python .claude/scripts/update-progress.py --task-id T003 --status in_progress --message "开始实现登录模块"
+.\.claude\harness\update-progress.ps1 T003 in_progress "开始实现登录模块"
 
 # Step 2: 阅读对应语言的 architect agent 指导
 # Step 3: 实现代码
 # Step 4: 代码审查
 # Step 5: 构建验证
-python .claude/scripts/run-regression.py
+.\.claude\harness\run-regression.ps1
 
 # Step 6: 验收审查
 /harness-code-review
 
 # Step 7: 标记完成（自动触发 Oracle 验证）
-python .claude/scripts/update-progress.py --task-id T003 --status passed --message "登录模块实现完成"
+.\.claude\harness\update-progress.ps1 T003 passed "登录模块实现完成"
 ```
 
 ### 5. GBK 编码项目配置
@@ -372,7 +367,7 @@ python .claude/scripts/update-progress.py --task-id T003 --status passed --messa
   "encoding": "gbk",
   "verify": {
     "verify_enabled": true,
-    "verify_command": "python .claude/scripts/run-regression.py",
+    "verify_command": ".\\.claude\\harness\\run-regression.ps1",
     "verify_timeout_seconds": 120
   }
 }
@@ -392,7 +387,7 @@ python .claude/scripts/session-catchup.py
 
 或者：
 ```bash
-python .claude/scripts/show-status.py
+.\.claude\harness\show-status.ps1
 # 查看当前任务状态，直接从 Step 2 继续
 ```
 
@@ -427,7 +422,7 @@ T001 和 T002 分属不同 group，可以同时在两个会话中独立执行。
 
 ```bash
 # 验证 features.json 结构（含循环依赖检测）
-python .claude/scripts/validate-features.py
+.\.claude\harness\validate-features.ps1
 # 输出:
 # PASSED: 6 个任务，结构验证通过
 # 或
