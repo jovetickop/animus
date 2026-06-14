@@ -1,3 +1,18 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+current_phase: Phase 1 — Foundation (编码统一与基础设施标准化)
+status: unknown
+last_updated: "2026-06-14T14:17:57.055Z"
+progress:
+  total_phases: 3
+  completed_phases: 0
+  total_plans: 5
+  completed_plans: 0
+  percent: 0
+---
+
 # State: ty-qt-ai-plugin (harness-cc)
 
 **Current Phase:** Phase 1 — Foundation (编码统一与基础设施标准化)
@@ -97,12 +112,16 @@ Phase 1 planning via `/gsd-plan-phase 1`.
 ### Restart Commands
 
 ```bash
+
 # View current roadmap
+
 gsd-tools query roadmap.analyze
 
 # View current state
+
 gsd-tools query state.load
 
 # Start Phase 1 planning
+
 /gsd-plan-phase 1
 ```

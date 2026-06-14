@@ -32,7 +32,14 @@
 6. `.gitattributes` 和 `.editorconfig` 文件存在于仓库根目录，自动约束 .sh/.ps1/.py/.json/.md 等文件类型的换行符和编码
 7. 全语言回归验证通过：分别创建 C++/Qt、Rust、Python 三种语言目标工程，运行完整 Setup→Plan→Implement→Review→Verify 流程，确认编码/换行符/路径修改未破坏任何语言工作流
 
-**Plans:** TBD
+**Plans:** 5 plans in 3 waves
+
+**Plan list:**
+- [ ] 01-01-ps-encoding-PLAN.md — PS 脚本 UTF-16LE → UTF-8 with BOM + 中文注释修复
+- [ ] 01-02-shell-line-endings-PLAN.md — Shell 脚本 CRLF → LF 换行符修复
+- [ ] 01-03-features-json-path-PLAN.md — 统一 features.json 路径为 .claude/state/
+- [ ] 01-04-templates-state-cleanup-PLAN.md — 清理 templates/state/ + 修复 init-project.ps1
+- [ ] 01-05-gitattributes-editorconfig-PLAN.md — 添加基础设施配置文件
 
 ---
 
