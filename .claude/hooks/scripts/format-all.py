@@ -13,6 +13,27 @@ import os
 import subprocess
 import sys
 
+# Cargo.toml 目录查找缓存，减少重复的向上遍历 I/O
+_cargo_root_cache = {}
+
+
+def find_cargo_root(start_path):
+    """查找包含 Cargo.toml 的目录，使用缓存加速"""
+    if start_path in _cargo_root_cache:
+        return _cargo_root_cache[start_path]
+    current_dir = start_path
+    result = None
+    while current_dir:
+        if os.path.exists(os.path.join(current_dir, "Cargo.toml")):
+            result = current_dir
+            break
+        parent = os.path.dirname(current_dir)
+        if parent == current_dir:
+            break
+        current_dir = parent
+    _cargo_root_cache[start_path] = result
+    return result
+
 
 def run_formatter(cmd, file_path, formatter_name):
     """执行格式化命令，返回是否执行成功"""
@@ -63,35 +84,21 @@ def format_rust(file_path):
     # Rust 的 cargo fmt 作用于整个项目而非单个文件
     # 查找当前文件所属项目的根目录（包含 Cargo.toml 的目录）
     current_dir = os.path.dirname(os.path.abspath(file_path))
-    while current_dir:
-        if os.path.exists(os.path.join(current_dir, "Cargo.toml")):
-            try:
-                proc = subprocess.Popen(
-                    ["cargo", "fmt", "--check"],
-                    cwd=current_dir,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE
-                )
-                proc.communicate(timeout=60)
-                # cargo fmt 没有 --files 选项，对整个项目执行
-                proc2 = subprocess.Popen(
-                    ["cargo", "fmt"],
-                    cwd=current_dir,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE
-                )
-                proc2.communicate(timeout=60)
-                if proc2.returncode == 0:
-                    print(u"[format-all] {0}: cargo fmt OK".format(file_path))
-                    return
-                else:
-                    return
-            except Exception:
+    cargo_root = find_cargo_root(current_dir)
+    if cargo_root:
+        try:
+            proc = subprocess.Popen(
+                ["cargo", "fmt"],
+                cwd=cargo_root,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            proc.communicate(timeout=60)
+            if proc.returncode == 0:
+                print(u"[format-all] {0}: cargo fmt OK".format(file_path))
                 return
-        parent = os.path.dirname(current_dir)
-        if parent == current_dir:
-            break
-        current_dir = parent
+        except Exception:
+            return
 
 
 def format_cpp(file_path):
