@@ -12,19 +12,16 @@ $projectRoot = if ($env:CLAUDE_PROJECT_ROOT) {
     Resolve-Path "$PSScriptRoot/../../.."
 }
 
-# 同时支持 .claude/harness/（init-project.ps1 复制位置）和 .claude/state/（约定位置）
-$featuresPath = $null
-foreach ($sub in @("harness", "state")) {
-    $candidate = Join-Path $projectRoot ".claude" $sub "features.json"
-    if (Test-Path -LiteralPath $candidate) {
-        $featuresPath = $candidate
-        break
-    }
+# 统一路径查找：features.json 固定在 .claude/state/
+$featuresPath = Join-Path $projectRoot ".claude" "state" "features.json"
+
+# 旧路径 deprecated 警告（仅提示，不影响逻辑）
+$oldFeaturesPath = Join-Path $projectRoot ".claude" "harness" "features.json"
+if (Test-Path -LiteralPath $oldFeaturesPath) {
+    Write-Host "[harness-cc] WARNING: features.json 在旧路径 .claude/harness/ (deprecated). 请迁移到 .claude/state/" -ForegroundColor Yellow
 }
+
 $progressPath = Join-Path $projectRoot ".claude" "state" "claude-progress.txt"
-if (-not (Test-Path -LiteralPath $progressPath)) {
-    $progressPath = Join-Path $projectRoot ".claude" "harness" "claude-progress.txt"
-}
 
 # 1) 如果 claude-progress.txt 存在，追加时间戳 [COMPACT] 标记行
 if (Test-Path -LiteralPath $progressPath) {

@@ -6,19 +6,15 @@
 # 确定项目根目录（从脚本路径 .claude/hooks/scripts/ 向上三级）
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 project_root="$(cd "$script_dir/../../.." && pwd)"
-# 同时支持 .claude/harness/（init-project.ps1 复制位置）和 .claude/state/（约定位置）
-features_path=""
-for sub in harness state; do
-    candidate="$project_root/.claude/$sub/features.json"
-    if [ -f "$candidate" ]; then
-        features_path="$candidate"
-        break
-    fi
-done
-progress_path="$project_root/.claude/state/claude-progress.txt"
-if [ ! -f "$progress_path" ]; then
-    progress_path="$project_root/.claude/harness/claude-progress.txt"
+# 统一路径查找：features.json 固定在 .claude/state/
+features_path="$project_root/.claude/state/features.json"
+
+# 旧路径 deprecated 警告（仅提示，不影响逻辑）
+if [ -f "$project_root/.claude/harness/features.json" ]; then
+    echo "[harness-cc] WARNING: features.json 在旧路径 .claude/harness/ (deprecated). 请迁移到 .claude/state/"
 fi
+
+progress_path="$project_root/.claude/state/claude-progress.txt"
 
 # 1) 如果 claude-progress.txt 存在，追加时间戳 [COMPACT] 标记行
 if [ -f "$progress_path" ]; then

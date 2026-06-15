@@ -342,14 +342,10 @@ def print_recovery_report(session_dir, sessions_info, features_writes_per_sessio
 
     # 检查当前 features.json 中的任务状态
     state_dir = os.path.join(os.path.dirname(session_dir), "..", "state")
-    # 尝试多个可能的位置查找 features.json
+    # 统一路径：features.json 固定在 .claude/state/
     features_candidates = [
         os.path.join(os.path.dirname(session_dir), "..", "state", "features.json"),
-        os.path.join(os.path.dirname(session_dir), "harness", "features.json"),
-        os.path.join(os.path.dirname(session_dir), "features.json"),
     ]
-    # 如果 session_dir 有父级，尝试从项目根找
-    # 这里我们使用 project_dir 推导
 
     features_found = None
     for cand in features_candidates:
