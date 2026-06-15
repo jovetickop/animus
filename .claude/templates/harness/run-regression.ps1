@@ -13,7 +13,8 @@ if (Test-Path $ConfigPath) {
 
     if (-not [string]::IsNullOrWhiteSpace($buildCmd)) {
         Write-Host "执行构建: $buildCmd"
-        Invoke-Expression $buildCmd
+        $parts = $buildCmd.Split(' ', 2)
+        & $parts[0] $parts[1]
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     } else {
         Write-Host "未配置构建命令，跳过构建"
@@ -21,7 +22,8 @@ if (Test-Path $ConfigPath) {
 
     if (-not [string]::IsNullOrWhiteSpace($testCmd)) {
         Write-Host "执行测试: $testCmd"
-        Invoke-Expression $testCmd
+        $parts = $testCmd.Split(' ', 2)
+        & $parts[0] $parts[1]
         exit $LASTEXITCODE
     } else {
         Write-Host "未配置测试命令，跳过测试"
@@ -37,7 +39,8 @@ if (Test-Path $FeaturesPath) {
     $testCmd = [string]$firstTask.test_command
     if (-not [string]::IsNullOrWhiteSpace($testCmd)) {
         Write-Host "执行测试: $testCmd"
-        Invoke-Expression $testCmd
+        $parts = $testCmd.Split(' ', 2)
+        & $parts[0] $parts[1]
         exit $LASTEXITCODE
     }
 }
