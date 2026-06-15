@@ -1,9 +1,14 @@
 # Format edited C/C++ files after Claude Code write operations.
 
-$inputJson = $input | Out-String
-
-if ($inputJson -notmatch '"file_path"\s*:\s*"([^"]+)"') { exit 0 }
-$filePath = $matches[1] -replace '\\\\', '\'
+# 使用 ConvertFrom-Json 替代脆弱的正则解析 JSON
+try {
+    $inputObj = $input | ConvertFrom-Json
+    $filePath = $inputObj.tool_input.file_path
+    if (-not $filePath) { exit 0 }
+} catch {
+    exit 0
+}
+$filePath = $filePath -replace '\\\\', '\'
 
 if ($filePath -notmatch '\.(cpp|cc|cxx|c|h|hpp|hxx)$') { exit 0 }
 

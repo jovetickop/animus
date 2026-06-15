@@ -2,22 +2,24 @@
 # 备份文件名为 features.json.bak.YYYYMMDDHHMMSS，保留最近 5 个备份
 # 始终以 exit 0 退出，绝不阻塞操作
 
-$inputJson = $input | Out-String
-
-# 从 stdin JSON 中提取操作类型（tool 或 name 字段）
-$operation = ""
-if ($inputJson -match '"tool"\s*:\s*"([^"]+)"') {
-    $operation = $matches[1]
-} elseif ($inputJson -match '"name"\s*:\s*"([^"]+)"') {
-    $operation = $matches[1]
+# 使用 ConvertFrom-Json 替代脆弱的正则解析 JSON
+try {
+    $inputObj = $input | ConvertFrom-Json
+    $tool = $inputObj.tool
+    $name = $inputObj.name
+    $filePath = $inputObj.tool_input.file_path
+} catch {
+    exit 0
 }
 
 # 仅处理 Write/Edit 操作
+$operation = $tool -or $name
+if (-not $operation) { exit 0 }
 if ($operation -notmatch '^(Write|Edit)$') { exit 0 }
 
 # 提取被写入的文件路径
-if ($inputJson -notmatch '"file_path"\s*:\s*"([^"]+)"') { exit 0 }
-$filePath = $matches[1] -replace '\\\\', '\'
+if (-not $filePath) { exit 0 }
+$filePath = $filePath -replace '\\\\', '\'
 
 # ---- GBK 编码自动转换：Write/Edit 前将 GBK 文件转为 UTF-8 ----
 # 检查 project-config.json 中 encoding=gbk，若是则运行 encoding-bridge.py

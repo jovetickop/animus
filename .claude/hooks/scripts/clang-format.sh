@@ -2,8 +2,11 @@
 # Format edited C/C++ files after Claude Code write operations.
 
 input=$(cat)
-file_path=$(echo "$input" | sed -n 's/.*"file_path":"\([^"]*\)".*/\1/p')
-
+# 使用 jq 解析 JSON（含 Python fallback）
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+if [ -z "$file_path" ] && command -v python >/dev/null 2>&1; then
+    file_path=$(echo "$input" | python -c "import json,sys; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('file_path',''))" 2>/dev/null)
+fi
 [ -z "$file_path" ] && exit 0
 
 file_path="${file_path//\\//}"
