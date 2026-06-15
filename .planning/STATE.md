@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: Phase 1 — Foundation (编码统一与基础设施标准化)
-status: unknown
-last_updated: "2026-06-14T14:17:57.055Z"
+status: in_progress
+last_updated: "2026-06-14T14:30:00Z"
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 5
-  completed_plans: 0
-  percent: 0
+  completed_plans: 1
+  percent: 20
 ---
 
 # State: ty-qt-ai-plugin (harness-cc)
@@ -49,9 +49,9 @@ progress:
 | Metric | Value |
 |--------|-------|
 | Phases completed | 0 / 3 |
-| Requirements completed | 0 / 11 |
-| Plans created | 0 |
-| Plans completed | 0 |
+| Requirements completed | 2 / 11 (TECHD-01, TECHD-03) |
+| Plans created | 5 |
+| Plans completed | 1 (01-01) |
 | Blockers | None |
 
 ---
@@ -82,10 +82,10 @@ None currently.
 
 ### Observations
 
-- 仓库中 7 个 UTF-16LE .ps1 文件是编码修复的主要目标（`templates/harness/` 下 4 个 + `commands/` 下 3 个）
+- [DONE] 仓库中 7 个 UTF-16LE .ps1 文件已转换为 UTF-8 with BOM（commit 38b38cf）
 - 4 个 `.sh` 文件（`hooks/scripts/` 下）使用 CRLF 换行符，需要转为 LF
 - `update-progress.ps1` 是最大单文件（424 行），同时存在 UTF-16LE 编码 + CRLF/LF 混用 + 中文注释损坏 + 多职责膨胀，是陷阱叠加效应的典型
-- 中文注释损坏在 commit 628f02c 中得到证实
+- [NOTE] `harness-code-setup.ps1` 第 45 行存在少量原始损坏的中文注释，是文件创建时就已存在的损坏，转换后仍保留
 - Phase 3 开始前需要研究 PowerShell 5.1 下 `.psm1` 模块加载行为
 
 ---
