@@ -1,4 +1,4 @@
-# update-progress.ps1 - 状态机主入口（精简编排器）
+﻿# update-progress.ps1 - 状态机主入口（精简编排器）
 # 所有逻辑位于 ./modules/ 子目录
 
 param(

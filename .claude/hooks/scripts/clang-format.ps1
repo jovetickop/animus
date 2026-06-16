@@ -1,4 +1,4 @@
-# Format edited C/C++ files after Claude Code write operations.
+﻿# Format edited C/C++ files after Claude Code write operations.
 
 # 使用 ConvertFrom-Json 替代脆弱的正则解析 JSON
 try {

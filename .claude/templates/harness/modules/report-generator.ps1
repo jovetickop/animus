@@ -1,4 +1,4 @@
-# report-generator.ps1 — 报告生成模块
+﻿# report-generator.ps1 — 报告生成模块
 # 生成 Markdown 格式的任务报告，存储在 docs/reports/ 目录
 
 function Convert-ToSafeFileName {

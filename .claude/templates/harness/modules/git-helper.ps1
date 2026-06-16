@@ -1,4 +1,4 @@
-# git-helper.ps1 — Git 自动提交模块（仅本地提交，由用户推送）
+﻿# git-helper.ps1 — Git 自动提交模块（仅本地提交，由用户推送）
 
 function Invoke-GitCommit {
     param(

@@ -1,4 +1,4 @@
-# PreToolUse 钩子 — Write/Edit 操作前自动备份 features.json 状态文件
+﻿# PreToolUse 钩子 — Write/Edit 操作前自动备份 features.json 状态文件
 # 备份文件名为 features.json.bak.YYYYMMDDHHMMSS，保留最近 5 个备份
 # 始终以 exit 0 退出，绝不阻塞操作
 

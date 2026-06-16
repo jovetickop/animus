@@ -1,4 +1,4 @@
-# oracle-runner.ps1 — Oracle 验证模块
+﻿# oracle-runner.ps1 — Oracle 验证模块
 # 执行构建/测试命令，验证状态机状态转换是否被批准
 
 function Invoke-OracleVerify {

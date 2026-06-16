@@ -1,4 +1,4 @@
-# validate-transition.ps1 — 状态机转换校验模块
+﻿# validate-transition.ps1 — 状态机转换校验模块
 # 提供状态转换合法性检查、并发冲突检查、依赖检查
 
 function Test-TransitionValid {

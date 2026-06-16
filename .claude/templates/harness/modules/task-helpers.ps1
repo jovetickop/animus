@@ -1,4 +1,4 @@
-# task-helpers.ps1 — 任务辅助模块
+﻿# task-helpers.ps1 — 任务辅助模块
 
 function Ensure-TaskField {
     param([Parameter(Mandatory=$true)][object]$Task,[Parameter(Mandatory=$true)][string]$Name,$Value)
