@@ -1,423 +1,60 @@
-﻿param(
-    [Parameter(Position = 0)]
-    [string]$TaskId,
-    [Parameter(Position = 1)]
-    [ValidateSet("pending", "in_progress", "passed", "failed", "completed")]
-    [string]$Status,
-    [Parameter(Position = 2)]
-    [string]$Message = "",
+# update-progress.ps1 - 状态机主入口（精简编排器）
+# 所有逻辑位于 ./modules/ 子目录
+
+param(
+    [Parameter(Position = 0)][string]$TaskId,
+    [Parameter(Position = 1)][ValidateSet('pending','in_progress','passed','failed','completed')][string]$Status,
+    [Parameter(Position = 2)][string]$Message='',
     [switch]$AutoPush,
-    [string]$ProjectRoot = "."
+    [string]$ProjectRoot='.'
 )
 
-function Ensure-TaskField {
-    param(
-        [Parameter(Mandatory = $true)]
-        [object]$Task,
-        [Parameter(Mandatory = $true)]
-        [string]$Name,
-        [Parameter(Mandatory = $true)]
-        $Value
-    )
-    if (-not $Task.PSObject.Properties[$Name]) {
-        $Task | Add-Member -NotePropertyName $Name -NotePropertyValue $Value
-    }
-}
-
-function Convert-ToSafeFileName {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$Name
-    )
-
-    if ([string]::IsNullOrWhiteSpace($Name)) {
-        return "unnamed-task"
-    }
-
-    $safeName = $Name
-    foreach ($invalidChar in [System.IO.Path]::GetInvalidFileNameChars()) {
-        $safeName = $safeName.Replace([string]$invalidChar, "-")
-    }
-
-    $safeName = $safeName.Trim()
-    $safeName = $safeName.TrimEnd(".")
-    if ([string]::IsNullOrWhiteSpace($safeName)) {
-        return "unnamed-task"
-    }
-
-    return $safeName
-}
-
-function Write-TaskReport {
-    param(
-        [Parameter(Mandatory = $true)]
-        [object]$Task,
-        [Parameter(Mandatory = $true)]
-        [string]$ProjectRoot,
-        [Parameter(Mandatory = $true)]
-        [string]$ProgressPath,
-        [Parameter(Mandatory = $true)]
-        [string]$CurrentStatus,
-        [Parameter(Mandatory = $true)]
-        [string]$NewStatus,
-        [Parameter(Mandatory = $true)]
-        [string]$LogMessage
-    )
-
-    $reportsDir = Join-Path $ProjectRoot "docs\reports"
-    New-Item -ItemType Directory -Force -Path $reportsDir | Out-Null
-
-    $taskId = [string]$Task.id
-    $taskName = [string]$Task.name
-    $safeTaskName = Convert-ToSafeFileName -Name $taskName
-    $reportPath = Join-Path $reportsDir ("{0}-{1}.md" -f $taskId, $safeTaskName)
-
-    $dependsOn = @($Task.depends_on)
-    $dependsOnText = if ($dependsOn.Count -gt 0) { ($dependsOn -join ", ") } else { "无" }
-
-    $acceptanceCriteria = @()
-    foreach ($criterion in @($Task.acceptance_criteria)) {
-        $criterionText = [string]$criterion
-        if (-not [string]::IsNullOrWhiteSpace($criterionText)) {
-            $acceptanceCriteria += $criterionText.Trim()
-        }
-    }
-    if ($acceptanceCriteria.Count -eq 0) {
-        $acceptanceCriteria = @("未定义验收标准")
-    }
-
-    $testCommand = [string]$Task.test_command
-    if ([string]::IsNullOrWhiteSpace($testCommand)) {
-        $testCommand = "(未配置)"
-    }
-
-    $lastError = [string]$Task.last_error
-    if ([string]::IsNullOrWhiteSpace($lastError)) {
-        $lastError = "无"
-    }
-
-    $statusSummary = switch ($NewStatus) {
-        "passed" { "验证通过" }
-        "failed" { "验证失败" }
-        "in_progress" { "进行中（待验证）" }
-        default { "等待执行" }
-    }
-
-    $historyLines = @()
-    if (Test-Path -LiteralPath $ProgressPath) {
-        $taskPattern = "\|\s*$([regex]::Escape($taskId))\s*\|"
-        $historyLines = @(Get-Content -LiteralPath $ProgressPath | Where-Object { $_ -match $taskPattern })
-    }
-    if ($historyLines.Count -eq 0) {
-        $historyLines = @("暂无任务历史记录")
-    }
-
-    $criteriaSection = ($acceptanceCriteria | ForEach-Object { "- $_" }) -join "`r`n"
-    $historySection = ($historyLines | ForEach-Object { "- $_" }) -join "`r`n"
-    $displayMessage = if ([string]::IsNullOrWhiteSpace($LogMessage)) { "(无补充说明)" } else { $LogMessage }
-    $priorityValue = [string]$Task.priority
-    $updatedAt = [string]$Task.updated_at
-
-    $reportContent = @"
-# $taskId - $taskName
-
-## 功能描述
-- 任务编号：`$taskId`
-- 任务名称：$taskName
-- 当前状态：`$($Task.status)`
-- 依赖任务：`$dependsOnText`
-- 优先级：`$priorityValue`
-- 验证命令：`$testCommand`
-
-### 验收标准
-$criteriaSection
-
-## 最新验证结果
-- 更新时间（UTC）：`$updatedAt`
-- 本次流转：`$CurrentStatus -> $NewStatus`
-- 结论：$statusSummary
-- 说明：$displayMessage
-- 最近失败原因：$lastError
-
-## 过程记录（claude-progress）
-$historySection
-"@
-
-    Set-Content -LiteralPath $reportPath -Encoding UTF8 -Value $reportContent
-    return $reportPath
-}
-
 if ([string]::IsNullOrWhiteSpace($TaskId) -or [string]::IsNullOrWhiteSpace($Status)) {
-    Write-Host "用法: .\\.claude\\harness\\update-progress.ps1 <TaskId> <Status> [Message] [-AutoPush] [-ProjectRoot .]"
+    Write-Host '用法: update-progress.ps1 <TaskId> <Status> [Message] [-AutoPush] [-ProjectRoot .]'
     exit 1
 }
 
-$ClaudeRoot = Join-Path $ProjectRoot ".claude"
-$FeaturesPath = Join-Path $ClaudeRoot "state\features.json"
-$ProgressPath = Join-Path $ClaudeRoot "state\claude-progress.txt"
-$HarnessRoot = Join-Path $ClaudeRoot "harness"
+$modulesDir = Join-Path $PSScriptRoot 'modules'
+. (Join-Path $modulesDir 'task-helpers.ps1')
+. (Join-Path $modulesDir 'validate-transition.ps1')
+. (Join-Path $modulesDir 'oracle-runner.ps1')
+. (Join-Path $modulesDir 'report-generator.ps1')
+. (Join-Path $modulesDir 'git-helper.ps1')
 
-if (-not (Test-Path $FeaturesPath)) {
-    Write-Host "未在 $HarnessRoot 中找到 features.json"
-    exit 1
-}
+$ClaudeRoot = Join-Path $ProjectRoot '.claude'
+$FeaturesPath = Join-Path $ClaudeRoot 'state\features.json'
+$ProgressPath = Join-Path $ClaudeRoot 'state\claude-progress.txt'
 
-$features = Get-Content -Raw -LiteralPath $FeaturesPath -Encoding UTF8 | ConvertFrom-Json
+$features = Read-FeaturesJson -FeaturesPath $FeaturesPath
+if (-not $features) { exit 1 }
 
-# 支持新格式（包含 initial_tasks 或 tasks 字段）和旧格式（直接是数组）
-$tasks = @()
-if ($features -is [PSCustomObject]) {
-    if ($features.initial_tasks) {
-        $tasks = @($features.initial_tasks)
-    } elseif ($features.tasks) {
-        $tasks = @($features.tasks)
-    } else {
-        # 单个对象没有任务数组，可能是单任务配置
-        $tasks = @($features)
-    }
-} elseif ($features -is [Array]) {
-    $tasks = $features
-}
-
-foreach ($task in $tasks) {
-    Ensure-TaskField -Task $task -Name "depends_on" -Value @()
-    Ensure-TaskField -Task $task -Name "priority" -Value 0
-    Ensure-TaskField -Task $task -Name "last_error" -Value ""
-    Ensure-TaskField -Task $task -Name "updated_at" -Value ""
-
-    $deps = @()
-    foreach ($dep in @($task.depends_on)) {
-        $depId = [string]$dep
-        if (-not [string]::IsNullOrWhiteSpace($depId)) {
-            $deps += $depId.Trim()
-        }
-    }
-    $task.depends_on = $deps
-
-    try {
-        $task.priority = [int]$task.priority
-    }
-    catch {
-        $task.priority = 0
-    }
-}
-
-$targetTask = $features | Where-Object { $_.id -eq $TaskId } | Select-Object -First 1
-if (-not $targetTask) {
-    Write-Host "未找到任务 $TaskId"
-    exit 1
-}
-
-$taskById = @{}
-foreach ($task in $tasks) {
-    $taskById[[string]$task.id] = $task
-}
+$tasks = Normalize-Tasks -Features $features
+$targetTask = Find-TaskById -Tasks $tasks -TaskId $TaskId
+if (-not $targetTask) { Write-Host ("未找到任务 " + $TaskId); exit 1 }
 
 $currentStatus = [string]$targetTask.status
+Test-TransitionValid -TargetTask $targetTask -NewStatus $Status -Tasks $tasks
 
-switch ($Status) {
-    "in_progress" {
-        if ($currentStatus -notin @("pending", "failed", "in_progress", "completed")) {
-            Write-Host "非法状态流转: $TaskId 不允许从 $currentStatus 变为 in_progress"
-            exit 1
-        }
-
-        if ($currentStatus -ne "in_progress") {
-            $otherInProgress = @($tasks | Where-Object { $_.id -ne $TaskId -and $_.status -eq "in_progress" })
-            if ($otherInProgress.Count -gt 0) {
-                $otherIds = ($otherInProgress | ForEach-Object { $_.id }) -join ", "
-                Write-Host "状态冲突: 已存在进行中任务 ($otherIds)。请先处理完成或回退后再切换 $TaskId。"
-                exit 1
-            }
-
-            $missingDeps = @()
-            $unmetDeps = @()
-            foreach ($depId in @($targetTask.depends_on)) {
-                if (-not $taskById.ContainsKey($depId)) {
-                    $missingDeps += $depId
-                    continue
-                }
-
-                if ([string]$taskById[$depId].status -notin @("passed", "completed")) {
-                    $unmetDeps += $depId
-                }
-            }
-
-            if ($missingDeps.Count -gt 0) {
-                Write-Host ("依赖配置错误: 任务 {0} 引用了不存在的 depends_on: {1}" -f $TaskId, ($missingDeps -join ", "))
-                exit 1
-            }
-
-            if ($unmetDeps.Count -gt 0) {
-                Write-Host ("依赖未满足: 任务 {0} 仍需等待 {1} 先通过" -f $TaskId, ($unmetDeps -join ", "))
-                exit 1
-            }
-        }
-    }
-    "passed" {
-        if ($currentStatus -notin @("in_progress", "completed")) {
-            Write-Host "非法状态流转: $TaskId 只能从 in_progress 或 completed 变为 passed"
-            exit 1
-        }
-    }
-    "completed" {
-        if ($currentStatus -eq "pending") {
-            # completed 可以直接从 pending 开始（手动标记）
-        } elseif ($currentStatus -notin @("in_progress", "passed", "completed")) {
-            Write-Host "非法状态流转: $TaskId 不允许从 $currentStatus 变为 completed"
-            exit 1
-        }
-    }
-    "failed" {
-        if ($currentStatus -eq "pending") {
-            # failed 可以直接从 pending 开始（标记为不可行）
-        } elseif ($currentStatus -ne "in_progress") {
-            Write-Host "非法状态流转: $TaskId 只能从 in_progress 变为 failed"
-            exit 1
-        }
-    }
-    "pending" {
-        if ($currentStatus -notin @("failed", "in_progress", "pending", "completed")) {
-            Write-Host "非法状态流转: $TaskId 不允许从 $currentStatus 变为 pending"
-            exit 1
-        }
-    }
+$finalStatus = $Status
+$finalMessage = $Message
+if ($Status -eq 'passed') {
+    $verifyResult = Invoke-OracleVerify -Features $features -TaskId $TaskId -ProgressPath $ProgressPath
+    if ($verifyResult.Failed) { $finalStatus = 'failed'; $finalMessage = $verifyResult.Message }
 }
 
-# --- Oracle 楠岃瘉闂細褰撶姸鎬佽浆鎹负 "passed" 鏃讹紝鎵ц楠岃瘉鍛戒护 ---
-# 楠岃瘉閫氳繃鎵嶅厑璁告爣璁颁负 passed锛屽惁鍒欏洖閫€涓?failed
-if ($Status -eq "passed") {
-    $verifyConfig = $null
-    if ($features -is [PSCustomObject]) {
-        $verifyConfig = $features.verify_config
-    }
-
-    if ($verifyConfig) {
-        $verifyEnabled = [bool]($verifyConfig.verify_enabled -eq $true)
-        $verifyCommand = [string]$verifyConfig.verify_command
-
-        if ($verifyEnabled -and (-not [string]::IsNullOrWhiteSpace($verifyCommand))) {
-            Write-Host "[Oracle 楠岃瘉闂╙ 楠岃瘉鍛戒护宸查厤缃紝寮€濮嬫墽琛岄獙璇?.."
-            Write-Host "鍛戒护: $verifyCommand"
-
-            # 鎵ц楠岃瘉鍛戒护骞舵崟鑾疯緭鍑哄拰閫€鍑虹爜
-            $verifyTempOut = Join-Path $env:TEMP "harness-verify-$([System.IO.Path]::GetRandomFileName()).txt"
-            $verifyTempErr = Join-Path $env:TEMP "harness-verify-err-$([System.IO.Path]::GetRandomFileName()).txt"
-
-            try {
-                $process = Start-Process -FilePath "powershell" -ArgumentList "-NoProfile", "-Command", $verifyCommand -NoNewWindow -PassThru -Wait -RedirectStandardOutput $verifyTempOut -RedirectStandardError $verifyTempErr
-                $verifyExitCode = $process.ExitCode
-                $verifyOutput = ""
-                if (Test-Path $verifyTempOut) {
-                    $verifyOutput = Get-Content -Raw -LiteralPath $verifyTempOut -Encoding UTF8
-                    Remove-Item -LiteralPath $verifyTempOut -Force -ErrorAction SilentlyContinue
-                }
-                $verifyError = ""
-                if (Test-Path $verifyTempErr) {
-                    $verifyError = Get-Content -Raw -LiteralPath $verifyTempErr -Encoding UTF8
-                    Remove-Item -LiteralPath $verifyTempErr -Force -ErrorAction SilentlyContinue
-                }
-            }
-            catch {
-                $verifyExitCode = -1
-                $verifyOutput = ""
-                $verifyError = "楠岃瘉鍛戒护鎵ц寮傚父: $_"
-            }
-
-            # 鏋勯€犻獙璇佹棩蹇?            $verifyTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-            $verifyLog = @(
-                "",
-                "--- Oracle 楠岃瘉闂?---",
-                "鏃堕棿: $verifyTimestamp",
-                "浠诲姟: $TaskId -> passed",
-                "楠岃瘉鍛戒护: $verifyCommand",
-                "閫€鍑虹爜: $verifyExitCode"
-            )
-            if (-not [string]::IsNullOrWhiteSpace($verifyOutput)) {
-                $verifyLog += "鏍囧噯杈撳嚭:"
-                $verifyLog += $verifyOutput.Trim()
-            }
-            if (-not [string]::IsNullOrWhiteSpace($verifyError)) {
-                $verifyLog += "閿欒杈撳嚭:"
-                $verifyLog += $verifyError.Trim()
-            }
-
-            # 灏嗛獙璇佹棩蹇楀啓鍏?claude-progress.txt
-            $verifyLogLine = ($verifyLog -join "`r`n")
-            Add-Content -LiteralPath $ProgressPath -Value $verifyLogLine
-
-            if ($verifyExitCode -ne 0) {
-                Write-Host "[Oracle 楠岃瘉闂╙ 鏈€氳繃 (exit code: $verifyExitCode)锛岀姸鎬佸皢琚涓?failed"
-                $Status = "failed"
-                # 鏋勫缓楠岃瘉澶辫触娑堟伅
-                $failureDetail = "Oracle 楠岃瘉闂ㄦ嫆缁? 楠岃瘉鍛戒护杩斿洖闈為浂閫€鍑虹爜 ($verifyExitCode)"
-                if (-not [string]::IsNullOrWhiteSpace($verifyError)) {
-                    $failureDetail = $failureDetail + "`r`n" + $verifyError.Trim()
-                }
-                $Message = $failureDetail
-            }
-            else {
-                Write-Host "[Oracle 楠岃瘉闂╙ 閫氳繃"
-            }
-        }
-    }
-}
-$logMessage = $Message
-if ($Status -eq "failed" -and [string]::IsNullOrWhiteSpace($logMessage)) {
-    $logMessage = "未提供失败原因"
-}
-
-$targetTask.status = $Status
-$targetTask.updated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-if ($Status -eq "failed") {
-    $targetTask.last_error = $logMessage
-}
-else {
-    $targetTask.last_error = ""
-}
+$targetTask.status = $finalStatus
+$targetTask.updated_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+$targetTask.last_error = if ($finalStatus -eq 'failed') { $finalMessage } else { '' }
 
 $features | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $FeaturesPath -Encoding UTF8
 
-$timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-Add-Content -LiteralPath $ProgressPath -Value "$timestamp | $TaskId | $currentStatus -> $Status | $logMessage"
+$timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+$logLine = "$timestamp | $TaskId | $currentStatus -> $finalStatus | $finalMessage"
+Add-Content -LiteralPath $ProgressPath -Value $logLine
 
-$reportPath = Write-TaskReport `
-    -Task $targetTask `
-    -ProjectRoot $ProjectRoot `
-    -ProgressPath $ProgressPath `
-    -CurrentStatus $currentStatus `
-    -NewStatus $Status `
-    -LogMessage $logMessage
+$reportPath = Write-TaskReport -Task $targetTask -ProjectRoot $ProjectRoot -ProgressPath $ProgressPath -CurrentStatus $currentStatus -NewStatus $finalStatus -LogMessage $finalMessage
 
-Write-Host "已将 $TaskId 从 $currentStatus 更新为 $Status"
-Write-Host "已输出任务报告: $reportPath"
+Write-Host ("已将 " + ($TaskId) + " 从 " + ($currentStatus) + " 更新为 " + ($finalStatus))
+Write-Host ("已输出任务报告: " + ($reportPath))
 
-if ($AutoPush) {
-    git rev-parse --is-inside-work-tree *> $null
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "当前目录不是 Git 仓库，跳过 AutoPush"
-        exit 0
-    }
-
-    git add -- $FeaturesPath $ProgressPath $reportPath
-    git diff --cached --quiet
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "没有可提交的变更，跳过 AutoPush"
-        exit 0
-    }
-
-    $commitMessage = "chore(harness): update $TaskId to $Status"
-    git commit -m $commitMessage
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "AutoPush: git commit 失败，请人工处理。"
-        exit 1
-    }
-
-    git push
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "AutoPush: git push 失败，请人工处理。"
-        exit 1
-    }
-}
-
-
+if ($AutoPush) { Invoke-GitCommit -FeaturesPath $FeaturesPath -ProgressPath $ProgressPath -ReportPath $reportPath -TaskId $TaskId -Status $finalStatus }

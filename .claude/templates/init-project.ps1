@@ -46,9 +46,12 @@ Write-Host ""
 # ============================================================
 Write-Step "确定 harness-cc 技能目录..."
 
-# 优先使用用户技能目录
-$UserSkillRoot = Join-Path $env:USERPROFILE ".claude\skills\harness-cc"
-$SkillRoot = $UserSkillRoot
+# 优先使用脚本所在目录（支持自定义安装路径）
+# Then fallback to user profile skill directory
+$SkillRoot = $PSScriptRoot
+if (-not (Test-Path (Join-Path $SkillRoot "SKILL.md"))) {
+    $SkillRoot = Join-Path $env:USERPROFILE ".claude\skills\harness-cc"
+}
 
 if (-not (Test-Path (Join-Path $SkillRoot "SKILL.md"))) {
     Write-Host "[错误] 无法找到 harness-cc 技能目录" -ForegroundColor Red
