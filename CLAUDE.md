@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 仓库性质
 
-本仓库是 **Claude Code 技能插件 `harness-cc` 本身的开发仓库**，不是使用该插件的目标工程。仓库根目录没有 `CMakeLists.txt` / `Cargo.toml` / `package.json` 等业务工程文件——所有源代码、脚本、模板、Agent 定义都集中在根目录各子目录中。
+本仓库是 **harness-cc 技能插件的源码发布仓库**，不是使用该插件的目标工程。用户克隆到 `~/.claude/skills/harness-cc` 作为全局技能使用。仓库根目录包含技能所有源代码（agents/, commands/, rules/, hooks/, templates/, scripts/, skills/, docs/），没有 `CMakeLists.txt` / `Cargo.toml` / `package.json` 等业务工程文件。
 
-`SKILL.md` 是技能入口（被 Claude Code 通过 `/harness-cc` 激活时读取），`templates/init-project.ps1` 是安装入口（用户执行后把插件资产复制到目标工程）。
+`SKILL.md` 是技能入口（被 Claude Code 通过 `/harness-cc` 激活时读取），`templates/init-project.ps1` 是安装入口（用户执行后为目标项目创建 `.claude/harness-cc/` 运行时目录）。
 
 ## 仓库根结构
 
@@ -41,10 +41,10 @@ ty-qt-ai-plugin/                       仓库根（插件发布源）
 
 1. **技能入口** (`SKILL.md`)：被 `/harness-cc` 激活后判定项目状态。
 2. **编排命令** (`commands/`)：3 个斜杠命令驱动工作流
-   - `harness-code-setup`：复制资产 + 检测项目类型（CMake/Qt/Cargo/npm/pip）+ 回填命令
+   - `harness-code-setup`：检测项目类型（CMake/Qt/Cargo/npm/pip）+ 创建 `.claude/harness-cc/` 运行时目录
    - `harness-code-plan`：PRD+方案 → `features.json` 任务列表
    - `harness-code-review`：通用 + 语言专项验收
-3. **执行层** (`agents/` + `rules/`)：universal 5 个通用 + 各语言专项 Agent；rules 约束编码规范。
+3. **执行层** (`agents/` + `rules/`)：agents/commands/rules 不再复制到目标项目，直接从技能安装目录 `~/.claude/skills/harness-cc/` 加载。universal 5 个通用 + 各语言专项 Agent；rules 约束编码规范。
 
 ## Agent 索引（按职责）
 
@@ -71,7 +71,7 @@ ty-qt-ai-plugin/                       仓库根（插件发布源）
 - 同时只能有一个 `in_progress` 任务（脚本会拒绝第二个）。
 - `in_progress → passed` 必须有构建/测试证据，否则违反工作流硬规则。
 - `depends_on` 必须是直接前置任务 ID；前置任务未 `passed` 时不能进入 `in_progress`。
-- 每次状态流转自动追加 `claude-progress.txt` 一行 + 生成 `docs/reports/<TaskId>-<name>.md` 报告。
+- 每次状态流转自动追加 `.claude/harness-cc/claude-progress.txt` 一行 + 生成 `.claude/harness-cc/docs/reports/<TaskId>-<name>.md` 报告。
 - `updated_at` / `last_error` 由脚本维护，不要手工批量改写。
 - 状态非法流转脚本会 `exit 1` 并打印原因——这是契约，不应放宽。
 
@@ -83,8 +83,7 @@ ty-qt-ai-plugin/                       仓库根（插件发布源）
 
 ## 模板与目标工程约定
 
-- `templates/existing_project/CLAUDE.md` 是**追加式**合并模板（`<!-- harness-cc -->` 哨兵），不是覆盖。修改时不要破坏哨兵标记。
-- `templates/init-project.ps1` 复制资产到目标工程；步骤 9 的"检查/追加 CLAUDE.md"是核心合并逻辑。
+- `templates/init-project.ps1` 为目标项目创建 `.claude/harness-cc/` 运行时目录，不再修改目标项目的 `CLAUDE.md`。
 - `templates/harness/features.json` 里的字段顺序（id/name/status/depends_on/priority/test_command/last_error/updated_at/acceptance_criteria）是契约，新字段必须保证向后兼容。
 
 ## 修改本仓库时的常用命令
@@ -211,7 +210,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 |---------|---------|---------|
 | PreToolUse | Write/Edit 前 | `pre-tool-use.sh` / `pre-tool-use.ps1`（备份 features.json + GBK→UTF-8） |
 | PostToolUse | Write/Edit 后 | `clang-format.sh` / `clang-format.ps1` + `format-all.py`（多语言格式化 + UTF-8→GBK） |
-| PreCompact | 上下文压缩前 | `pre-compact.sh` / `pre-compact.ps1`（刷进度到 claude-progress.txt） |
+| PreCompact | 上下文压缩前 | `pre-compact.sh` / `pre-compact.ps1`（刷进度到 `.claude/harness-cc/claude-progress.txt`） |
 | Stop | 会话结束时 | `stop-check.sh` / `stop-check.ps1`（检查未完成任务，输出恢复提示） |
 
 ## 平台注意事项
@@ -275,7 +274,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 ### GBK 编码支持 (`rules/cpp-cmake/encoding.md`)
 
-- 在 `.claude/harness/project-config.json` 中设置 `"encoding": "gbk"` 启用。
+- 在 `.claude/harness-cc/project-config.json` 中设置 `"encoding": "gbk"` 启用。
 - PreToolUse 钩子自动 GBK → UTF-8 转换，PostToolUse 自动 UTF-8 → GBK 回转。
 - Agent 不需手动编码转换，hooks 自动完成。
 
@@ -405,14 +404,14 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 ### 验收审查 (`harness-code-review` 命令)
 
 - `commands\validate-features.ps1` — 验证 `features.json` 结构。
-- `commands\check-consistency.ps1` — 检查 `features.json` 与 `claude-progress.txt` 状态一致性。
+- `commands\check-consistency.ps1` — 检查 `.claude/harness-cc/features.json` 与 `.claude/harness-cc/claude-progress.txt` 状态一致性。
 
 ### 状态机验收硬规则 (CLAUDE.md)
 
 - `in_progress → passed` 必须有构建/测试证据。
 - 不得标记任务为 `passed` 之前跳过验证。
 - 必须执行 `verify_command` 并确认 `exit 0`。
-- 验证输出写入 `claude-progress.txt`（至少最后 3 行）。
+- 验证输出写入 `.claude/harness-cc/claude-progress.txt`（至少最后 3 行）。
 - 不得修改 `verify_config` 中的 `verify_command`。
 
 ### 已有工程验收清单 (`templates/existing_project/review-checklist.md`)
@@ -449,7 +448,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 | 命令 | 职责 | 文件 |
 |------|------|------|
-| `/harness-code-setup` | 项目初始化 + 类型检测 + 资产复制 + CLAUDE.md 合并 | `commands/harness-code-setup.md` |
+| `/harness-code-setup` | 项目初始化 + 类型检测 + 创建 `.claude/harness-cc/` 运行时目录 | `commands/harness-code-setup.md` |
 | `/harness-code-plan` | PRD/方案文档 -> features.json 任务列表 | `commands/harness-code-plan.md` |
 | `/harness-code-review` | 通用验收 + 语言专项验收 | `commands/harness-code-review.md` |
 | 验证辅助 | features.json 结构校验 | `commands/validate-features.ps1` |
@@ -512,9 +511,9 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 ### 3. 模板 + 安装脚本的部署模式
 
-- 所有运行时资产集中存储在 `templates/` 下
-- `init-project.ps1` 是单入口安装脚本，负责检测、复制、合并
-- CLAUDE.md 采用哨兵标记的追加式合并，而非覆盖
+- 所有技能资产集中存储在仓库根目录下
+- `init-project.ps1` 是安装脚本，为目标项目创建 `.claude/harness-cc/` 运行时目录
+- 不再修改目标项目的 CLAUDE.md
 
 ### 4. 钩子自动化
 
@@ -536,13 +535,13 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 | 决策 | 理由 | 体现位置 |
 |------|------|----------|
-| 所有技能资产放在 `.claude/` 下 | 符合 Claude Code 插件约定，单一复制源 | 仓库根结构 |
+| 所有技能资产放在仓库根目录下 | 技能源码仓库，被克隆到 ~/.claude/skills/harness-cc 全局安装 | agents/, commands/, rules/ 等目录 |
 | 使用 PowerShell 作为主脚本语言 | Windows 优先的用户群体，PS 5.1 兼容 | `templates/harness/` |
 | 核心脚本从 PS 迁移到 Python | 跨平台 + Python 2/3 兼容 | `scripts/` 中的 `.py` 文件 |
 | HTML 注释引用替代原生 include | Markdown 缺乏 include 机制，HTML 注释是最便携方式 | `agents/base/*.md` |
 | 前置声明式 tasks.json | JSON 比 YAML 更宽泛的语言解析支持 | `templates/state/features.json` |
-| CLAUDE.md 追加而非覆盖 | 目标项目已有自己的 CLAUDE.md，不能破坏 | `init-project.ps1` 步骤 9 |
-| 状态分片 (active/archive) | 缩减 Token 消耗约 78%，长项目更友好 | `state/` 目录 |
+| 不修改目标项目的 CLAUDE.md | 目标项目保持独立，仅创建 .claude/harness-cc/ 运行时目录 | `init-project.ps1` |
+| 状态分片 (active/archive) | 缩减 Token 消耗约 78%，长项目更友好 | `.claude/harness-cc/` 目录 |
 | 双平台钩子脚本 | Windows/Linux 开发环境都需支持 | `hooks/scripts/*.ps1 + *.sh` |
 | 项目类型自动检测 | 零配置上手，按项目文件判定语言栈 | `init-project.ps1` 步骤 5 |
 | 空命令值保持空 | 不硬编码默认值，由用户首次运行时填写 | `project-config.json` |
@@ -557,7 +556,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 ### 可扩展性 (插件化)
 
-- 新增语言：创建 `agents/{lang}/` 目录 + `rules/{lang}/` 目录 + 在 `init-project.ps1` `$TypeMapping` 添加映射
+- 新增语言：创建 `agents/{lang}/` 目录 + `rules/{lang}/` 目录（安装脚本中无需添加映射，不再复制到目标项目）
 - 新增 Agent：在对应目录创建 `.md` 文件，keep `description` frontmatter
 - 新增钩子：在 `hooks/hooks.json` 注册，在 `hooks/scripts/` 加脚本
 - MCP 集成：通过 `.mcp.json` 模板，非侵入式

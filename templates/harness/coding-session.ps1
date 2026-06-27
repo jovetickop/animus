@@ -4,14 +4,13 @@
 
 # ===== 路径定义 =====
 $ClaudeRoot = Join-Path $ProjectRoot ".claude"
-$HarnessRoot = Join-Path $ClaudeRoot "harness"
-$StateRoot = Join-Path $ClaudeRoot "state"
+$StateRoot = Join-Path $ClaudeRoot "harness-cc"
 $FeaturesFile = Join-Path $StateRoot "features.json"
-$ShowStatus = Join-Path $HarnessRoot "show-status.py"
+$ShowStatus = Join-Path $StateRoot "show-status.py"
 
 # ===== 1. 运行原有的状态展示脚本 =====
 if (-not (Test-Path $ShowStatus)) {
-    Write-Host "错误: 在 $HarnessRoot 未找到 show-status.py"
+    Write-Host "错误: 在 $StateRoot 未找到 show-status.py"
     exit 1
 }
 

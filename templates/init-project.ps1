@@ -1,10 +1,10 @@
-﻿param(
+param(
     [string]$ProjectRoot = "."
 )
 
 # ============================================================
-# harness-cc 项目初始化脚本
-# 功能：复制完整的工作流资产到目标项目
+# harness-cc 项目初始化脚本（精简版）
+# 功能：创建 .claude\harness-cc\ 目录和配置文件，不再复制文件
 # ============================================================
 
 # 中文输出函数
@@ -24,31 +24,36 @@ function Write-Info([string]$Message) {
     Write-Host "[信息] $Message" -ForegroundColor Gray
 }
 
+# ============================================================
+# 步骤 1: 确定路径
+# ============================================================
+Write-Step "确定项目路径..."
+
 # 确保 ProjectRoot 是绝对路径
 if (-not [System.IO.Path]::IsPathRooted($ProjectRoot)) {
     $ProjectRoot = Join-Path (Get-Location) $ProjectRoot
 }
 
-# 确保路径使用反斜杠
+# 斜杠统一为反斜杠
 $ProjectRoot = $ProjectRoot -replace '/', '\'
 
-$ClaudeDir = Join-Path $ProjectRoot ".claude"
-$HarnessDir = Join-Path $ClaudeDir "harness"
+$StateDir  = Join-Path $ProjectRoot ".claude\harness-cc"
+$ReportsDir = Join-Path $StateDir "docs\reports"
 
 Write-Host "========================================" -ForegroundColor Magenta
-Write-Host "  harness-cc 项目初始化" -ForegroundColor Magenta
+Write-Host "  harness-cc 项目初始化（精简模式）" -ForegroundColor Magenta
 Write-Host "========================================" -ForegroundColor Magenta
 Write-Host "目标目录: $ProjectRoot"
 Write-Host ""
 
 # ============================================================
-# 步骤 1: 确定技能目录（SKILL.md 所在目录）
+# 步骤 2: 确定技能根目录
 # ============================================================
 Write-Step "确定 harness-cc 技能目录..."
 
-# 优先使用脚本所在目录（支持自定义安装路径）
-# Then fallback to user profile skill directory
-$SkillRoot = $PSScriptRoot
+# 脚本在 templates/ 下，技能根是父目录
+$SkillRoot = Split-Path $PSScriptRoot -Parent
+
 if (-not (Test-Path (Join-Path $SkillRoot "SKILL.md"))) {
     $SkillRoot = Join-Path $env:USERPROFILE ".claude\skills\harness-cc"
 }
@@ -60,126 +65,26 @@ if (-not (Test-Path (Join-Path $SkillRoot "SKILL.md"))) {
     exit 1
 }
 
-$SourceRoot = Join-Path $SkillRoot ".claude"
-Write-Success "技能目录: $SourceRoot"
+Write-Success "技能目录: $SkillRoot"
 
 # ============================================================
-# 步骤 2: 检查初始化状态
+# 步骤 3: 创建目录
 # ============================================================
-Write-Step "检查项目初始化状态..."
+Write-Step "创建 .claude\harness-cc 目录结构..."
 
-$NeedFullInit = $false
-$NeedCopyAssets = $false
+New-Item -ItemType Directory -Force -Path $StateDir  | Out-Null
+New-Item -ItemType Directory -Force -Path $ReportsDir | Out-Null
 
-# 检查目录是否有内容（不仅检查是否存在）
-function Test-DirHasContent([string]$Path) {
-    if (-not (Test-Path $Path)) {
-        return $false
-    }
-    $Items = Get-ChildItem $Path -Force -ErrorAction SilentlyContinue
-    return ($Items.Count -gt 0)
-}
-
-# 检查 harness 目录是否完整
-$RequiredHarnessFiles = @("features.json", "show-status.py", "update-progress.ps1", "run-regression.ps1")
-$MissingHarnessFiles = @()
-foreach ($File in $RequiredHarnessFiles) {
-    $FilePath = Join-Path $HarnessDir $File
-    if (-not (Test-Path $FilePath)) {
-        $MissingHarnessFiles += $File
-    }
-}
-
-# 检查是否有任何需要的资产缺失
-$HasAgents = Test-DirHasContent (Join-Path $ClaudeDir "agents\universal")
-$HasRules = Test-DirHasContent (Join-Path $ClaudeDir "rules\universal")
-$HasCommands = Test-Path (Join-Path $ClaudeDir "commands")
-$HasHooks = Test-Path (Join-Path $ClaudeDir "hooks")
-
-if (-not (Test-Path $HarnessDir) -or $MissingHarnessFiles.Count -gt 0) {
-    Write-Info "harness 目录缺失或文件不完整，需要初始化"
-    $NeedFullInit = $true
-    $NeedCopyAssets = $true
-} elseif (-not ($HasAgents -and $HasRules -and $HasCommands -and $HasHooks)) {
-    Write-Info "部分资产缺失，补充复制"
-    $NeedFullInit = $false
-    $NeedCopyAssets = $true
-} else {
-    Write-Info "项目已完整初始化，跳过"
-    Write-Host ""
-    Write-Host "项目状态: 已完成初始化" -ForegroundColor Green
-    Write-Host "  - harness: 已安装"
-    Write-Host "  - agents: 已安装"
-    Write-Host "  - rules: 已安装"
-    Write-Host "  - commands: 已安装"
-    Write-Host "  - hooks: 已安装"
-    Write-Host ""
-    Write-Host "使用 /harness-cc 开始工作流" -ForegroundColor Cyan
-    exit 0
-}
+Write-Success "目录创建完成: $StateDir"
 
 # ============================================================
-# 步骤 3: 创建目录结构
-# ============================================================
-Write-Step "创建 .claude 目录结构..."
-
-$DirsToCreate = @(
-    $ClaudeDir,
-    (Join-Path $ClaudeDir "agents"),
-    (Join-Path $ClaudeDir "agents\universal"),
-    (Join-Path $ClaudeDir "rules"),
-    (Join-Path $ClaudeDir "rules\universal"),
-    (Join-Path $ClaudeDir "commands"),
-    (Join-Path $ClaudeDir "hooks"),
-    (Join-Path $ClaudeDir "hooks\scripts"),
-    (Join-Path $ClaudeDir "skills"),
-    $HarnessDir
-)
-
-foreach ($Dir in $DirsToCreate) {
-    if (-not (Test-Path $Dir)) {
-        New-Item -ItemType Directory -Force -Path $Dir | Out-Null
-    }
-}
-
-Write-Success "目录结构创建完成"
-
-# ============================================================
-# 步骤 4: 复制 harness 目录
-# ============================================================
-Write-Step "复制 harness 状态引擎..."
-
-$SourceHarness = Join-Path $SourceRoot "templates\harness"
-$HarnessFiles = @(
-    "features.json",
-    "project-config.json",
-    "claude-progress.txt",
-    "show-status.py",
-    "update-progress.ps1",
-    "run-regression.ps1",
-    "coding-session.ps1",
-    "README.md"
-)
-
-foreach ($File in $HarnessFiles) {
-    $Source = Join-Path $SourceHarness $File
-    $Dest = Join-Path $HarnessDir $File
-    if (Test-Path $Source) {
-        Copy-Item $Source $Dest -Force
-        Write-Info "  复制: $File"
-    } else {
-        Write-Warn "  源文件不存在: $File"
-    }
-}
-
-Write-Success "harness 目录复制完成"
-
-# ============================================================
-# 步骤 5: 检测项目类型
+# 步骤 4: 检测项目类型
 # ============================================================
 Write-Step "检测项目类型..."
 
 $ProjectType = "generic"
+
+$Today = Get-Date -Format "yyyy-MM-dd"
 
 if (Test-Path (Join-Path $ProjectRoot "CMakeLists.txt")) {
     $CMakeContent = Get-Content (Join-Path $ProjectRoot "CMakeLists.txt") -Raw -Encoding UTF8
@@ -193,6 +98,9 @@ if (Test-Path (Join-Path $ProjectRoot "CMakeLists.txt")) {
 } elseif (Test-Path (Join-Path $ProjectRoot "Cargo.toml")) {
     $ProjectType = "rust"
     Write-Info "检测到: Rust 项目"
+} elseif (Test-Path (Join-Path $ProjectRoot "go.mod")) {
+    $ProjectType = "go"
+    Write-Info "检测到: Go 项目"
 } elseif (Test-Path (Join-Path $ProjectRoot "package.json")) {
     $ProjectType = "node"
     Write-Info "检测到: Node.js 项目"
@@ -200,216 +108,168 @@ if (Test-Path (Join-Path $ProjectRoot "CMakeLists.txt")) {
     $ProjectType = "python"
     Write-Info "检测到: Python 项目"
 } else {
-    Write-Info "检测到: 通用项目"
+    Write-Info "检测到: 通用项目 (generic)"
 }
 
 Write-Success "项目类型: $ProjectType"
 
 # ============================================================
-# 步骤 6: 复制通用资产
+# 步骤 5: 写入 README.md
 # ============================================================
-Write-Step "复制通用资产..."
+Write-Step "写入 README.md..."
 
-# 复制 universal agents
-$SourceUniversalAgents = Join-Path $SourceRoot "agents\universal"
-if (Test-Path $SourceUniversalAgents) {
-    $DestUniversalAgents = Join-Path $ClaudeDir "agents\universal"
-    Copy-Item "$SourceUniversalAgents\*" $DestUniversalAgents -Force -Recurse
-    Write-Info "  agents/universal/ -> .claude/agents/universal/"
-}
+$ReadmeFile = Join-Path $StateDir "README.md"
 
-# 复制 universal rules
-$SourceUniversalRules = Join-Path $SourceRoot "rules\universal"
-if (Test-Path $SourceUniversalRules) {
-    $DestUniversalRules = Join-Path $ClaudeDir "rules\universal"
-    Copy-Item "$SourceUniversalRules\*" $DestUniversalRules -Force -Recurse
-    Write-Info "  rules/universal/ -> .claude/rules/universal/"
-}
+$ReadmeContent = @"
+# CodeHarness (harness-cc)
 
-# 复制 commands
-$SourceCommands = Join-Path $SourceRoot "commands"
-if (Test-Path $SourceCommands) {
-    $DestCommands = Join-Path $ClaudeDir "commands"
-    if (-not (Test-Path $DestCommands)) {
-        New-Item -ItemType Directory -Force -Path $DestCommands | Out-Null
-    }
-    Copy-Item "$SourceCommands\*" $DestCommands -Force -Recurse
-    Write-Info "  commands/ -> .claude/commands/"
-}
+## 目录位置
 
-# 复制 hooks
-$SourceHooks = Join-Path $SourceRoot "hooks"
-if (Test-Path $SourceHooks) {
-    $DestHooks = Join-Path $ClaudeDir "hooks"
-    Copy-Item "$SourceHooks\*" $DestHooks -Force -Recurse
-    Write-Info "  hooks/ -> .claude/hooks/"
-}
+- **技能安装目录**: $SkillRoot
+- **项目状态目录**: .claude\harness-cc\（本目录）
 
-# 复制 tdd-workflow skill
-$SourceTddSkill = Join-Path $SourceRoot "skills\tdd-workflow"
-if (Test-Path $SourceTddSkill) {
-    $DestTddSkill = Join-Path $ClaudeDir "skills\tdd-workflow"
-    if (-not (Test-Path $DestTddSkill)) {
-        New-Item -ItemType Directory -Force -Path $DestTddSkill | Out-Null
-    }
-    Copy-Item "$SourceTddSkill\*" $DestTddSkill -Force -Recurse
-    Write-Info "  skills/tdd-workflow/ -> .claude/skills/tdd-workflow/"
+## 目录结构
+
+```
+.claude\harness-cc\
+├── README.md                # 本文件
+├── features.json            # 任务状态列表
+├── claude-progress.txt      # 进度日志
+├── project-config.json      # 项目配置
+└── docs\reports\            # 任务报告
+```
+
+## 工作流命令
+
+### 查看状态
+```
+python "$SkillRoot/scripts/show-status.py"
+```
+
+### 更新任务状态
+```
+powershell -File "$SkillRoot/templates/harness/update-progress.ps1" <TaskId> <status> "描述"
+```
+
+### 运行回归测试
+```
+powershell -File "$SkillRoot/templates/harness/run-regression.ps1"
+```
+
+### 状态说明
+- `pending` - 等待执行
+- `in_progress` - 正在执行
+- `passed` - 已完成
+- `failed` - 失败
+
+## Agent 索引
+- 通用 Agent: $SkillRoot/agents/universal/
+- 各语言专项: $SkillRoot/agents/{lang}/
+
+## 规则索引
+- 通用规则: $SkillRoot/rules/universal/
+- 各语言专项: $SkillRoot/rules/{lang}/
+"@
+
+if (-not (Test-Path $ReadmeFile)) {
+    Set-Content -Path $ReadmeFile -Value $ReadmeContent -Encoding UTF8
+    Write-Info "  README.md 已创建"
 } else {
-    Write-Warn "  skills/tdd-workflow/ 未找到"
+    Write-Info "  README.md 已存在，跳过"
 }
 
-Write-Success "通用资产复制完成"
-
 # ============================================================
-# 步骤 7: 复制语言专项资产
+# 步骤 6: 写入 project-config.json
 # ============================================================
-Write-Step "复制 $ProjectType 专项资产..."
+Write-Step "写入 project-config.json..."
 
-$TypeMapping = @{
-    "cpp-qt" = @{ Agents = "qt"; Rules = "qt" }
-    "cpp-cmake" = @{ Agents = "cpp-cmake"; Rules = "cpp-cmake" }
-    "python" = @{ Agents = "python"; Rules = "python" }
-    "node" = @{ Agents = "node"; Rules = "node" }
-    "rust" = @{ Agents = "rust"; Rules = "rust" }
-}
-
-if ($TypeMapping.ContainsKey($ProjectType)) {
-    $TypeInfo = $TypeMapping[$ProjectType]
-
-    # 复制语言专项 agents
-    $SourceTypeAgents = Join-Path $SourceRoot "agents\$($TypeInfo.Agents)"
-    if (Test-Path $SourceTypeAgents) {
-        $DestTypeAgents = Join-Path $ClaudeDir "agents\$($TypeInfo.Agents)"
-        if (-not (Test-Path $DestTypeAgents)) {
-            New-Item -ItemType Directory -Force -Path $DestTypeAgents | Out-Null
-        }
-        Copy-Item "$SourceTypeAgents\*" $DestTypeAgents -Force -Recurse
-        Write-Info "  agents/$($TypeInfo.Agents)/ -> .claude/agents/$($TypeInfo.Agents)/"
-    }
-
-    # 复制语言专项 rules
-    $SourceTypeRules = Join-Path $SourceRoot "rules\$($TypeInfo.Rules)"
-    if (Test-Path $SourceTypeRules) {
-        $DestTypeRules = Join-Path $ClaudeDir "rules\$($TypeInfo.Rules)"
-        if (-not (Test-Path $DestTypeRules)) {
-            New-Item -ItemType Directory -Force -Path $DestTypeRules | Out-Null
-        }
-        Copy-Item "$SourceTypeRules\*" $DestTypeRules -Force -Recurse
-        Write-Info "  rules/$($TypeInfo.Rules)/ -> .claude/rules/$($TypeInfo.Rules)/"
-    }
-}
-
-Write-Success "专项资产复制完成"
-
-# ============================================================
-# 步骤 8: 复制根目录配置文件
-# ============================================================
-Write-Step "复制配置文件到项目根目录..."
-
-# 根目录文件映射
-$RootFiles = @{
-    "templates\.clang-format" = ".clang-format"
-    "templates\.mcp.json" = ".mcp.json"
-    "templates\existing_project\review-checklist.md" = "review-checklist.md"
-    "templates\existing_project\cmake-adapter.md" = "cmake-adapter.md"
-}
-
-foreach ($Mapping in $RootFiles.GetEnumerator()) {
-    $Source = Join-Path $SourceRoot $Mapping.Key
-    $Dest = Join-Path $ProjectRoot $Mapping.Value
-    if ((Test-Path $Source) -and (-not (Test-Path $Dest))) {
-        Copy-Item $Source $Dest -Force
-        Write-Info "  $($Mapping.Value)"
-    }
-}
-
-Write-Success "配置文件复制完成"
-
-# ============================================================
-# 步骤 9: 处理 CLAUDE.md
-# ============================================================
-Write-Step "处理 CLAUDE.md..."
-
-$SourceClaudeMd = Join-Path $SourceRoot "templates\existing_project\CLAUDE.md"
-$DestClaudeMd = Join-Path $ProjectRoot "CLAUDE.md"
-
-if (Test-Path $SourceClaudeMd) {
-    if (Test-Path $DestClaudeMd) {
-        # 追加到现有 CLAUDE.md
-        $ExistingContent = Get-Content $DestClaudeMd -Encoding UTF8 -Raw
-        $TemplateContent = Get-Content $SourceClaudeMd -Encoding UTF8 -Raw
-
-        # 检查是否已有完整的 harness-cc 区块（开+闭标签都存在，大小写不敏感）
-        $hasOpenSentinel = $ExistingContent -match "(?i)<!--\s*harness-cc\s*-->"
-        $hasCloseSentinel = $ExistingContent -match "(?i)<!--\s*/harness-cc\s*-->"
-        $hasCompleteSection = $hasOpenSentinel -and $hasCloseSentinel
-        if (-not $hasCompleteSection) {
-            $HarnessSection = "`n`n<!-- harness-cc -->`n$TemplateContent`n<!-- /harness-cc -->"
-            Add-Content -Path $DestClaudeMd -Value $HarnessSection -Encoding UTF8
-            if ($hasOpenSentinel -or $hasCloseSentinel) {
-                Write-Info "  检测到不完整的 harness-cc 哨兵，重新追加"
-            } else {
-                Write-Info "  追加到现有 CLAUDE.md"
-            }
-        } else {
-            Write-Info "  CLAUDE.md 已包含完整 harness-cc 区块，跳过"
-        }
-    } else {
-        # 直接复制模板
-        Copy-Item $SourceClaudeMd $DestClaudeMd -Force
-        Write-Info "  创建新的 CLAUDE.md"
-    }
-}
-
-Write-Success "CLAUDE.md 处理完成"
-
-# ============================================================
-# 步骤 10: 更新 project-config.json
-# ============================================================
-Write-Step "更新项目配置..."
-
-$ConfigFile = Join-Path $HarnessDir "project-config.json"
-$Today = Get-Date -Format "yyyy-MM-dd"
+$ConfigFile = Join-Path $StateDir "project-config.json"
 
 $Config = @{
     "project-type" = $ProjectType
-    "detected-at" = $Today
-    "configure-command" = ""
+    "detected-at"  = $Today
     "build-command" = ""
-    "test-command" = ""
-    "run-command" = ""
+    "test-command"  = ""
+    "run-command"   = ""
 }
 
-# 如果文件已存在，读取现有配置
+# 如果文件已存在，保留已有的 build/test/run-command 值
 if (Test-Path $ConfigFile) {
     $ExistingConfig = Get-Content $ConfigFile -Encoding UTF8 | ConvertFrom-Json
-    # 保留已填写的命令
-    if ($ExistingConfig."configure-command") { $Config."configure-command" = $ExistingConfig."configure-command" }
     if ($ExistingConfig."build-command") { $Config."build-command" = $ExistingConfig."build-command" }
-    if ($ExistingConfig."test-command") { $Config."test-command" = $ExistingConfig."test-command" }
-    if ($ExistingConfig."run-command") { $Config."run-command" = $ExistingConfig."run-command" }
+    if ($ExistingConfig."test-command")  { $Config."test-command"  = $ExistingConfig."test-command" }
+    if ($ExistingConfig."run-command")   { $Config."run-command"   = $ExistingConfig."run-command" }
+    Write-Info "  project-config.json 已存在，保留已有命令值"
 }
 
 $Config | ConvertTo-Json -Depth 3 | Set-Content $ConfigFile -Encoding UTF8
-Write-Success "项目配置已更新: $ProjectType"
+Write-Success "project-config.json 已写入"
 
 # ============================================================
-# 完成
+# 步骤 7: 写入 features.json
+# ============================================================
+Write-Step "写入 features.json..."
+
+$FeaturesFile = Join-Path $StateDir "features.json"
+
+$Features = @{
+    "verify_config" = @{
+        "verify_enabled"        = $false
+        "verify_command"        = ""
+        "verify_timeout_seconds" = 120
+    }
+    "tasks" = @()
+}
+
+if (-not (Test-Path $FeaturesFile)) {
+    $Features | ConvertTo-Json -Depth 3 | Set-Content $FeaturesFile -Encoding UTF8
+    Write-Info "  features.json 已创建"
+} else {
+    Write-Info "  features.json 已存在，跳过"
+}
+
+# ============================================================
+# 步骤 8: 写入 claude-progress.txt
+# ============================================================
+Write-Step "写入 claude-progress.txt..."
+
+$ProgressFile = Join-Path $StateDir "claude-progress.txt"
+
+if (-not (Test-Path $ProgressFile)) {
+    $ProgressContent = @"
+# harness-cc 进度日志
+创建时间: $Today
+项目类型: $ProjectType
+技能目录: $SkillRoot
+================================================
+
+"@
+    Set-Content -Path $ProgressFile -Value $ProgressContent -Encoding UTF8
+    Write-Info "  claude-progress.txt 已创建"
+} else {
+    Write-Info "  claude-progress.txt 已存在，跳过"
+}
+
+# ============================================================
+# 步骤 9: 完成（不修改项目 CLAUDE.md，不复制任何文件）
 # ============================================================
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Magenta
 Write-Success "初始化完成!"
 Write-Host "========================================" -ForegroundColor Magenta
 Write-Host ""
-Write-Host "已安装:" -ForegroundColor Green
-Write-Host "  - .claude/harness/       状态引擎"
-Write-Host "  - .claude/agents/        Agent 定义"
-Write-Host "  - .claude/rules/         编码规范"
-Write-Host "  - .claude/commands/      斜杠命令"
-Write-Host "  - .claude/hooks/         自动化钩子"
-Write-Host "  - .claude/skills/        子技能"
+Write-Host "已创建:" -ForegroundColor Green
+Write-Host "  - $StateDir\README.md"
+Write-Host "  - $StateDir\features.json"
+Write-Host "  - $StateDir\claude-progress.txt"
+Write-Host "  - $StateDir\project-config.json"
+Write-Host "  - $StateDir\docs\reports\"
 Write-Host ""
 Write-Host "项目类型: $ProjectType" -ForegroundColor Cyan
+Write-Host "技能目录: $SkillRoot" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "注意: 本模式仅创建配置文件，Agent/规则/命令/Hook 等资产" -ForegroundColor Yellow
+Write-Host "      直接从技能目录读取，不再复制到项目。 " -ForegroundColor Yellow
 Write-Host ""
 Write-Host "下一步:" -ForegroundColor Yellow
 Write-Host "  1. 确认构建/测试命令（编辑 project-config.json）"

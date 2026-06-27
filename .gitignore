@@ -9,5 +9,4 @@ __pycache__/
 temp_utf8.ps1
 
 node_modules/
-.claude/harness/
-.claude/state/
+.claude/harness-cc/

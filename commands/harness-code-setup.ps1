@@ -1,4 +1,4 @@
-﻿param(
+param(
     [Parameter(Mandatory=$true)]
     [string]$ProjectDir,
     [Parameter(Mandatory=$true)]
@@ -10,15 +10,15 @@ $startTime = Get-Date
 
 Write-Progress -Activity "CodeHarness Setup" -Status "Detecting project type" -PercentComplete 5
 
-# === 1. Detect project type ===
+# === 1. 检测项目类型 ===
 $projectType = "generic"
 $cmakeFile = Join-Path $ProjectDir "CMakeLists.txt"
 $cargoFile = Join-Path $ProjectDir "Cargo.toml"
 $pkgFile = Join-Path $ProjectDir "package.json"
 $pyprojectFile = Join-Path $ProjectDir "pyproject.toml"
 $reqFile = Join-Path $ProjectDir "requirements.txt"
-
 $goModFile = Join-Path $ProjectDir "go.mod"
+
 if (Test-Path $cmakeFile) {
     $content = Get-Content $cmakeFile -Raw
     if ($content -match 'find_package\(Qt') {
@@ -27,6 +27,7 @@ if (Test-Path $cmakeFile) {
         $projectType = "cpp-cmake"
     }
 } elseif (Test-Path $cargoFile) {
+    # Cargo.toml 优先级高于 go.mod
     $projectType = "rust"
 } elseif (Test-Path $goModFile) {
     $projectType = "go"
@@ -38,209 +39,183 @@ if (Test-Path $cmakeFile) {
 
 Write-Host "[harness] Detected project type: $projectType"
 
-# === 2. Build target paths ===
-$targetClaude = Join-Path $ProjectDir ".claude"
+# === 2. 计算路径 ===
+$StateDir = Join-Path $ProjectDir ".claude\harness-cc"
+$ReportsDir = Join-Path $StateDir "docs\reports"
 
-# === 3. Always-copied source directories ===
-# �ų� features.json �� claude-progress.txt������������Ŀ״̬���ݣ����ܸ���
-$excludeStateFiles = @('features.json', 'claude-progress.txt')
-$alwaysCopy = @(
-    @{Src=".claude/templates/harness";       Dst="harness"}
-    @{Src=".claude/agents/universal";       Dst="agents/universal"}
-    @{Src=".claude/rules/universal";        Dst="rules/universal"}
-    @{Src=".claude/commands";               Dst="commands"}
-    @{Src=".claude/skills/tdd-workflow";    Dst="skills/tdd-workflow"}
-    @{Src=".claude/hooks";                  Dst="hooks"}
-)
+Write-Progress -Activity "CodeHarness Setup" -Status "Creating directories" -PercentComplete 15
 
-Write-Progress -Activity "CodeHarness Setup" -Status "Copying common files" -PercentComplete 20
-$fileCount = 0
+# === 3. 创建目录 ===
+New-Item -ItemType Directory -Force -Path $StateDir | Out-Null
+New-Item -ItemType Directory -Force -Path $ReportsDir | Out-Null
+Write-Host "[harness]   Created state directory: $StateDir"
 
-foreach ($item in $alwaysCopy) {
-    $srcDir = Join-Path $SkillDir $item.Src
-    $dstDir = Join-Path $targetClaude $item.Dst
-    if (Test-Path $srcDir) {
-        if (-not (Test-Path $dstDir)) { New-Item -ItemType Directory -Path $dstDir -Force | Out-Null }
-        # �� harness Ŀ¼�ų���Ŀ״̬�ļ�����ֹ������������
-        if ($item.Dst -eq "harness") {
-            Copy-Item -Path "$srcDir/*" -Destination $dstDir -Recurse -Force -Exclude $excludeStateFiles
-        } else {
-            Copy-Item -Path "$srcDir/*" -Destination $dstDir -Recurse -Force
-        }
-        $count = (Get-ChildItem -Path "$srcDir/*" -Recurse -File).Count
-        $fileCount += $count
-        Write-Host "[harness]   Copied $($item.Src) -> $dstDir ($count files)"
-    }
-}
+# === 4. 写入 README.md（如果不存在） ===
+Write-Progress -Activity "CodeHarness Setup" -Status "Writing README" -PercentComplete 30
 
-# ���״ΰ�װʱ���� features.json �� claude-progress.txt
-$stateFiles = @(
-    @{Name="features.json"; Src=".claude/templates/state/features.json"; Dst="state/features.json"}
-    @{Name="claude-progress.txt"; Src=".claude/templates/state/claude-progress.txt"; Dst="state/claude-progress.txt"}
-)
-foreach ($item in $stateFiles) {
-    $src = Join-Path $SkillDir $item.Src
-    $dst = Join-Path $targetClaude $item.Dst
-    if (-not (Test-Path $dst) -and (Test-Path $src)) {
-        $parentDir = Split-Path $dst -Parent
-        if (-not (Test-Path $parentDir)) { New-Item -ItemType Directory -Path $parentDir -Force | Out-Null }
-        Copy-Item $src $dst
-        $fileCount++
-        Write-Host "[harness]   Created $($item.Name) (first install)"
-    }
-}
+$readmePath = Join-Path $StateDir "README.md"
+if (-not (Test-Path $readmePath)) {
+    $readmeContent = @"
+# CodeHarness (harness-cc)
 
-# === 4. Type-specific copy ===
-# ע�⣺Դ·���ڼ���Ŀ¼�£��� .claude/����Ŀ��·���������Ŀ .claude/ Ŀ¼������ .claude/��
-$typeAgents = @{
-    "cpp-qt"    = @{Src=".claude/agents/qt";    Dst="agents/qt";    SrcRules=".claude/rules/qt";    DstRules="rules/qt"}
-    "cpp-cmake" = @{Src=".claude/agents/cpp-cmake"; Dst="agents/cpp-cmake"; SrcRules=".claude/rules/cpp-cmake"; DstRules="rules/cpp-cmake"}
-    "python"    = @{Src=".claude/agents/python"; Dst="agents/python"; SrcRules=".claude/rules/python"; DstRules="rules/python"}
-    "node"      = @{Src=".claude/agents/node";   Dst="agents/node";   SrcRules=".claude/rules/node";   DstRules="rules/node"}
-    "rust"      = @{Src=".claude/agents/rust";   Dst="agents/rust";   SrcRules=".claude/rules/rust";   DstRules="rules/rust"}
-    "go"        = @{Src=".claude/agents/go";        Dst="agents/go";        SrcRules=".claude/rules/go";        DstRules="rules/go"}
-}
+## 目录位置
 
-Write-Progress -Activity "CodeHarness Setup" -Status "Copying type-specific files" -PercentComplete 50
+- **技能安装目录**: $SkillDir
+- **项目状态目录**: `.claude\harness-cc\`（本目录）
 
-if ($typeAgents.ContainsKey($projectType)) {
-    $spec = $typeAgents[$projectType]
-    # ���� agents
-    $srcAgents = Join-Path $SkillDir $spec.Src
-    $dstAgents = Join-Path $targetClaude $spec.Dst
-    if (Test-Path $srcAgents) {
-        if (-not (Test-Path $dstAgents)) { New-Item -ItemType Directory -Path $dstAgents -Force | Out-Null }
-        Copy-Item -Path "$srcAgents/*" -Destination $dstAgents -Recurse -Force
-        $count = (Get-ChildItem -Path "$srcAgents/*" -Recurse -File).Count
-        $fileCount += $count
-        Write-Host "[harness]   Copied agents ($($spec.Src)) -> $dstAgents ($count files)"
-    }
-    # ���� rules
-    $srcRules = Join-Path $SkillDir $spec.SrcRules
-    $dstRules = Join-Path $targetClaude $spec.DstRules
-    if (Test-Path $srcRules) {
-        if (-not (Test-Path $dstRules)) { New-Item -ItemType Directory -Path $dstRules -Force | Out-Null }
-        Copy-Item -Path "$srcRules/*" -Destination $dstRules -Recurse -Force
-        $count = (Get-ChildItem -Path "$srcRules/*" -Recurse -File).Count
-        $fileCount += $count
-        Write-Host "[harness]   Copied rules ($($spec.SrcRules)) -> $dstRules ($count files)"
-    }
-}
+## 目录结构
 
-# === 5. Generate project-config.json ===
-Write-Progress -Activity "CodeHarness Setup" -Status "Generating config" -PercentComplete 80
+```
+.claude\harness-cc\
+├── README.md                # 本文件
+├── features.json            # 任务状态列表
+├── claude-progress.txt      # 进度日志
+├── project-config.json      # 项目配置
+└── docs\reports\            # 任务报告
+```
 
-$configPath = Join-Path $targetClaude "harness/project-config.json"
-$claudeFile = Join-Path $ProjectDir "CLAUDE.md"   # ���� 6 Ҳ���õ����ڴ�ͳһ����
+## 工作流命令
 
-# ����Ѵ��������ļ��������û����е�����ֵ����������Ŀ���ͺͼ��ʱ��
-if (Test-Path $configPath) {
-    try {
-        $existingConfig = Get-Content $configPath -Raw -Encoding utf8 | ConvertFrom-Json
-        # ������ȡ��������ǿ�ʱ�ű��������ʹ��Ĭ��ֵ
-        $buildCmd = if ($existingConfig.'build-command') { $existingConfig.'build-command' } else { "" }
-        $testCmd = if ($existingConfig.'test-command') { $existingConfig.'test-command' } else { "" }
-        $runCmd = if ($existingConfig.'run-command') { $existingConfig.'run-command' } else { "" }
-        Write-Host "[harness]   Preserved existing project-config.json commands"
-    } catch {
-        Write-Host "[harness]   Could not read existing project-config.json, using defaults"
-        $buildCmd = ""
-        $testCmd = ""
-        $runCmd = ""
-    }
+### 查看状态
+```
+python "$SkillDir/scripts/show-status.py"
+```
+
+### 更新任务状态
+```
+powershell -File "$SkillDir/templates/harness/update-progress.ps1" <TaskId> <status> "描述"
+```
+
+### 运行回归测试
+```
+powershell -File "$SkillDir/templates/harness/run-regression.ps1"
+```
+
+### 状态说明
+- `pending` - 等待执行
+- `in_progress` - 正在执行
+- `passed` - 已完成
+- `failed` - 失败
+
+## Agent 索引
+- 通用 Agent: `$SkillDir/agents/universal/`
+- 各语言专项: `$SkillDir/agents/{lang}/`
+
+## 规则索引
+- 通用规则: `$SkillDir/rules/universal/`
+- 各语言专项: `$SkillDir/rules/{lang}/`
+"@
+    Set-Content -Path $readmePath -Value $readmeContent -Encoding utf8
+    Write-Host "[harness]   Created README.md"
 } else {
-    # �״ΰ�װ���� CLAUDE.md ����Ĭ������
-    $buildCmd = ""
-    $testCmd = ""
-    $runCmd = ""
-
-    if (Test-Path $claudeFile) {
-        $claudeContent = Get-Content $claudeFile -Raw
-        if ($claudeContent -match '(?<=�������`)([^`]+)') { $buildCmd = $matches[1] }
-        if ($claudeContent -match '(?<=�������`)([^`]+)') { $testCmd = $matches[1] }
-        if ($claudeContent -match '(?<=�������`)([^`]+)') { $runCmd = $matches[1] }
-    }
+    Write-Host "[harness]   README.md already exists, skipped"
 }
 
+# === 5. 写入 project-config.json ===
+Write-Progress -Activity "CodeHarness Setup" -Status "Writing project config" -PercentComplete 50
+
+$configPath = Join-Path $StateDir "project-config.json"
 $config = @{
     "project-type"  = $projectType
     "detected-at"   = (Get-Date -Format "yyyy-MM-dd")
-    "build-command" = $buildCmd
-    "test-command"  = $testCmd
-    "run-command"   = $runCmd
-} | ConvertTo-Json
+    "build-command" = ""
+    "test-command"  = ""
+    "run-command"   = ""
+}
 
-$config | Out-File -FilePath $configPath -Encoding utf8
+# 如果文件已存在，保留现有命令配置
+if (Test-Path $configPath) {
+    try {
+        $existingConfig = Get-Content $configPath -Raw -Encoding utf8 | ConvertFrom-Json
+        if ($existingConfig.'build-command') { $config.'build-command' = $existingConfig.'build-command' }
+        if ($existingConfig.'test-command')  { $config.'test-command'  = $existingConfig.'test-command' }
+        if ($existingConfig.'run-command')   { $config.'run-command'   = $existingConfig.'run-command' }
+        Write-Host "[harness]   Preserved existing project-config.json commands"
+    } catch {
+        Write-Host "[harness]   Could not read existing project-config.json, using defaults"
+    }
+}
+
+$config | ConvertTo-Json -Depth 3 | Set-Content -Path $configPath -Encoding utf8
 Write-Host "[harness]   Generated project-config.json: $projectType"
 
-# === 6. Handle CLAUDE.md merge ===
-Write-Progress -Activity "CodeHarness Setup" -Status "Checking CLAUDE.md" -PercentComplete 90
+# === 6. 初始化 features.json（如果不存在） ===
+Write-Progress -Activity "CodeHarness Setup" -Status "Initializing features" -PercentComplete 70
 
-if (-not (Test-Path $claudeFile)) {
-    $templateClaude = Join-Path $SkillDir ".claude/templates/existing_project/CLAUDE.md"
-    if (Test-Path $templateClaude) {
-        Copy-Item $templateClaude $claudeFile
-        Write-Host "[harness]   Created CLAUDE.md from template"
+$featuresPath = Join-Path $StateDir "features.json"
+if (-not (Test-Path $featuresPath)) {
+    $features = @{
+        verify_config = @{
+            verify_enabled       = $false
+            verify_command       = ""
+            verify_timeout_seconds = 120
+        }
+        tasks = @()
     }
+    $features | ConvertTo-Json -Depth 3 | Set-Content -Path $featuresPath -Encoding utf8
+    Write-Host "[harness]   Initialized features.json"
 } else {
-    $claudeContent = Get-Content $claudeFile -Raw
-    if ($claudeContent -notmatch "CodeHarness|harness-cc") {
-        $harnessBlock = @"
+    Write-Host "[harness]   features.json already exists, skipped"
+}
 
-## CodeHarness Workflow
+# === 7. 初始化 claude-progress.txt（如果不存在） ===
+Write-Progress -Activity "CodeHarness Setup" -Status "Initializing progress log" -PercentComplete 80
 
-### Session Init
-```powershell
-.\.claude\harness\coding-session.ps1
-python .claude/harness/show-status.py
-Get-Content .claude/harness/claude-progress.txt -Tail 20 -Encoding UTF8
-```
+$progressPath = Join-Path $StateDir "claude-progress.txt"
+if (-not (Test-Path $progressPath)) {
+    $progressHeader = @"
+========================================
+ CodeHarness Progress Log
+ Created: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+ Project Type: $projectType
+ Skill Dir: $SkillDir
+========================================
 
-### Task State Transitions
-- Start task: `.\.claude\harness\update-progress.ps1 <TaskId> in_progress "description"`
-- Complete task: `.\.claude\harness\update-progress.ps1 <TaskId> passed "description"`
-- Mark failed: `.\.claude\harness\update-progress.ps1 <TaskId> failed "reason"`
 "@
-        Add-Content -Path $claudeFile -Value $harnessBlock
-        Write-Host "[harness]   Appended CodeHarness block to CLAUDE.md"
-    } else {
-        Write-Host "[harness]   CLAUDE.md already has CodeHarness content, skipped"
+    Set-Content -Path $progressPath -Value $progressHeader -Encoding utf8
+    Write-Host "[harness]   Initialized claude-progress.txt"
+} else {
+    Write-Host "[harness]   claude-progress.txt already exists, skipped"
+}
+
+# === 8. 旧状态文件迁移 ===
+Write-Progress -Activity "CodeHarness Setup" -Status "Migrating old state files" -PercentComplete 90
+
+$oldPaths = @(
+    @{Src = Join-Path $ProjectDir ".claude\harness\features.json"}
+    @{Src = Join-Path $ProjectDir ".claude\state\features.json"}
+    @{Src = Join-Path $ProjectDir ".claude\harness\claude-progress.txt"}
+    @{Src = Join-Path $ProjectDir ".claude\state\claude-progress.txt"}
+)
+
+$migrationDone = $false
+foreach ($item in $oldPaths) {
+    $src = $item.Src
+    $fileName = Split-Path $src -Leaf
+    $dst = Join-Path $StateDir $fileName
+    if ((Test-Path $src) -and -not (Test-Path $dst)) {
+        Move-Item -Path $src -Destination $dst -Force
+        Write-Host "[harness]   Migrated: $src -> $dst"
+        $migrationDone = $true
     }
 }
 
-# === 7. Migration: ����·��״̬�ļ���Ǩ�� ===
-Write-Progress -Activity "CodeHarness Setup" -Status "Migrating old state files" -PercentComplete 95
-
-$oldFeatures = Join-Path $targetClaude "harness/features.json"
-$oldProgress = Join-Path $targetClaude "harness/claude-progress.txt"
-$stateDir = Join-Path $targetClaude "state"
-$needsMigration = $false
-
-if ((Test-Path $oldFeatures) -and -not (Test-Path (Join-Path $stateDir "features.json"))) {
-    if (-not (Test-Path $stateDir)) { New-Item -ItemType Directory -Path $stateDir -Force | Out-Null }
-    Move-Item $oldFeatures (Join-Path $stateDir "features.json") -Force
-    Write-Host "[harness]   Migrated: harness/features.json -> state/features.json"
-    $needsMigration = $true
-}
-if ((Test-Path $oldProgress) -and -not (Test-Path (Join-Path $stateDir "claude-progress.txt"))) {
-    if (-not (Test-Path $stateDir)) { New-Item -ItemType Directory -Path $stateDir -Force | Out-Null }
-    Move-Item $oldProgress (Join-Path $stateDir "claude-progress.txt") -Force
-    Write-Host "[harness]   Migrated: harness/claude-progress.txt -> state/claude-progress.txt"
-    $needsMigration = $true
-}
-if ($needsMigration) {
-    Write-Host "[harness]   State files migrated. Update CLAUDE.md path references."
+if ($migrationDone) {
+    Write-Host "[harness]   Old state files migrated to $StateDir"
 }
 
-# === 8. Done ===
+# === 9. 不复制任何文件到项目，不修改项目 CLAUDE.md ===
+# 本脚本只创建 .claude\harness-cc\ 目录和配置文件
+
+# === 10. 完成 ===
+Write-Progress -Activity "CodeHarness Setup" -Status "Done" -PercentComplete 100
+
 $elapsed = [DateTime](Get-Date) - [DateTime]$startTime
 Write-Host ""
 Write-Host "============================================"
 Write-Host "  CodeHarness Setup Complete"
 Write-Host "  Project type: $projectType"
-Write-Host "  Files copied: $fileCount"
+Write-Host "  State dir: $StateDir"
 Write-Host "  Elapsed: $($elapsed.TotalSeconds.ToString('0.0'))s"
 Write-Host "============================================"
 Write-Host ""
-Write-Host "Next: run .\.claude\harness\coding-session.ps1 to start working"
-
