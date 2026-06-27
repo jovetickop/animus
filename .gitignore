@@ -7,5 +7,5 @@ __pycache__/
 *.pyc
 .codegraph/
 temp_utf8.ps1
-.claude/
-node_modules/
+
+.vscode/changelists.json

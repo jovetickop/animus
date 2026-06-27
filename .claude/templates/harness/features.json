@@ -1,0 +1,29 @@
+{
+  "verify_config": {
+    "verify_enabled": false,
+    "verify_command": "",
+    "verify_timeout_seconds": 120
+  },
+  "tasks": [
+    {
+      "id": "T001",
+      "name": "示例待处理任务",
+      "description": "一个待处理的任务示例",
+      "status": "pending",
+      "depends_on": [],
+      "parallel_group": "",
+      "priority": 100,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "",
+      "acceptance_criteria": [
+        "验收标准1"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    }
+  ]
+}
