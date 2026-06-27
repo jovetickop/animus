@@ -8,4 +8,6 @@ __pycache__/
 .codegraph/
 temp_utf8.ps1
 
-.vscode/changelists.json
+node_modules/
+.claude/harness/
+.claude/state/
