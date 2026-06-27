@@ -184,7 +184,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 ### Python 运行时依赖
 
-- `json`, `os`, `sys`, `subprocess`, `argparse`, `datetime`, `re`, `time`, `glob`, `io`, `argparse`
+- `json`, `os`, `sys`, `subprocess`, `argparse`, `datetime`, `re`, `time`, `glob`, `io`
 
 ## 配置文件体系
 
@@ -447,13 +447,6 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 - 裸指针只用于"不拥有对象"的场景。
 - 避免带副作用的全局变量和静态初始化对象。
 
-## Architecture
-
-## 总体架构概览
-
-```text
-
-```
 
 ## 架构分层/模块划分
 
@@ -510,24 +503,6 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 - `features.archive.json` — 已完成/失败归档
 - `claude-progress.txt` — 累计进度日志
 - `harness-history.jsonl` — 失败历史分析
-
-## 核心数据流
-
-### 主工作流 (8 步闭环)
-
-```
-
-```
-
-### 状态机流转
-
-```
-
-```
-
-### 初始化数据流
-
-```
 
 ```
 

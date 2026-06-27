@@ -13,21 +13,21 @@ Claude Code 通过 `hooks.json` 注册 4 种钩子：
 ### PreToolUse
 ```powershell
 # 模拟 Write 工具调用
-echo '{"tool_name":"Write","tool_input":{"file_path":"test.cpp"}}' | .claude/hooks/scripts/pre-tool-use.ps1
+echo '{"tool_name":"Write","tool_input":{"file_path":"test.cpp"}}' | hooks/scripts/pre-tool-use.ps1
 ```
 
 ### PostToolUse (clang-format)
 ```powershell
-echo '{"tool_name":"Write","tool_input":{"file_path":"test.cpp"}}' | .claude/hooks/scripts/clang-format.ps1
+echo '{"tool_name":"Write","tool_input":{"file_path":"test.cpp"}}' | hooks/scripts/clang-format.ps1
 ```
 
 ### 双平台测试
 ```bash
 # Shell 版本（Linux/macOS）
-echo '{"tool_name":"Write","tool_input":{"file_path":"test.cpp"}}' | .claude/hooks/scripts/clang-format.sh 2>/dev/null
+echo '{"tool_name":"Write","tool_input":{"file_path":"test.cpp"}}' | hooks/scripts/clang-format.sh 2>/dev/null
 
 # PowerShell 版本（Windows）
-echo '{"tool_name":"Write","tool_input":{"file_path":"test.cpp"}}' | .claude/hooks/scripts/clang-format.ps1
+echo '{"tool_name":"Write","tool_input":{"file_path":"test.cpp"}}' | hooks/scripts/clang-format.ps1
 ```
 
 ## 调试模式
@@ -54,7 +54,7 @@ $env:HARNESS_DEBUG = "true"
 ### Shell 脚本执行失败
 最常见原因：`.sh` 文件使用 CRLF 换行（已修复）。验证：
 ```bash
-grep -l $'\r$' .claude/hooks/scripts/*.sh  # 应返回空
+grep -l $'\r$' hooks/scripts/*.sh  # 应返回空
 ```
 
 ### JSON 解析失败

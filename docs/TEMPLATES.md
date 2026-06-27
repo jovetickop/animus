@@ -3,7 +3,7 @@
 ## 目录结构
 
 ```
-.claude/templates/
+templates/
 ├── state/               # 状态文件模板（安装到目标工程的 .claude/state/）
 ├── harness/             # 状态机脚本 + 配置模板（安装到目标工程的 .claude/harness/）
 ├── existing_project/    # 已有工程的 CLAUDE.md / review-checklist 模板
