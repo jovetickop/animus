@@ -448,8 +448,8 @@ ctest --test-dir build -R "ConfigLoader|SettingsDialog" --output-on-failure
 
 如果仓库启用了 harness，还应同步：
 
-- 把验证命令写入 `.claude/harness/features.json`
-- 把最新结果写入 `.claude/harness/claude-progress.txt`
+- 把验证命令写入 `.claude/harness-cc/features.json`
+- 把最新结果写入 `.claude/harness-cc/claude-progress.txt`
 
 ## 完成标准
 

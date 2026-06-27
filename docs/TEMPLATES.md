@@ -4,22 +4,15 @@
 
 ```
 templates/
-├── state/               # 状态文件模板（安装到目标工程的 .claude/state/）
-├── harness/             # 状态机脚本 + 配置模板（安装到目标工程的 .claude/harness/）
-├── existing_project/    # 已有工程的 CLAUDE.md / review-checklist 模板
+├── harness/             # 状态机脚本 + 配置模板（安装到目标工程的 .claude/harness-cc/）
+├── existing_project/    # 已有工程模板（review-checklist / cmake-adapter）
 ├── .clang-format        # C++ 格式化规则模板
 ├── .mcp.json            # MCP 服务器配置模板
 └── init-project.ps1     # 项目初始化脚本（入口）
 ```
 
-## state/ 模板文件
-
-| 文件 | 用途 | 安装目标 |
-|------|------|---------|
-| `features.json` | 初始状态文件，包含示例任务 | `.claude/state/features.json` |
-| `claude-progress.txt` | 进度日志初始文件（空占位） | `.claude/state/claude-progress.txt` |
-
-**注意：** `features.active.json` 和 `features.archive.json` 已合并清理。`features.json` 是唯一的初始状态模板。
+**说明：** 旧版 `state/` 目录已合并到 `harness/`，不再单独存放状态模板。
+安装目标路径统一为 `.claude/harness-cc/`（不再使用 `.claude/harness/` 和 `.claude/state/`）。
 
 ## harness/ 脚本文件
 
@@ -42,7 +35,7 @@ templates/
 
 `init-project.ps1` 按以下顺序处理：
 1. 检测项目类型（CMake/Cargo/npm/pip/go）
-2. 创建 `.claude/` 目录结构
-3. 从 `templates/harness/` 复制状态机脚本
-4. 从 `templates/state/` 复制状态文件
-5. 合并 `CLAUDE.md`（追加式，不覆盖）
+2. 创建 `.claude/harness-cc/` 运行时目录
+3. 从 `templates/harness/` 复制状态机脚本和初始模板
+4. 回填检测到的构建/测试命令到 `project-config.json`
+5. **不再修改目标项目的 CLAUDE.md**（Agent 通过 `$SKILL_DIR` 从技能安装目录加载）

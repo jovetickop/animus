@@ -105,7 +105,7 @@ git clone https://github.com/jovetickop/Harness-CC.git $env:USERPROFILE/.claude/
 技能被 `/harness-cc` 激活后，执行 8 步闭环：
 
 ### Step 1: 读取状态
-读取 `.claude/state/features.active.json` 和 `state/claude-progress.txt`，判断当前阶段。
+读取 `.claude/harness-cc/features.active.json` 和 `claude-progress.txt`，判断当前阶段。
 
 ### Step 2: 选择任务
 - 优先继续 `in_progress` 任务
@@ -157,7 +157,7 @@ git clone https://github.com/jovetickop/Harness-CC.git $env:USERPROFILE/.claude/
 6. 都检测不到 → "generic"
 ```
 
-检测结果写入 `.claude/harness/project-config.json`，后续所有命令都读取该文件。
+检测结果写入 `.claude/harness-cc/project-config.json`，后续所有命令都读取该文件。
 
 ## Agent 选择规则
 
@@ -365,7 +365,7 @@ pending ──→ in_progress ──→ passed ──→ completed（别名）
 ### 5. GBK 编码项目配置
 
 ```json
-// .claude/harness/project-config.json
+// .claude/harness-cc/project-config.json
 {
   "project-type": "cpp-cmake",
   "encoding": "gbk",
@@ -456,7 +456,7 @@ T001 和 T002 分属不同 group，可以同时在两个会话中独立执行。
 
 ### 配置方式
 
-在项目 `.claude/harness/project-config.json` 中设置 `encoding` 字段：
+在项目 `.claude/harness-cc/project-config.json` 中设置 `encoding` 字段：
 
 ```json
 {

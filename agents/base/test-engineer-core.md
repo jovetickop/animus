@@ -11,7 +11,7 @@
 
 - 根据当前任务的验收标准设计测试矩阵。
 - 推荐适合项目语言和生态的测试框架与工具。
-- 为 `.claude/harness/features.json` 提供可执行的 `test_command`。
+- 为 `.claude/harness-cc/features.json` 提供可执行的 `test_command`。
 - 当测试不足时指出最小补齐方案。
 
 ## 输出格式

@@ -13,7 +13,7 @@ description: 负责为 Python 任务设计验证方案，适合处理 pytest、p
 - 根据当前任务的验收标准设计测试矩阵。
 - 选择测试框架：`pytest`（Python 3 首选）、`unittest`（Python 2 存量兼容）。
 - 明确 Python 版本：Python 3 优先使用 f-string、类型注解等新特性；Python 2 项目避免。
-- 为 `.claude/harness/features.json` 提供明确的 `test_command`。
+- 为 `.claude/harness-cc/features.json` 提供明确的 `test_command`。
 - 在测试不足时指出最小补齐方案。
 
 ## 测试设计要求
@@ -26,7 +26,7 @@ description: 负责为 Python 任务设计验证方案，适合处理 pytest、p
 
 ## 必须检查
 
-- `.claude/harness/features.json` 中当前任务定义。
+- `.claude/harness-cc/features.json` 中当前任务定义。
 - 项目 `pyproject.toml` 或 `setup.cfg` 中的测试工具配置。
 - 现有 `tests/` 目录结构是否对应模块层级。
 - `conftest.py` 中已有的 fixture 可复用性。

@@ -12,7 +12,7 @@ description: 负责为 Go 任务设计验证方案，适合处理 go test、tabl
 
 - 根据当前任务的验收标准设计测试矩阵
 - 补齐或优化单元测试、集成测试和基准测试
-- 为 `.claude/harness/features.json` 提供明确的 `test_command`
+- 为 `.claude/harness-cc/features.json` 提供明确的 `test_command`
 - 在测试不足时指出最小补齐方案
 
 ## 测试设计要求
@@ -25,7 +25,7 @@ description: 负责为 Go 任务设计验证方案，适合处理 go test、tabl
 
 ## 必须检查
 
-- `.claude/harness/features.json` 中当前任务定义
+- `.claude/harness-cc/features.json` 中当前任务定义
 - 现有 `*_test.go` 文件和 `go.mod` 中测试依赖
 - 相邻模块的外部测试用例可复用
 - 当前是否已有 `go test -bench` 入口

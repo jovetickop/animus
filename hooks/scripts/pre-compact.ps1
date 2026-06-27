@@ -12,16 +12,20 @@ $projectRoot = if ($env:CLAUDE_PROJECT_ROOT) {
     Resolve-Path "$PSScriptRoot/../../.."
 }
 
-# 统一路径查找：features.json 固定在 .claude/state/
-$featuresPath = Join-Path $projectRoot ".claude" "state" "features.json"
+# 统一路径查找：features.json 固定在 .claude/harness-cc/
+$featuresPath = Join-Path $projectRoot ".claude" "harness-cc" "features.json"
 
-# 旧路径 deprecated 警告（仅提示，不影响逻辑）
-$oldFeaturesPath = Join-Path $projectRoot ".claude" "harness" "features.json"
-if (Test-Path -LiteralPath $oldFeaturesPath) {
-    Write-Host "[harness-cc] WARNING: features.json 在旧路径 .claude/harness/ (deprecated). 请迁移到 .claude/state/" -ForegroundColor Yellow
+# 旧路径 deprecated 警告（同时检查 .claude/state/ 和 .claude/harness/）
+$oldStatePath = Join-Path $projectRoot ".claude" "state" "features.json"
+$oldHarnessPath = Join-Path $projectRoot ".claude" "harness" "features.json"
+if (Test-Path -LiteralPath $oldStatePath) {
+    Write-Host "[harness-cc] WARNING: features.json 在旧路径 .claude/state/ (deprecated). 请迁移到 .claude/harness-cc/" -ForegroundColor Yellow
+}
+if (Test-Path -LiteralPath $oldHarnessPath) {
+    Write-Host "[harness-cc] WARNING: features.json 在旧路径 .claude/harness/ (deprecated). 请迁移到 .claude/harness-cc/" -ForegroundColor Yellow
 }
 
-$progressPath = Join-Path $projectRoot ".claude" "state" "claude-progress.txt"
+$progressPath = Join-Path $projectRoot ".claude" "harness-cc" "claude-progress.txt"
 
 # 1) 如果 claude-progress.txt 存在，追加时间戳 [COMPACT] 标记行
 if (Test-Path -LiteralPath $progressPath) {
