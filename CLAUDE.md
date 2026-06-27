@@ -137,8 +137,6 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 - **跨平台不阻塞**：Hooks 脚本失败时必须以 `exit 0` 不阻塞工作流，此语义必须保持
 - **本地提交**：本仓库不做自动远程推送，所有提交由用户手动推送
 
-## Technology Stack
-
 ## 语言分布
 
 | 语言 | 占比 | 用途 |
@@ -223,8 +221,6 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 - **跨平台降级**：所有 hook 脚本同时提供 `.sh` 和 `.ps1` 两种版本，互为 fallback
 - **GBK 编码支持**：通过 `encoding-bridge.py` 实现 GBK ↔ UTF-8 双向转换，仅作用于 C/C++ 源文件
 
-## Conventions
-
 ## 语言级规范
 
 | 语言 | 规范文件 | 范围 |
@@ -240,7 +236,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 | Qt UI 架构 | `rules/qt/ui-architecture.md` | Qt 界面布局 |
 | GBK 编码 | `rules/cpp-cmake/encoding.md` | Windows 中文编码 |
 
-### C++ 标准选择 (`.claude/rules/cpp-cmake/best-practices.md`)
+### C++ 标准选择 (`rules/cpp-cmake/best-practices.md`)
 
 - 新项目默认 **C++17**，需 concepts/ranges/coroutines 时用 C++20。
 - `CMakeLists.txt` 中显式声明 `set(CMAKE_CXX_STANDARD 17)` 和 `set(CMAKE_CXX_STANDARD_REQUIRED ON)`。
@@ -249,7 +245,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 - 使用 `target_include_directories`、`target_link_libraries` 替代全局设置。
 - 使用 `FetchContent` 管理第三方依赖。
 
-### Python 标准 (`.claude/rules/python/best-practices.md`)
+### Python 标准 (`rules/python/best-practices.md`)
 
 - 新项目默认 Python 3；系统工具脚本需兼容 Python 2.7+ 和 3.x。
 - 遵循 PEP 8 风格，行宽 88 字符（兼容 `black`）。
@@ -257,27 +253,27 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 - import 顺序：标准库 → 第三方 → 本地模块，每组空一行。
 - 禁止 `from module import *`。
 
-### Node/TypeScript 标准 (`.claude/rules/node/best-practices.md`)
+### Node/TypeScript 标准 (`rules/node/best-practices.md`)
 
 - ESLint 使用 `@typescript-eslint` 规则集，Prettier 负责格式化。
 - 前端默认 Vite，库工具包优先使用 tsup 或 esbuild。
 - 锁定依赖版本，定期运行 `npm audit`。
 - CI 中加入 `lint` 步骤。
 
-### Rust 标准 (`.claude/rules/rust/best-practices.md`)
+### Rust 标准 (`rules/rust/best-practices.md`)
 
 - 所有代码必须通过 `cargo clippy -- -D warnings` 无警告。
 - `unsafe` 必须封装在安全抽象内，每个 `unsafe` 块附 `// Safety: ...` 注释。
 - 域错误使用 `thiserror`，顶层使用 `anyhow::Result`。
 - 使用 `cargo fmt` 统一格式，每行不超过 100 字符。
 
-### Go 标准 (`.claude/rules/go/best-practices.md`)
+### Go 标准 (`rules/go/best-practices.md`)
 
 - 使用 Go 1.21+，代码必须通过 `gofmt` 格式化。
 - 使用 `go vet` 静态检查。
 - 使用 `error` 返回值而非 panic；库代码禁止 panic。
 
-### GBK 编码支持 (`.claude/rules/cpp-cmake/encoding.md`)
+### GBK 编码支持 (`rules/cpp-cmake/encoding.md`)
 
 - 在 `.claude/harness/project-config.json` 中设置 `"encoding": "gbk"` 启用。
 - PreToolUse 钩子自动 GBK → UTF-8 转换，PostToolUse 自动 UTF-8 → GBK 回转。
@@ -300,7 +296,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 | 语言 | 约定 | 文件 |
 |------|------|------|
-| Go 包名 | 全小写，简短无下划线 | `.claude/rules/go/best-practices.md` |
+| Go 包名 | 全小写，简短无下划线 | `rules/go/best-practices.md` |
 | Go 文件 | snake_case | `user_service.go` |
 | Go 测试文件 | `*_test.go` | `user_service_test.go` |
 | Python 模块 | 短小全小写 | `data_loader.py` |
@@ -327,11 +323,6 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 - 实现文件第一行通常是对应的头文件。
 - 能前置声明的类型优先前置声明。
 
-### 前端组件组织 (`frontend/component-guidelines.md`)
-
-### 仓库根结构（本仓库）
-
-### Python import 顺序 (`python/best-practices.md`)
 
 ## 注释规范
 
@@ -343,9 +334,6 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 - `TODO` 必须写清楚后续动作，不要只留"待优化"。
 - 本项目所有源代码、Agent 定义、规范文件均使用中文注释。
 
-### Rust unsafe 注释 (`rust/best-practices.md`)
-
-### 前端组件注释 (`frontend/component-guidelines.md`)
 
 ## 格式要求
 
@@ -377,7 +365,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 ## Git 工作流规范
 
-### Commit 消息格式 (`.claude/rules/universal/git-workflow.md`)
+### Commit 消息格式 (`rules/universal/git-workflow.md`)
 
 - <变更点 1>
 - <变更点 2>
@@ -416,8 +404,8 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 ### 验收审查 (`harness-code-review` 命令)
 
-- `.claude\commands\validate-features.ps1` — 验证 `features.json` 结构。
-- `.claude\commands\check-consistency.ps1` — 检查 `features.json` 与 `claude-progress.txt` 状态一致性。
+- `commands\validate-features.ps1` — 验证 `features.json` 结构。
+- `commands\check-consistency.ps1` — 检查 `features.json` 与 `claude-progress.txt` 状态一致性。
 
 ### 状态机验收硬规则 (CLAUDE.md)
 
