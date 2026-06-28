@@ -4,6 +4,35 @@
 
 ---
 
+## 安装
+
+### 在线安装（推荐）
+
+在 Claude Code 会话中执行：
+
+```
+/plugin marketplace add jovetickop/Harness-CC
+/plugin install harness-cc@harness-cc
+```
+
+安装后即可使用三个斜杠命令：
+
+| 命令 | 用途 |
+|------|------|
+| `/harness-code-setup` | 初始化目标项目的运行时状态目录 |
+| `/harness-code-plan` | 将 PRD/方案拆解为可执行任务列表 |
+| `/harness-code-review` | 代码审查与验收检查 |
+
+### 手动安装
+
+克隆仓库到本地，然后执行：
+
+```
+/plugin install <本地路径>
+```
+
+---
+
 ## 核心设计思想
 
 ### 为什么要用状态机？
