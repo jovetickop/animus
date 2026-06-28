@@ -66,17 +66,10 @@ def read_features(path):
     if not os.path.isfile(path):
         return None
     try:
-        with io.open(path, "r", encoding="utf-8") as f:
+        with io.open(path, "r", encoding="utf-8-sig") as f:
             data = json.load(f)
         if isinstance(data, dict):
             tasks = data.get("initial_tasks", data.get("tasks", None))
-            if tasks is None:
-                # 兼容直接包含 tasks 数组的 dict
-                for key in ("features", "items"):
-                    val = data.get(key)
-                    if isinstance(val, list):
-                        tasks = val
-                        break
             return tasks if isinstance(tasks, list) else []
         elif isinstance(data, list):
             return data
@@ -95,8 +88,10 @@ def read_jsonl(path):
     events = []
     try:
         with io.open(path, "r", encoding="utf-8") as f:
-            for line in f:
-                d = safe_json_parse(line)
+            content = f.read()
+            blocks = content.split('---\n')
+            for block in blocks:
+                d = safe_json_parse(block)
                 if d:
                     events.append(d)
         return events
@@ -139,10 +134,10 @@ def get_failed(tasks):
     return [t for t in tasks if t.get("status") == "failed"]
 
 
-def get_recent_failed_events(events, limit=3):
-    """提取最近的 failed 事件（从事件列表尾部取 limit 条）。"""
+def get_recent_failed_events(events):
+    """提取最近的 3 条 failed 事件（从事件列表尾部取）。"""
     failed = [e for e in events if e.get("status") == "failed"]
-    return failed[-limit:]
+    return failed[-3:]
 
 
 def get_file_mtime(path):

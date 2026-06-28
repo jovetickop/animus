@@ -54,6 +54,6 @@ function Append-HistoryJsonl {
     if ($Message) { $record.message = $Message }
     if ($Verification) { $record.verification = $Verification }
 
-    $line = ($record | ConvertTo-Json -Compress)
-    Add-Content -LiteralPath $HistoryPath -Encoding UTF8 -Value $line
+    "---" | Add-Content -LiteralPath $HistoryPath -Encoding UTF8
+    $record | ConvertTo-Json -Depth 3 | Add-Content -LiteralPath $HistoryPath -Encoding UTF8
 }

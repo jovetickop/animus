@@ -62,8 +62,8 @@ if (Test-Path -LiteralPath $featuresPath) {
                         reason = "context_window_reached"
                         summary = "$doneCount/$totalCount 任务完成"
                     }
-                    $compactLine = $compactRecord | ConvertTo-Json -Compress
-                    Add-Content -LiteralPath $historyPath -Encoding UTF8 -Value $compactLine
+                    "---" | Add-Content -LiteralPath $historyPath -Encoding UTF8
+                    $compactRecord | ConvertTo-Json -Depth 3 | Add-Content -LiteralPath $historyPath -Encoding UTF8
                 } catch { }
             }
 
@@ -93,8 +93,8 @@ if (Test-Path -LiteralPath $featuresPath) {
                             timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
                             action = "task_plan_checkbox_auto_synced"
                         }
-                        $syncLine = $syncRecord | ConvertTo-Json -Compress
-                        Add-Content -LiteralPath $historyPath -Encoding UTF8 -Value $syncLine
+                        "---" | Add-Content -LiteralPath $historyPath -Encoding UTF8
+                        $syncRecord | ConvertTo-Json -Depth 3 | Add-Content -LiteralPath $historyPath -Encoding UTF8
                     }
                 } catch { }
             }
@@ -106,11 +106,13 @@ if (Test-Path -LiteralPath $featuresPath) {
     # 5) Append-only 检测：从 JSONL 提取历史 task_id，检查是否被删除
     if (Test-Path -LiteralPath $historyPath) {
         try {
-            $historyLines = Get-Content -LiteralPath $historyPath -Encoding UTF8
+            $historyContent = Get-Content -LiteralPath $historyPath -Raw -Encoding UTF8
+            $historyBlocks = $historyContent -split '---\r?\n'
             $historicalIds = @{}
-            foreach ($hLine in $historyLines) {
-                if ([string]::IsNullOrWhiteSpace($hLine)) { continue }
-                try { $hParsed = $hLine | ConvertFrom-Json; if ($hParsed.task_id) { $historicalIds[[string]$hParsed.task_id] = $true } } catch {}
+            foreach ($hBlock in $historyBlocks) {
+                $hTrimmed = $hBlock.Trim()
+                if (-not $hTrimmed) { continue }
+                try { $hParsed = $hTrimmed | ConvertFrom-Json; if ($hParsed.task_id) { $historicalIds[[string]$hParsed.task_id] = $true } } catch {}
             }
             $currentIds = @{}
             foreach ($t in $tasks) { $currentIds[[string]$t.id] = $true }

@@ -41,13 +41,6 @@ else:
             pass
 
 
-def text_type():
-    """兼容 Python 2/3 的字符串类型判断"""
-    if sys.version_info[0] < 3:
-        return (str, unicode)
-    return (str,)
-
-
 # ---------- JSONL 读取 ----------
 
 def read_jsonl(filepath):
@@ -58,7 +51,7 @@ def read_jsonl(filepath):
     events = []
 
     # 尝试多种编码读取
-    encodings = ["utf-8", "utf-8-sig", "gbk", "gb18030", "latin-1"]
+    encodings = ["utf-8"]
     file_content = None
     for enc in encodings:
         try:
@@ -75,15 +68,16 @@ def read_jsonl(filepath):
         except (IOError, OSError):
             return events
 
-    for line_num, line in enumerate(file_content.splitlines(), 1):
-        line = line.strip()
-        if not line:
+    blocks = file_content.split('---\n')
+    for block_num, block in enumerate(blocks, 1):
+        block = block.strip()
+        if not block:
             continue
         try:
-            event = json.loads(line)
+            event = json.loads(block)
             events.append(event)
         except (ValueError, TypeError) as e:
-            print("Warning: malformed JSON on line {}: {}".format(line_num, e),
+            print("Warning: malformed JSON in block {}: {}".format(block_num, e),
                   file=sys.stderr)
 
     return events
@@ -102,7 +96,7 @@ def format_timestamp(ts):
             return dt.strftime("%Y-%m-%d %H:%M:%S")
         except (ValueError, OSError):
             return str(ts)
-    if isinstance(ts, text_type()):
+    if isinstance(ts, (str, unicode) if sys.version_info[0] < 3 else (str,)):
         # 去掉 T 分隔符和毫秒部分
         return ts.replace("T", " ").split(".")[0]
     return str(ts)
@@ -116,61 +110,72 @@ def format_timestamp_markdown(ts):
     return s
 
 
+def _format_event(event, print_row):
+    """共享事件类型分支逻辑。
+
+    print_row(ts, event_type, task_id, change, message) 是格式特定的输出回调。
+    """
+    ts = event.get("timestamp")
+    event_type = event.get("type", "")
+    task_id = event.get("task_id", "") or ""
+    message = event.get("message", "")
+
+    if event_type == "state_transition":
+        from_status = event.get("from_status", "")
+        to_status = event.get("to_status", "")
+        change = "{} → {}".format(from_status, to_status)
+        exit_code = event.get("exit_code")
+        if exit_code is not None and to_status == "passed":
+            message = "{} [exit: {}]".format(message, exit_code)
+        print_row(ts, event_type, task_id, change, message)
+    elif event_type == "compact":
+        print_row(ts, event_type, task_id, "", message)
+    elif event_type == "note":
+        print_row(ts, event_type, task_id, "", message)
+    elif event_type == "subtask_update":
+        print_row(ts, event_type, task_id, "", message)
+    elif event_type == "sync":
+        print_row(ts, event_type, task_id, "", message)
+    else:
+        print_row(ts, event_type, task_id, "", message)
+
+
 def format_plain(events):
     """输出纯文本格式（管道分隔）。"""
-    for e in events:
-        ts = format_timestamp(e.get("timestamp"))
-        event_type = e.get("type", "")
-        task_id = e.get("task_id", "")
-        message = e.get("message", "")
-
+    def print_row(ts, event_type, task_id, change, message):
+        ts_fmt = format_timestamp(ts)
         if event_type == "state_transition":
-            from_status = e.get("from_status", "")
-            to_status = e.get("to_status", "")
-            change = "{} → {}".format(from_status, to_status)
-            exit_code = e.get("exit_code")
-            if exit_code is not None and to_status == "passed":
-                message = "{} [exit: {}]".format(message, exit_code)
-            print("{} | {} | {} | {}".format(ts, task_id, change, message))
-
+            print("{} | {} | {} | {}".format(ts_fmt, task_id, change, message))
         elif event_type == "compact":
-            print("{} | [COMPACT] 上下文压缩 | {}".format(ts, message))
-
+            print("{} | [COMPACT] 上下文压缩 | {}".format(ts_fmt, message))
         elif event_type == "note":
-            print("{} | [NOTE] {} | {}".format(ts, task_id, message))
-
+            print("{} | [NOTE] {} | {}".format(ts_fmt, task_id, message))
         elif event_type == "subtask_update":
-            print("{} | [SUBTASK] {} | {}".format(ts, task_id, message))
-
+            print("{} | [SUBTASK] {} | {}".format(ts_fmt, task_id, message))
         elif event_type == "sync":
-            print("{} | [SYNC] {} | {}".format(ts, task_id, message))
-
+            print("{} | [SYNC] {} | {}".format(ts_fmt, task_id, message))
         else:
-            print("{} | {} | {} | {}".format(ts, event_type, task_id, message))
+            print("{} | {} | {} | {}".format(ts_fmt, event_type, task_id, message))
+
+    for e in events:
+        _format_event(e, print_row)
 
 
 def format_markdown(events):
     """输出 Markdown 表格格式。"""
     print("| 时间 | 类型 | 任务 | 变更 | 消息 |")
     print("|------|------|------|------|------|")
-    for e in events:
-        ts = format_timestamp_markdown(e.get("timestamp"))
-        event_type = e.get("type", "")
-        task_id = e.get("task_id", "") or ""
-        message = e.get("message", "")
-
+    def print_row(ts, event_type, task_id, change, message):
+        ts_fmt = format_timestamp_markdown(ts)
         if event_type == "state_transition":
-            from_status = e.get("from_status", "")
-            to_status = e.get("to_status", "")
-            change = "{}→{}".format(from_status, to_status)
-            exit_code = e.get("exit_code")
-            if exit_code is not None and to_status == "passed":
-                message = "{} [exit: {}]".format(message, exit_code)
             print("| {} | state_transition | {} | {} | {} |".format(
-                ts, task_id, change, message))
+                ts_fmt, task_id, change, message))
         else:
             print("| {} | {} | {} | | {} |".format(
-                ts, event_type, task_id, message))
+                ts_fmt, event_type, task_id, message))
+
+    for e in events:
+        _format_event(e, print_row)
 
 
 # ---------- 主入口 ----------

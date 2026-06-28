@@ -70,16 +70,21 @@ foreach ($id in $progressStatus.Keys) {
 $jsonlErrors = @()
 $knownTaskIds = @{}
 if (Test-Path $historyPath) {
-    $lines = Get-Content $historyPath -Encoding UTF8
-    foreach ($line in $lines) {
-        if ([string]::IsNullOrWhiteSpace($line)) { continue }
+    $content = Get-Content $historyPath -Raw -Encoding UTF8
+    $blocks = $content -split '---\r?\n'
+    $blockNum = 0
+    foreach ($block in $blocks) {
+        $blockNum++
+        $trimmed = $block.Trim()
+        if (-not $trimmed) { continue }
         try {
-            $parsed = $line | ConvertFrom-Json
+            $parsed = $trimmed | ConvertFrom-Json
             if ($parsed.type -eq "state_transition" -and $parsed.task_id) {
                 $knownTaskIds[$parsed.task_id] = $true
             }
         } catch {
-            $jsonlErrors += "[WARN] JSONL 损坏行 (行号 $($lines.IndexOf($line) + 1)): $($line.Substring(0, [Math]::Min(80, $line.Length)))..."
+            $preview = if ($trimmed.Length -gt 80) { $trimmed.Substring(0, 80) } else { $trimmed }
+            $jsonlErrors += "[WARN] JSONL 损坏块 (块 #$blockNum): $preview..."
         }
     }
 }
