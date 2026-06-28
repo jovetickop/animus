@@ -1,4 +1,4 @@
-param(
+﻿param(
     [Parameter(Mandatory=$true)]
     [string]$ProjectDir,
     [Parameter(Mandatory=$true)]
@@ -33,7 +33,7 @@ if (Test-Path $cmakeFile) {
     $projectType = "go"
 } elseif (Test-Path $pkgFile) {
     $projectType = "node"
-} elseif (Test-Path $pyprojectFile -or (Test-Path $reqFile)) {
+} elseif ((Test-Path $pyprojectFile) -or (Test-Path $reqFile)) {
     $projectType = "python"
 }
 
@@ -105,7 +105,7 @@ powershell -File "$SkillDir/templates/harness/run-regression.ps1"
 - 通用规则: `$SkillDir/rules/universal/`
 - 各语言专项: `$SkillDir/rules/{lang}/`
 "@
-    Set-Content -Path $readmePath -Value $readmeContent -Encoding utf8
+    [System.IO.File]::WriteAllText($readmePath, $readmeContent)
     Write-Host "[harness]   Created README.md"
 } else {
     Write-Host "[harness]   README.md already exists, skipped"
@@ -136,7 +136,8 @@ if (Test-Path $configPath) {
     }
 }
 
-$config | ConvertTo-Json -Depth 3 | Set-Content -Path $configPath -Encoding utf8
+$configJson = $config | ConvertTo-Json -Depth 3
+[System.IO.File]::WriteAllText($configPath, $configJson)
 Write-Host "[harness]   Generated project-config.json: $projectType"
 
 # === 6. 初始化 features.json（如果不存在） ===
@@ -152,7 +153,8 @@ if (-not (Test-Path $featuresPath)) {
         }
         tasks = @()
     }
-    $features | ConvertTo-Json -Depth 3 | Set-Content -Path $featuresPath -Encoding utf8
+    $featuresJson = $features | ConvertTo-Json -Depth 3
+    [System.IO.File]::WriteAllText($featuresPath, $featuresJson)
     Write-Host "[harness]   Initialized features.json"
 } else {
     Write-Host "[harness]   features.json already exists, skipped"
@@ -172,7 +174,7 @@ if (-not (Test-Path $progressPath)) {
 ========================================
 
 "@
-    Set-Content -Path $progressPath -Value $progressHeader -Encoding utf8
+    [System.IO.File]::WriteAllText($progressPath, $progressHeader)
     Write-Host "[harness]   Initialized claude-progress.txt"
 } else {
     Write-Host "[harness]   claude-progress.txt already exists, skipped"

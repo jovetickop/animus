@@ -17,9 +17,14 @@ try {
     exit 1
 }
 
+# 支持根对象（模板格式：{ verify_config: ..., tasks: [...] }）或根数组
 if ($data -isnot [array]) {
-    Write-Host "FAILED: Root element is not an array"
-    exit 1
+    if ($data.tasks -is [array]) {
+        $data = $data.tasks
+    } else {
+        Write-Host "FAILED: Root element is neither an array nor an object with 'tasks' array"
+        exit 1
+    }
 }
 
 $requiredFields = @('id','name','status','depends_on','priority','test_command','last_error','updated_at','acceptance_criteria')

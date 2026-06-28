@@ -1,5 +1,5 @@
 ﻿param(
-    [string]$StateDir = ".claude/state"
+    [string]$StateDir = ".claude/harness-cc"
 )
 
 $ErrorActionPreference = "Stop"
@@ -22,6 +22,9 @@ try {
 }
 
 $taskStatus = @{}
+if ($data -isnot [array]) {
+    $data = $data.tasks
+}
 foreach ($task in $data) {
     $taskStatus[$task.id] = @{
         status = $task.status
@@ -48,17 +51,17 @@ foreach ($id in $taskStatus.Keys) {
 
     if (-not $progStatus) {
         if ($jsonStatus -ne 'pending') {
-            $warnings += "[WARN] $id: features.json=$jsonStatus, progress.txt=NO RECORD"
+            $warnings += "[WARN] ${id}: features.json=$jsonStatus, progress.txt=NO RECORD"
         }
     } elseif ($jsonStatus -ne $progStatus) {
-        $warnings += "[WARN] $id: features.json=$jsonStatus, progress.txt=$progStatus"
+        $warnings += "[WARN] ${id}: features.json=$jsonStatus, progress.txt=$progStatus"
     }
 }
 
 # Reverse check: progress.txt has entries not in features.json
 foreach ($id in $progressStatus.Keys) {
     if (-not $taskStatus.ContainsKey($id)) {
-        $warnings += "[WARN] $id: features.json=NOT FOUND, progress.txt=$($progressStatus[$id])"
+        $warnings += "[WARN] ${id}: features.json=NOT FOUND, progress.txt=$($progressStatus[$id])"
     }
 }
 
