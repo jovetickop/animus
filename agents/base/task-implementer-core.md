@@ -48,6 +48,27 @@
 - 不得修改 project-config.json 中的 verify_config
 - 每次开始实现前，先读取该任务在 harness-history.jsonl 中的失败历史
 
+## 自动代码审查（passed 前置门控）
+
+在标记任务为 `passed` 之前，必须先通过代码审查：
+
+**审查流程：**
+1. 实现完成并执行 `verify_command` 通过后
+2. 调用 `code-reviewer` agent 对当前变更进行审查
+3. 审查结论为"通过"时，才能执行 `update-progress.ps1 TaskId passed`
+4. 审查结论为"不通过"或"有条件通过"时：
+   - 修复审查指出的问题
+   - 重新执行 `verify_command`
+   - 重新审查
+   - 重复此循环直到"通过"
+
+**审查内容：**
+- 当前任务涉及的所有文件变更
+- 编码规范、命名、错误处理、测试覆盖
+- 是否有未清理的调试代码或临时日志
+
+**此规则不可跳过、不可豁免。**
+
 ## 通用知识积累要求
 
 - 每次遇到非显而易见的修复（如奇怪编译错误、特殊 API 行为、非预期约束），记录到 `.claude/harness-cc/findings.md`
