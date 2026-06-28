@@ -33,3 +33,27 @@ function Find-TaskById {
     param([Parameter(Mandatory=$true)][object[]]$Tasks,[Parameter(Mandatory=$true)][string]$TaskId)
     return $Tasks | Where-Object { $_.id -eq $TaskId } | Select-Object -First 1
 }
+
+function Append-HistoryJsonl {
+    param(
+        [string]$HistoryPath,
+        [string]$Type = "state_transition",
+        [string]$TaskId = "",
+        [string]$FromStatus = "",
+        [string]$ToStatus = "",
+        [string]$Message = "",
+        $Verification = $null
+    )
+    $record = @{
+        type = $Type
+        timestamp = (Get-Date -Format "yyyy-MM-ddTHH:mm:ss")
+    }
+    if ($TaskId) { $record.task_id = $TaskId }
+    if ($FromStatus) { $record.from = $FromStatus }
+    if ($ToStatus) { $record.to = $ToStatus }
+    if ($Message) { $record.message = $Message }
+    if ($Verification) { $record.verification = $Verification }
+
+    $line = ($record | ConvertTo-Json -Compress)
+    Add-Content -LiteralPath $HistoryPath -Encoding UTF8 -Value $line
+}

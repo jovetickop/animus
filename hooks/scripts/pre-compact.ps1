@@ -24,6 +24,7 @@ if (Test-Path -LiteralPath $oldHarnessPath) {
 }
 
 $progressPath = Join-Path $projectRoot ".claude" "harness-cc" "claude-progress.txt"
+$historyPath = Join-Path $projectRoot ".claude" "harness-cc" "harness-history.jsonl"
 
 # 1) 如果 claude-progress.txt 存在，追加时间戳 [COMPACT] 标记行
 if (Test-Path -LiteralPath $progressPath) {
@@ -51,10 +52,79 @@ if (Test-Path -LiteralPath $featuresPath) {
             # 统计状态为 passed 或 completed 的已完成任务数
             $doneCount = ($tasks | Where-Object { $_.status -in @("passed", "completed") }).Count
             Write-Host "[harness-cc] PreCompact: $doneCount/$totalCount 任务完成"
+
+            # 3) 写入 JSONL compact 事件
+            if (Test-Path -LiteralPath $historyPath) {
+                try {
+                    $compactRecord = @{
+                        type = "compact"
+                        timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+                        reason = "context_window_reached"
+                        summary = "$doneCount/$totalCount 任务完成"
+                    }
+                    $compactLine = $compactRecord | ConvertTo-Json -Compress
+                    Add-Content -LiteralPath $historyPath -Encoding UTF8 -Value $compactLine
+                } catch { }
+            }
+
+            # 4) 自动同步 features.json → task_plan.md
+            $taskPlanPath = Join-Path $projectRoot ".claude" "harness-cc" "task_plan.md"
+            if (Test-Path -LiteralPath $taskPlanPath) {
+                try {
+                    $planContent = Get-Content -LiteralPath $taskPlanPath -Encoding UTF8
+                    $modified = $false
+                    foreach ($task in $tasks) {
+                        if ($task.status -eq "passed" -or $task.status -eq "completed") {
+                            $taskId = [string]$task.id
+                            # 查找 [ ] Txxx 样式的 checkbox 并标记为 [x]
+                            $pattern = "\[ \] ([^\]]*${taskId}[^\]]*)"
+                            $newContent = $planContent -replace $pattern, '[x] $1'
+                            if ($newContent -ne $planContent) {
+                                $planContent = $newContent
+                                $modified = $true
+                            }
+                        }
+                    }
+                    if ($modified) {
+                        $planContent | Set-Content -LiteralPath $taskPlanPath -Encoding UTF8
+                        # 记录 sync 事件
+                        $syncRecord = @{
+                            type = "sync"
+                            timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+                            action = "task_plan_checkbox_auto_synced"
+                        }
+                        $syncLine = $syncRecord | ConvertTo-Json -Compress
+                        Add-Content -LiteralPath $historyPath -Encoding UTF8 -Value $syncLine
+                    }
+                } catch { }
+            }
         }
     } catch {
         # features.json 解析失败时静默处理，不影响压缩流程
     }
+
+    # 5) Append-only 检测：从 JSONL 提取历史 task_id，检查是否被删除
+    if (Test-Path -LiteralPath $historyPath) {
+        try {
+            $historyLines = Get-Content -LiteralPath $historyPath -Encoding UTF8
+            $historicalIds = @{}
+            foreach ($hLine in $historyLines) {
+                if ([string]::IsNullOrWhiteSpace($hLine)) { continue }
+                try { $hParsed = $hLine | ConvertFrom-Json; if ($hParsed.task_id) { $historicalIds[[string]$hParsed.task_id] = $true } } catch {}
+            }
+            $currentIds = @{}
+            foreach ($t in $tasks) { $currentIds[[string]$t.id] = $true }
+            $missingIds = @()
+            foreach ($hId in $historicalIds.Keys) {
+                if (-not $currentIds.ContainsKey($hId)) { $missingIds += $hId }
+            }
+            if ($missingIds.Count -gt 0) {
+                Write-Host "[harness-cc] WARNING: Append-only 违规！以下任务已从 features.json 中删除: $($missingIds -join ', ')" -ForegroundColor Red
+                Write-Host "[harness-cc] 建议从备份 features.json.bak.* 中恢复" -ForegroundColor Yellow
+            }
+        } catch { }
+    }
+
 }
 
 exit 0

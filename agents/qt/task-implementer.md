@@ -13,7 +13,7 @@ description: 围绕当前 harness 任务实现最小闭环，适合处理单个 
 ## 必须检查
 
 - `.claude/harness-cc/features.json` 中当前任务的定义。
-- `.claude/harness-cc/claude-progress.txt` 最近状态。
+- `.claude/harness-cc/harness-history.jsonl` 最近状态。
 - 项目根目录 `CLAUDE.md` 中记录的配置、构建、测试、运行命令。
 - 当前任务涉及的源码、UI、资源、测试文件。
 

@@ -24,6 +24,7 @@ $modulesDir = Join-Path $PSScriptRoot 'modules'
 $ClaudeRoot = Join-Path $ProjectRoot '.claude'
 $FeaturesPath = Join-Path $ClaudeRoot 'harness-cc\features.json'
 $ProgressPath = Join-Path $ClaudeRoot 'harness-cc\claude-progress.txt'
+$HistoryPath = Join-Path $ClaudeRoot 'harness-cc\harness-history.jsonl'
 
 $features = Read-FeaturesJson -FeaturesPath $FeaturesPath
 if (-not $features) { exit 1 }
@@ -51,6 +52,22 @@ $features | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $FeaturesPath -E
 $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
 $logLine = "$timestamp | $TaskId | $currentStatus -> $finalStatus | $finalMessage"
 Add-Content -LiteralPath $ProgressPath -Encoding UTF8 -Value $logLine
+
+# JSONL 日志（双写阶段）
+$historyRecord = @{
+    type = "state_transition"
+    timestamp = $timestamp
+    task_id = $TaskId
+    from = $currentStatus
+    to = $finalStatus
+    message = $finalMessage
+}
+# 如果是 passed 且有 Oracle 验证结果，附加验证信息
+if ($Status -eq 'passed' -and $verifyResult) {
+    $historyRecord.verification = @{ exit_code = if ($verifyResult.Failed) { 1 } else { 0 } }
+}
+$historyLine = $historyRecord | ConvertTo-Json -Compress
+Add-Content -LiteralPath $HistoryPath -Encoding UTF8 -Value $historyLine
 
 $reportPath = Write-TaskReport -Task $targetTask -ProjectRoot $ProjectRoot -ProgressPath $ProgressPath -CurrentStatus $currentStatus -NewStatus $finalStatus -LogMessage $finalMessage
 

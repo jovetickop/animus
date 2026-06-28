@@ -25,7 +25,7 @@ ty-qt-ai-plugin/                       仓库根（插件发布源）
 ├── docs/                              开发文档（编码策略、Hook 调试、模板说明）
 ├── hooks/                             PostToolUse 自动 clang-format 等运行时钩子
 ├── rules/                             8 个编码规范文件（按语言分组）
-├── scripts/                           Python 脚本（session-catchup、状态显示等）
+├── scripts/                           Python 脚本（session-catchup 5问重启、format-log JSONL渲染、状态显示等）
 ├── skills/tdd-workflow/               子技能（/tdd-workflow）
 └── templates/                         安装时使用的模板
     ├── harness/                       状态机脚本（features.json + 7 个脚本）
@@ -71,7 +71,7 @@ ty-qt-ai-plugin/                       仓库根（插件发布源）
 - 同时只能有一个 `in_progress` 任务（脚本会拒绝第二个）。
 - `in_progress → passed` 必须有构建/测试证据，否则违反工作流硬规则。
 - `depends_on` 必须是直接前置任务 ID；前置任务未 `passed` 时不能进入 `in_progress`。
-- 每次状态流转自动追加 `.claude/harness-cc/claude-progress.txt` 一行 + 生成 `.claude/harness-cc/docs/reports/<TaskId>-<name>.md` 报告。
+- 每次状态流转自动追加 `.claude/harness-cc/harness-history.jsonl` 一行 + 生成 `.claude/harness-cc/docs/reports/<TaskId>-<name>.md` 报告。
 - `updated_at` / `last_error` 由脚本维护，不要手工批量改写。
 - 状态非法流转脚本会 `exit 1` 并打印原因——这是契约，不应放宽。
 
@@ -210,7 +210,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 |---------|---------|---------|
 | PreToolUse | Write/Edit 前 | `pre-tool-use.sh` / `pre-tool-use.ps1`（备份 features.json + GBK→UTF-8） |
 | PostToolUse | Write/Edit 后 | `clang-format.sh` / `clang-format.ps1` + `format-all.py`（多语言格式化 + UTF-8→GBK） |
-| PreCompact | 上下文压缩前 | `pre-compact.sh` / `pre-compact.ps1`（刷进度到 `.claude/harness-cc/claude-progress.txt`） |
+| PreCompact | 上下文压缩前 | `pre-compact.sh` / `pre-compact.ps1`（刷进度：JSONL compact 事件 + features.json→task_plan.md 自动同步） |
 | Stop | 会话结束时 | `stop-check.sh` / `stop-check.ps1`（检查未完成任务，输出恢复提示） |
 
 ## 平台注意事项
@@ -404,14 +404,14 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 ### 验收审查 (`harness-code-review` 命令)
 
 - `commands\validate-features.ps1` — 验证 `features.json` 结构。
-- `commands\check-consistency.ps1` — 检查 `.claude/harness-cc/features.json` 与 `.claude/harness-cc/claude-progress.txt` 状态一致性。
+- `commands\check-consistency.ps1` — 检查 `.claude/harness-cc/features.json` 与 `.claude/harness-cc/harness-history.jsonl` 一致性（含 append-only 校验）
 
 ### 状态机验收硬规则 (CLAUDE.md)
 
 - `in_progress → passed` 必须有构建/测试证据。
 - 不得标记任务为 `passed` 之前跳过验证。
 - 必须执行 `verify_command` 并确认 `exit 0`。
-- 验证输出写入 `.claude/harness-cc/claude-progress.txt`（至少最后 3 行）。
+- 验证输出追加到 `.claude/harness-cc/harness-history.jsonl`（至少最后 3 条）。
 - 不得修改 `verify_config` 中的 `verify_command`。
 
 ### 已有工程验收清单 (`templates/existing_project/review-checklist.md`)
@@ -471,7 +471,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 |------|---------|------|
 | PreToolUse | Write/Edit 前 | 备份 features.json + GBK->UTF-8 编码转换 |
 | PostToolUse | Write/Edit 后 | clang-format + format-all 多语言格式化 + UTF-8->GBK 回转 |
-| PreCompact | 上下文压缩前 | 刷写进度到 claude-progress.txt |
+| PreCompact | 上下文压缩前 | 刷进度（JSONL compact 事件 + features→task_plan 同步） |
 | Stop | 会话结束时 | 检查未完成任务，输出恢复提示 |
 
 ### 6. 运行时引擎 (Harness)
@@ -488,7 +488,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 - `features.active.json` — 当前活动任务 (Token 优化分片)
 - `features.archive.json` — 已完成/失败归档
-- `claude-progress.txt` — 累计进度日志
+- `harness-history.jsonl` — 统一结构化日志
 - `harness-history.jsonl` — 失败历史分析
 
 ```
@@ -528,8 +528,10 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 ### 6. 跨会话恢复
 
-- `session-catchup.py` 在 `/clear` 后自动重建上下文
-- 状态持久化为 `features.active.json` (分片) 降低 Token 消耗约 78%
+- `session-catchup.py` 直接读文件输出 5 问恢复检查，关机/断网同效
+- `task_plan.md` 子步骤追踪 + `findings.md` 知识积累
+- PreCompact 钩子自动同步 features.json → task_plan.md
+- 状态分片 (active/archive) 降低 Token 消耗约 78%
 
 ## 架构决策记录（隐含的）
 
@@ -572,13 +574,14 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 - Oracle 门控防止任务被过早标记完成
 - 状态机校验防止非法流转
 - hooks 双平台互为降级，单点失败不阻塞
-- 每次状态流转生成 `docs/reports/` 报告 + 追加 `claude-progress.txt`
+- 每次状态流转生成 `docs/reports/` 报告 + 追加 JSONL 日志
 
 ### 跨会话持久性
 
 - `features.active.json` + `features.archive.json` 持久化任务状态
-- `harness-history.jsonl` 记录所有状态转换历史
-- `session-catchup.py` 在会话中断后自动恢复
+- `harness-history.jsonl` 记录所有状态转换历史（JSONL 格式，追加写入）
+- `session-catchup.py` 在会话中断后自动恢复（5 问重启检查）
+- `findings.md` 记录决策和错误经验（非易失性知识）
 
 ### 性能考量
 

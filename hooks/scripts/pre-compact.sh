@@ -42,6 +42,12 @@ if [ -f "$features_path" ] && command -v jq >/dev/null 2>&1; then
 
     if [ -n "$stats" ]; then
         echo "[harness-cc] PreCompact: $stats 任务完成"
+        # 3) 写入 JSONL compact 事件
+        history_path="$project_root/.claude/harness-cc/harness-history.jsonl"
+        if [ -f "$history_path" ]; then
+            timestamp=$(date "+%Y-%m-%d %H:%M:%S")
+            echo "{\"type\":\"compact\",\"timestamp\":\"$timestamp\",\"reason\":\"context_window_reached\",\"summary\":\"$stats\"}" >> "$history_path"
+        fi
     fi
 fi
 

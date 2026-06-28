@@ -32,6 +32,6 @@
 
 - 构建成功
 - 相关测试通过
-- 结果已经写入 `.claude/harness-cc/claude-progress.txt`
+- 结果已经追加到 `.claude/harness-cc/harness-history.jsonl`
 
-如果构建或测试失败，先把失败摘要写入进度日志，再把任务回退到 `pending`。
+如果构建或测试失败，先把失败摘要写入 JSONL 日志，再把任务回退到 `pending`。

@@ -17,7 +17,7 @@
 
 - 没有构建和测试结果，禁止标记 `passed`。
 - `moc`/`uic`/`rcc` 失败等价于任务失败。
-- 每轮都必须更新 `.claude/harness-cc/claude-progress.txt`。
+- 每轮都必须追加日志到 `.claude/harness-cc/harness-history.jsonl`。
 - 每次任务状态流转后，必须自动更新 `.claude/harness-cc/docs/reports/<任务编号>-任务描述.md`，沉淀“功能描述 + 最新验证结果”。
 - 失败任务默认保持 `failed`，不要自动回退到 `pending`。
 - `depends_on` 只写直接依赖；依赖任务必须先 `passed`，当前任务才能进入 `in_progress`。
@@ -31,7 +31,7 @@
 
 - 确认构建命令和测试命令已正确填入 CLAUDE.md
 - 用实际需求替换 `features.json` 中的示例任务，补全 `depends_on`、`priority` 等字段
-- 在 `claude-progress.txt` 补一条初始化记录，说明接入背景
+- 在 `harness-history.jsonl` 补一条初始化记录，说明接入背景
 - 首次编码前运行 `show-status.py`，确认状态文件可读
 
 ### 最低要求

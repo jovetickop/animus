@@ -134,7 +134,7 @@ $ReadmeContent = @"
 .claude\harness-cc\
 ├── README.md                # 本文件
 ├── features.json            # 任务状态列表
-├── claude-progress.txt      # 进度日志
+├── harness-history.jsonl    # 结构化日志
 ├── project-config.json      # 项目配置
 └── docs\reports\            # 任务报告
 ```
@@ -251,6 +251,20 @@ if (-not (Test-Path $ProgressFile)) {
 }
 
 # ============================================================
+# 步骤 8b: 写入 harness-history.jsonl
+# ============================================================
+Write-Step "写入 harness-history.jsonl..."
+
+$HistoryFile = Join-Path $StateDir "harness-history.jsonl"
+
+if (-not (Test-Path $HistoryFile)) {
+    Set-Content -Path $HistoryFile -Value "" -Encoding UTF8
+    Write-Info "  harness-history.jsonl 已创建"
+} else {
+    Write-Info "  harness-history.jsonl 已存在，跳过"
+}
+
+# ============================================================
 # 步骤 9: 完成（不修改项目 CLAUDE.md，不复制任何文件）
 # ============================================================
 Write-Host ""
@@ -262,6 +276,7 @@ Write-Host "已创建:" -ForegroundColor Green
 Write-Host "  - $StateDir\README.md"
 Write-Host "  - $StateDir\features.json"
 Write-Host "  - $StateDir\claude-progress.txt"
+Write-Host "  - $StateDir\harness-history.jsonl"
 Write-Host "  - $StateDir\project-config.json"
 Write-Host "  - $StateDir\docs\reports\"
 Write-Host ""

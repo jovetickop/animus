@@ -94,4 +94,14 @@ try {
     # 清理失败不影响主流程
 }
 
+# 保存当前 task IDs 快照，用于 append-only 校验
+$idsSnapshotPath = Join-Path $backupDir "features.json.ids"
+try {
+    $featuresContent = Get-Content $featuresPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $taskList = if ($featuresContent -is [array]) { $featuresContent } else { $featuresContent.tasks }
+    $idList = @()
+    foreach ($t in $taskList) { $idList += [string]$t.id }
+    $idList | Set-Content -LiteralPath $idsSnapshotPath -Encoding UTF8
+} catch { }
+
 exit 0
