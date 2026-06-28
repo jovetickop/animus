@@ -7,7 +7,6 @@ templates/
 ├── harness/             # 状态机脚本 + 配置模板（安装到目标工程的 .claude/harness-cc/）
 ├── existing_project/    # 已有工程模板（review-checklist / cmake-adapter）
 ├── .clang-format        # C++ 格式化规则模板
-├── .mcp.json            # MCP 服务器配置模板
 └── init-project.ps1     # 项目初始化脚本（入口）
 ```
 

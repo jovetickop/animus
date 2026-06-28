@@ -1,6 +1,6 @@
 ---
 name: tdd-workflow
-description: 面向通用 C++/Qt 开发的 TDD 工作流指南，使用 /tdd-workflow 显式调用
+description: 面向 C++/Qt 开发的 TDD 工作流指南。功能实现、缺陷修复、重构时自动激活——先写失败测试、再写实现、重构并保持绿色。与 harness-cc task-implementer 配合使用。
 ---
 # C++/Qt 测试驱动开发 (TDD) 工作流
 
@@ -8,7 +8,7 @@ description: 面向通用 C++/Qt 开发的 TDD 工作流指南，使用 /tdd-wor
 
 ## 如何使用
 
-**显式调用**: 输入 `/tdd-workflow` 激活此工作流
+**自动触发**: 当 task-implementer 创建或修改 C++/Qt 代码时，此指南自动生效
 
 ## 适用场景
 

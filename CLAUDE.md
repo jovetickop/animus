@@ -31,7 +31,6 @@ harness-cc/                             仓库根（插件发布源）
     ├── harness/                       状态机脚本 + 状态文件（含 task_plan.md 子步骤追踪、findings.md 知识积累、plan-context.md 规划上下文等 10 个文件）
     ├── existing_project/              CLAUDE.md / review-checklist / cmake-adapter 模板
     ├── .clang-format                  C++ 格式化配置
-    ├── .mcp.json                      MCP 服务器模板
     └── init-project.ps1               项目初始化主脚本
 ```
 
@@ -143,7 +142,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 | PowerShell | ~45% | 核心状态机引擎、项目初始化编排、会话管理、回归测试运行器、hook 脚本 |
 | Python | ~30% | 状态显示、状态机替代实现、编码桥接（GBK/UTF-8）、多语言格式化分发、会话恢复、验证脚本 |
 | Markdown | ~20% | Agent 定义（22 个）、插件清单（plugin.json）、编码规范规则、命令文档 |
-| JSON | ~5% | 配置（hooks.json、settings.local.json、.mcp.json、project-config.json、features.json） |
+| JSON | ~5% | 配置（hooks.json、settings.local.json、project-config.json、features.json） |
 | Shell (Bash) | ~3% | 跨平台 hook 降级脚本（clang-format、pre-tool-use、pre-compact、stop-check） |
 | YAML / TOML | 无 | 不在本仓库中使用 |
 
@@ -154,19 +153,10 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 | PowerShell | 5.1+（Windows） | 主要运行时，所有 .ps1 脚本 |
 | Python | 2.7+ / 3.x 双兼容 | 所有 .py 脚本，含 Python 2/3 兼容层（`from __future__`） |
 | Bash | 任意 POSIX shell | 跨平台 hook 降级（.sh 脚本） |
-| Node.js | 任意（通过 npx） | MCP 服务器运行时（filesystem/git/memory/linear） |
+| Node.js | 任意（通过 npx） | （可选）MCP 服务器运行时 |
 | Git | 任意 | 版本控制、提交工作流 |
 
 ## 核心框架/库
-
-### MCP 服务器（通过 npx 动态加载）
-
-| 包 | 用途 | 来源 |
-|----|------|------|
-| `@modelcontextprotocol/server-filesystem` | 读写 features.json 等状态文件，避免编码问题 | npm（npx 运行） |
-| `@modelcontextprotocol/server-git` | Git 操作集成 | npm（npx 运行） |
-| `@modelcontextprotocol/server-memory` | 对 harness-history.jsonl 进行语义查询 | npm（npx 运行） |
-| `@linear/mcp-server` | Linear 问题跟踪集成 | npm（npx 运行） |
 
 ### 代码格式化工具
 
@@ -189,7 +179,6 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 |------|------|
 | `.claude/settings.local.json` | Claude Code 本地权限白名单（此仓库也保留在 `.claude/` 下）（Bash/Read/MCP/skill 调用） |
 | `hooks/hooks.json` | 注册 PostToolUse/PreToolUse/PreCompact/Stop 四个钩子 |
-| `templates/.mcp.json` | MCP 服务器连接配置模板（filesystem/git/memory/linear） |
 | `templates/harness/project-config.json` | 目标项目类型配置（frontend/backend/verify 字段） |
 | `templates/.clang-format` | C++ 格式化规则模板 |
 | `.claude-plugin/plugin.json` | 插件清单，声明元信息、斜杠命令和自动发现组件 |
@@ -562,7 +551,6 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 - 新增语言：创建 `agents/{lang}/` 目录 + `rules/{lang}/` 目录（安装脚本中无需添加映射，不再复制到目标项目）
 - 新增 Agent：在对应目录创建 `.md` 文件，keep `description` frontmatter
 - 新增钩子：在 `hooks/hooks.json` 注册，在 `hooks/scripts/` 加脚本
-- MCP 集成：通过 `.mcp.json` 模板，非侵入式
 
 ### 可测试性 (插件自身)
 
