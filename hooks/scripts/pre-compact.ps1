@@ -1,4 +1,4 @@
-﻿# PreCompact 钩子 — 上下文压缩前刷新进度到 claude-progress.txt
+﻿# PreCompact 钩子 — 刷新进度到 JSONL + task_plan.md 自动同步
 # 追加时间戳 [COMPACT] 标记行，并输出 features.json 任务完成摘要
 # 始终以 exit 0 退出，不影响压缩流程
 

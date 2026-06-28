@@ -18,6 +18,7 @@ if [ -f "$project_root/.claude/harness/features.json" ]; then
 fi
 
 progress_path="$project_root/.claude/harness-cc/claude-progress.txt"
+history_path="$project_root/.claude/harness-cc/harness-history.jsonl"
 
 # 1) 如果 claude-progress.txt 存在，追加时间戳 [COMPACT] 标记行
 if [ -f "$progress_path" ]; then
@@ -43,9 +44,9 @@ if [ -f "$features_path" ] && command -v jq >/dev/null 2>&1; then
     if [ -n "$stats" ]; then
         echo "[harness-cc] PreCompact: $stats 任务完成"
         # 3) 写入 JSONL compact 事件
-        history_path="$project_root/.claude/harness-cc/harness-history.jsonl"
         if [ -f "$history_path" ]; then
-            timestamp=$(date "+%Y-%m-%d %H:%M:%S")
+            timestamp=$(date "+%Y-%m-%dT%H:%M:%S")
+            echo "---" >> "$history_path"
             echo "{\"type\":\"compact\",\"timestamp\":\"$timestamp\",\"reason\":\"context_window_reached\",\"summary\":\"$stats\"}" >> "$history_path"
         fi
     fi
