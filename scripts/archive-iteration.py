@@ -75,7 +75,7 @@ def main():
 
     # 复制运行时文件
     files_to_archive = ["features.json", "harness-history.jsonl",
-                        "task_plan.md", "findings.md"]
+                        "feature-detail.md", "task_plan.md", "findings.md"]
     for fname in files_to_archive:
         src = os.path.join(harness_dir, fname)
         if os.path.isfile(src):
@@ -114,6 +114,13 @@ def main():
     with io.open(os.path.join(iter_dir, "iteration-summary.md"), "w", encoding="utf-8") as f:
         f.write(summary)
     print(u"  生成: iteration-summary.md")
+
+    # 清理运行时残留（plan-context.md 来自模板，claude-progress.txt 已迁移到 JSONL）
+    for fname in ["plan-context.md", "claude-progress.txt"]:
+        fpath = os.path.join(harness_dir, fname)
+        if os.path.isfile(fpath):
+            os.remove(fpath)
+            print(u"  清理: {}".format(fname))
 
     # 清空当前状态
     for fname in files_to_archive:

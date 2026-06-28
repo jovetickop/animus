@@ -1,7 +1,7 @@
 {
   "name": "harness-cc",
   "description": "状态机驱动的编码工作流引擎，支持 C++/Qt、Python、Node.js、Rust、Go 等多语言项目。提供任务编排、代码审查、测试验证等完整工作流。",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "author": {
     "name": "JiangJie",
     "url": "https://github.com/jovetickop"
