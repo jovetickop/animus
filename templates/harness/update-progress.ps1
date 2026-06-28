@@ -53,21 +53,9 @@ $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
 $logLine = "$timestamp | $TaskId | $currentStatus -> $finalStatus | $finalMessage"
 Add-Content -LiteralPath $ProgressPath -Encoding UTF8 -Value $logLine
 
-# JSONL 日志（双写阶段）
-$historyRecord = @{
-    type = "state_transition"
-    timestamp = $timestamp
-    task_id = $TaskId
-    from = $currentStatus
-    to = $finalStatus
-    message = $finalMessage
-}
-# 如果是 passed 且有 Oracle 验证结果，附加验证信息
-if ($Status -eq 'passed' -and $verifyResult) {
-    $historyRecord.verification = @{ exit_code = if ($verifyResult.Failed) { 1 } else { 0 } }
-}
-$historyLine = $historyRecord | ConvertTo-Json -Compress
-Add-Content -LiteralPath $HistoryPath -Encoding UTF8 -Value $historyLine
+# JSONL 日志（multi-line pretty 格式）
+$historyVerification = if ($Status -eq 'passed' -and $verifyResult) { @{ exit_code = if ($verifyResult.Failed) { 1 } else { 0 } } } else { $null }
+Append-HistoryJsonl -HistoryPath $HistoryPath -TaskId $TaskId -FromStatus $currentStatus -ToStatus $finalStatus -Message $finalMessage -Verification $historyVerification
 
 $reportPath = Write-TaskReport -Task $targetTask -ProjectRoot $ProjectRoot -ProgressPath $ProgressPath -CurrentStatus $currentStatus -NewStatus $finalStatus -LogMessage $finalMessage
 
