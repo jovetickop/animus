@@ -9,7 +9,7 @@
 - [ ] 代码是否符合项目编码规范？
 - [ ] 是否有未处理的错误路径？
 - [ ] 是否有调试代码或临时日志残留？
-- [ ] harness 状态是否已更新？（features.json + harness-history.jsonl + task_plan.md + findings.md）
+- [ ] harness 状态是否已更新？（features.json + harness-history.jsonl + feature-detail.md + task_plan.md + findings.md）
 
 ## 语言专项（按项目类型选做）
 

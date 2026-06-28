@@ -41,3 +41,31 @@
 - 构建失败时能回写进度日志
 - 每次状态流转后自动生成/更新 `.claude/harness-cc/docs/reports/<任务编号>-描述.md`
 - 现有源码目录和架构不被模板误改
+
+---
+
+## 文件清单
+
+### 状态文件
+
+| 文件 | 用途 |
+|------|------|
+| `features.json` | 任务状态 + 依赖（纯数组，仅机器读） |
+| `feature-detail.md` | 功能方案文档模板（详细描述"怎么做"） |
+| `domain-lexicon.md` | 领域术语表模板 |
+| `harness-history.jsonl` | 结构化日志 |
+| `task_plan.md` | 子步骤追踪 |
+| `findings.md` | 知识积累（决策/错误/待办） |
+| `adr/` | 架构决策记录目录 |
+| `iteration-summary.md` | 迭代总结模板 |
+
+### 脚本
+
+| 脚本 | 用途 |
+|------|------|
+| `update-progress.ps1` | 状态机引擎 |
+| `show-status.py` | 状态概览显示 |
+| `init.ps1` | 首次初始化引导 |
+| `coding-session.ps1` | 会话入口 |
+| `gap-analysis.py` | 差距分析脚本（在 `scripts/` 下） |
+| `archive-iteration.py` | 归档脚本（在 `scripts/` 下） |

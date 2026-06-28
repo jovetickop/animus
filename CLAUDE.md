@@ -23,7 +23,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 本仓库是 **harness-cc 插件的源码发布仓库**，不是使用该插件的目标工程。用户通过 `/plugin marketplace add` + `/plugin install` 或手动克隆后 `/plugin install <path>` 安装，插件目录通过 `${CLAUDE_PLUGIN_ROOT}` 环境变量解析。仓库根目录包含插件所有源代码（agents/, commands/, rules/, hooks/, templates/, scripts/, skills/, docs/），没有 `CMakeLists.txt` / `Cargo.toml` / `package.json` 等业务工程文件。
 
-`.claude-plugin/plugin.json` 是插件入口，3 个斜杠命令（`/harness-code-setup`、`/harness-code-plan`、`/harness-code-review`）是主要工作流入口。`templates/init-project.ps1` 是手动安装入口（用户执行后为目标项目创建 `.claude/harness-cc/` 运行时目录）。
+`.claude-plugin/plugin.json` 是插件入口，6 个斜杠命令（`/harness-code-setup`、`/harness-code-plan`、`/harness-code-review`、`/harness-code-handoff`、`/harness-code-continue`、`/harness-code-archive`）是主要工作流入口。`templates/init-project.ps1` 是手动安装入口（用户执行后为目标项目创建 `.claude/harness-cc/` 运行时目录）。
 
 ## 仓库根结构
 
@@ -38,7 +38,7 @@ harness-cc/                             仓库根（插件发布源）
 │   ├── qt/ / cpp-cmake/               C++ 专项
 │   ├── python/ / node/ / rust/ / go/   各语言专项
 │   └── frontend/                      前端专项
-├── commands/                          3 个斜杠命令 + 验证脚本
+├── commands/                          6 个斜杠命令 + 验证脚本
 ├── docs/                              开发文档（编码策略、Hook 调试、模板说明）
 ├── hooks/                             PostToolUse 自动 clang-format 等运行时钩子
 ├── rules/                             8 个编码规范文件（按语言分组）
@@ -56,10 +56,13 @@ harness-cc/                             仓库根（插件发布源）
 插件按"插件清单 → 编排命令 → 执行 Agent + 规则"组织：
 
 1. **插件清单** (`.claude-plugin/plugin.json`)：声明插件元信息、3 个斜杠命令入口和自动发现组件。
-2. **编排命令** (`commands/`)：3 个斜杠命令驱动工作流
+2. **编排命令** (`commands/`)：6 个斜杠命令驱动工作流
    - `harness-code-setup`：检测项目类型（CMake/Qt/Cargo/npm/pip）+ 创建 `.claude/harness-cc/` 运行时目录
    - `harness-code-plan`：PRD+方案 → `features.json` 任务列表
    - `harness-code-review`：通用 + 语言专项验收
+   - `harness-code-handoff`：保存 session 上下文快照到 handoff.json
+   - `harness-code-continue`：从 handoff.json 恢复 session 上下文
+   - `harness-code-archive`：归档当前迭代，清空并开始新迭代
 3. **执行层** (`agents/` + `rules/`)：agents/commands/rules 不再复制到目标项目，直接从插件安装目录（通过 `${CLAUDE_PLUGIN_ROOT}` 环境变量解析）加载。universal 5 个通用 + 各语言专项 Agent；rules 约束编码规范。
 
 ## Agent 索引（按职责）
@@ -457,6 +460,9 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 | `/harness-code-setup` | 项目初始化 + 类型检测 + 创建 `.claude/harness-cc/` 运行时目录 | `commands/harness-code-setup.md` |
 | `/harness-code-plan` | PRD/方案文档 -> features.json 任务列表 | `commands/harness-code-plan.md` |
 | `/harness-code-review` | 通用验收 + 语言专项验收 | `commands/harness-code-review.md` |
+| `/harness-code-handoff` | 保存 session 上下文快照到 handoff.json | `commands/harness-code-handoff.md` |
+| `/harness-code-continue` | 从 handoff.json 恢复 session 上下文 | `commands/harness-code-continue.md` |
+| `/harness-code-archive` | 归档当前迭代，清空并开始新迭代 | `commands/harness-code-archive.md` |
 | 验证辅助 | features.json 结构校验 | `commands/validate-features.ps1` |
 | 一致性检查 | 检查状态文件一致性 | `commands/check-consistency.ps1` |
 

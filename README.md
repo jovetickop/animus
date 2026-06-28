@@ -18,6 +18,9 @@
 | `/harness-code-setup` | 首次接入：初始化目标项目的运行时状态 |
 | `/harness-code-plan` | 有新需求：PRD/方案 → 可执行任务列表 |
 | `/harness-code-review` | 实现完成：通用 + 语言专项验收检查 |
+| `/harness-code-handoff` | session 结束时：保存上下文快照到 handoff.json |
+| `/harness-code-continue` | 新 session 中：从 handoff.json 恢复上下文 |
+| `/harness-code-archive` | 阶段完成时：归档当前迭代，清空并开始新迭代 |
 
 日常开发：`/harness-code-plan`（拆任务）→ 实现 → `/harness-code-review`（验收）
 
@@ -142,5 +145,16 @@ python scripts/session-catchup.py --project-dir .
 ├── skills/tdd-workflow/
 └── templates/harness/ + existing_project/
 ```
+
+### 状态文件
+| 文件 | 用途 |
+|------|------|
+| `features.json` | 任务状态 + 依赖（纯数组，仅机器读） |
+| `feature-detail.md` | 功能方案文档（详细描述"怎么做"） |
+| `harness-history.jsonl` | 结构化日志 |
+| `task_plan.md` | 子步骤追踪 |
+| `findings.md` | 知识积累（决策/错误/待办） |
+| `domain-lexicon.md` | 领域术语表 |
+| `adr/` | 架构决策记录 |
 
 完整结构见仓库 `CLAUDE.md`。
