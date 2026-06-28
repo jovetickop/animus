@@ -46,6 +46,11 @@ description: 负责 Rust 方案设计与风险拆解，适合处理所有权/借
 - 不得标记任务为 passed 之前跳过验证
 - 必须执行 verify_command 并确认 exit 0
 - 将验证输出追加到 harness-history.jsonl（至少最后3条）
-- 不得修改 verify_config 中的 verify_command
+- 不得修改 project-config.json 中的 verify_config
 - 规划时需考虑验证步骤，每个任务需要 verify_command
 - 如果不确定 API 用法、库版本或技术选型，使用 WebSearch/WebFetch 查找当前最佳实践和文档
+
+### ADR 创建
+设计完成后，将关键架构决策记录到 `.claude/harness-cc/adr/` 目录（参考模板 ADR-000-模板.md）。
+包括：框架选型、模块划分、关键接口约定、非功能性约束妥协。
+

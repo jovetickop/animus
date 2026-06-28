@@ -39,7 +39,7 @@ Test-TransitionValid -TargetTask $targetTask -NewStatus $Status -Tasks $tasks
 $finalStatus = $Status
 $finalMessage = $Message
 if ($Status -eq 'passed') {
-    $verifyResult = Invoke-OracleVerify -Features $features -TaskId $TaskId
+    $verifyResult = Invoke-OracleVerify -Features $features -TaskId $TaskId -ProgressPath $ProgressPath
     if ($verifyResult.Failed) { $finalStatus = 'failed'; $finalMessage = $verifyResult.Message }
 }
 

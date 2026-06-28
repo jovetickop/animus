@@ -181,24 +181,12 @@ def main():
         sys.exit(0)
 
     # ============================================================
-    # 验证配置项（可选，但检查 verify_config 结构）
-    # ============================================================
-    if isinstance(data, dict) and "verify_config" in data:
-        vc = data["verify_config"]
-        if not isinstance(vc, dict):
-            warnings.append(u"verify_config 应为字典类型")
-
-    # ============================================================
     # 常量定义
     # ============================================================
     required_fields = [
         "id", "name", "status", "depends_on", "priority",
-        "test_command", "last_error", "updated_at", "acceptance_criteria"
+        "last_error", "updated_at"
     ]
-    # description 和 metadata 是可选的，不强制要求存在
-    optional_string_fields = {"description"}
-    optional_dict_fields = {"metadata"}
-    valid_statuses = {"pending", "in_progress", "passed", "failed", "completed"}
 
     all_ids = set()
     in_progress_count = 0
@@ -216,9 +204,6 @@ def main():
         # 检查必需字段
         for field in required_fields:
             if field not in task or task[field] is None:
-                if field == "acceptance_criteria":
-                    # acceptance_criteria 允许为空
-                    continue
                 errors.append(u"[ERROR] {0}: 缺少必需字段 '{1}'".format(task_id, field))
 
         # 检查 ID 唯一性
@@ -246,35 +231,6 @@ def main():
             except (TypeError, ValueError):
                 errors.append(u"[ERROR] {0}: priority 必须为整数，当前值: {1}".format(task_id, priority))
 
-        # 检查 acceptance_criteria 格式
-        ac = task.get("acceptance_criteria")
-        if ac is not None and not isinstance(ac, list):
-            errors.append(u"[ERROR] {0}: acceptance_criteria 必须为数组".format(task_id))
-
-        # 检查 description（可选，如果存在则应为字符串）
-        desc = task.get("description")
-        if desc is not None and not isinstance(desc, (str, type(None))):
-            errors.append(u"[ERROR] {0}: description 应为字符串类型".format(task_id))
-
-        # 检查 metadata（可选，如果存在则应为字典）
-        meta = task.get("metadata")
-        if meta is not None:
-            if not isinstance(meta, dict):
-                errors.append(u"[ERROR] {0}: metadata 应为字典类型".format(task_id))
-            else:
-                # 检查 metadata 内部字段类型（如果存在）
-                meta_created = meta.get("created_at")
-                if meta_created is not None and not isinstance(meta_created, (str, type(None))):
-                    errors.append(u"[ERROR] {0}: metadata.created_at 应为字符串".format(task_id))
-                meta_duration = meta.get("duration_seconds")
-                if meta_duration is not None and meta_duration != "":
-                    try:
-                        int(meta_duration)
-                    except (TypeError, ValueError):
-                        errors.append(u"[ERROR] {0}: metadata.duration_seconds 应为整数".format(task_id))
-                meta_session = meta.get("session_id")
-                if meta_session is not None and not isinstance(meta_session, (str, type(None))):
-                    errors.append(u"[ERROR] {0}: metadata.session_id 应为字符串".format(task_id))
 
     # ============================================================
     # 检查 depends_on 引用

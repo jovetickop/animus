@@ -98,10 +98,24 @@ def get_tasks(data):
     return []
 
 
-def get_verify_config(data):
-    """获取验证配置"""
+def get_verify_config(data, project_dir):
+    """获取验证配置。优先从 project-config.json 读取（T032），降级到 features.json。"""
+    config_path = os.path.join(project_dir, ".claude", "harness-cc", "project-config.json")
+    if os.path.isfile(config_path):
+        try:
+            with open(config_path, "rb") as f:
+                proj_data = json.loads(f.read())
+            if isinstance(proj_data, dict):
+                vc = proj_data.get("verify_config")
+                if vc:
+                    return vc
+        except Exception:
+            pass
+    # 降级：从 features.json 读取（向后兼容）
     if isinstance(data, dict):
-        return data.get("verify_config", {})
+        vc = data.get("verify_config")
+        if vc:
+            return vc
     return {}
 
 
@@ -403,7 +417,7 @@ def main():
     # ============================================================
     # Oracle 验证门: 仅在转为 passed 时执行
     # ============================================================
-    verify_config = get_verify_config(data)
+    verify_config = get_verify_config(data, project_root)
     verify_enabled = verify_config.get("verify_enabled", False) is True
     verify_command = str(verify_config.get("verify_command", "") or "")
 
@@ -495,12 +509,21 @@ def main():
                 archive_data = read_json(archive_path)
             else:
                 archive_data = {"tasks": []}
-            # 确保归档文件包含 verify_config
-            archive_data["verify_config"] = data.get("verify_config", {
+            # 确保归档文件包含 verify_config（从 project-config.json 读取，T032）
+            archive_verify_config = data.get("verify_config") if isinstance(data, dict) else None
+            if not archive_verify_config:
+                config_path = os.path.join(features_root, "project-config.json")
+                if os.path.exists(config_path):
+                    try:
+                        config_data = read_json(config_path)
+                        archive_verify_config = config_data.get("verify_config") if isinstance(config_data, dict) else None
+                    except Exception:
+                        archive_verify_config = None
+            archive_data["verify_config"] = archive_verify_config or {
                 "verify_enabled": False,
                 "verify_command": "",
                 "verify_timeout_seconds": 120
-            })
+            }
             # 从 active 中移除该任务
             active_tasks = get_tasks(data)
             data["tasks"] = [t for t in active_tasks if str(t.get("id", "")) != task_id]

@@ -45,7 +45,7 @@
 - 不得标记任务为 passed 之前跳过验证
 - 必须执行 verify_command 并确认 exit 0
 - 将验证输出追加到 harness-history.jsonl（至少最后3条）
-- 不得修改 verify_config 中的 verify_command
+- 不得修改 project-config.json 中的 verify_config
 - 每次开始实现前，先读取该任务在 harness-history.jsonl 中的失败历史
 
 ## 通用知识积累要求
@@ -54,6 +54,18 @@
 - findings.md 格式参考 `${CLAUDE_PLUGIN_ROOT}/templates/harness/findings.md`
 - 记录内容：决策记录（架构选型）/ 错误经验（踩坑修复）/ 待办（延期项）
 - 每次记录附带来源任务 ID
+
+### 术语表维护
+
+遇到业务领域术语时，追加到 `.claude/harness-cc/domain-lexicon.md`（如不存在则参考模板创建）。
+每行记录：术语、英文名、定义、别名、来源（I{N}-T{NNN}）。
+
+### ADR 记录
+
+遇到架构级决策（技术选型、架构变更、关键约束）时：
+1. 在 `.claude/harness-cc/adr/` 目录创建 ADR 文件
+2. 编号递增，标题用中文描述决策主题
+3. 记录上下文、决策、备选方案和后果
 
 ## 通用子步骤追踪要求
 

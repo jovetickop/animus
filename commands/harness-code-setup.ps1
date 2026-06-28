@@ -118,6 +118,12 @@ $configPath = Join-Path $StateDir "project-config.json"
 $config = @{
     "project-type"  = $projectType
     "detected-at"   = (Get-Date -Format "yyyy-MM-dd")
+    "auto-update-plugin" = $true
+    "verify_config" = @{
+        "verify_enabled"        = $false
+        "verify_command"        = ""
+        "verify_timeout_seconds" = 120
+    }
     "build-command" = ""
     "test-command"  = ""
     "run-command"   = ""
@@ -145,15 +151,8 @@ Write-Progress -Activity "CodeHarness Setup" -Status "Initializing features" -Pe
 
 $featuresPath = Join-Path $StateDir "features.json"
 if (-not (Test-Path $featuresPath)) {
-    $features = @{
-        verify_config = @{
-            verify_enabled       = $false
-            verify_command       = ""
-            verify_timeout_seconds = 120
-        }
-        tasks = @()
-    }
-    $featuresJson = $features | ConvertTo-Json -Depth 3
+    $features = @()
+    $featuresJson = $features | ConvertTo-Json
     [System.IO.File]::WriteAllText($featuresPath, $featuresJson)
     Write-Host "[harness]   Initialized features.json"
 } else {

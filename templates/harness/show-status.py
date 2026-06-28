@@ -97,7 +97,17 @@ def main():
     next_pending = executable_pending[0] if executable_pending else None
 
     # --- 显示 Oracle 验证门配置状态 ---
-    verify_config = data.get("verify_config") if isinstance(data, dict) else None
+    # 优先从 project-config.json 读取 verify_config（T032），降级到 features.json
+    verify_config = None
+    config_path = os.path.join(state_root, "project-config.json")
+    if os.path.exists(config_path):
+        try:
+            config_data = read_json(config_path)
+            verify_config = config_data.get("verify_config") if isinstance(config_data, dict) else None
+        except Exception:
+            verify_config = None
+    if not verify_config:
+        verify_config = data.get("verify_config") if isinstance(data, dict) else None
     if verify_config:
         enabled = verify_config.get("verify_enabled", False)
         cmd = verify_config.get("verify_command", "")

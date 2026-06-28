@@ -14,3 +14,7 @@ description: 执行通用检查 + 按项目类型的专项验收检查
 辅助验证脚本：
 - `${CLAUDE_PLUGIN_ROOT}/commands/validate-features.ps1` — 验证 features.json 结构
 - `${CLAUDE_PLUGIN_ROOT}/commands/check-consistency.ps1` — 检查状态一致性
+
+### 并行任务审查
+完成并行任务后，先逐一审查每个 group 的变更，
+再整体审查合并后的全量差异，确认无 group 间冲突。

@@ -17,7 +17,7 @@ try {
     exit 1
 }
 
-# 支持根对象（模板格式：{ verify_config: ..., tasks: [...] }）或根数组
+# 支持纯数组格式
 if ($data -isnot [array]) {
     if ($data.tasks -is [array]) {
         $data = $data.tasks
@@ -27,7 +27,7 @@ if ($data -isnot [array]) {
     }
 }
 
-$requiredFields = @('id','name','status','depends_on','priority','test_command','last_error','updated_at','acceptance_criteria')
+$requiredFields = @('id','name','status','depends_on','priority','last_error','updated_at')
 $validStatuses = @('pending','in_progress','passed','failed')
 $allIds = @{}
 $inProgressCount = 0
@@ -61,10 +61,6 @@ foreach ($task in $data) {
         $errors += "[ERROR] $($id): priority must be a positive integer"
     }
 
-    # Check acceptance_criteria
-    if ($null -ne $task.acceptance_criteria -and ($task.acceptance_criteria -isnot [array] -or $task.acceptance_criteria.Count -eq 0)) {
-        $errors += "[ERROR] $($id): acceptance_criteria must be a non-empty array"
-    }
 }
 
 # Check depends_on references

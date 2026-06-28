@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Python 2.7+ / 3.x 兼容
 #
-# session-catchup.py - /clear 后恢复会话上下文（5 问恢复检查）
+# session-catchup.py - /clear 后恢复会话上下文（6 问恢复检查）
 #
 # 用法:
 #   python scripts/session-catchup.py [--project-dir DIR]
@@ -159,7 +159,7 @@ def get_file_mtime(path):
         return u"（无法读取）"
 
 
-# ---------- 5 问输出 ----------
+# ---------- 6 问输出 ----------
 
 def print_q1(tasks):
     """[问题 1/5] 显示 in_progress 任务。"""
@@ -293,6 +293,25 @@ def print_q5(tasks):
         print(u"  建议: 所有任务已完成，准备进入下一阶段。")
 
 
+def print_q6(handoff_path):
+    """[问题 6/6] 如果 handoff.json 存在，显示上次思路。"""
+    if not os.path.isfile(handoff_path):
+        return
+    try:
+        with io.open(handoff_path, "r", encoding="utf-8") as f:
+            handoff = json.load(f)
+        if handoff.get("status") == "loaded":
+            return
+        print()
+        print(u"【问题 6/6】上一次的开发思路？")
+        print(u"  下一步计划: " + handoff.get("next_intended", ""))
+        thinking = handoff.get("recent_thinking", [])
+        for t in thinking:
+            print(u"  - " + t)
+    except Exception:
+        pass
+
+
 def print_footer():
     """输出末尾提示。"""
     print()
@@ -304,7 +323,7 @@ def print_footer():
 def print_header():
     """输出报告头部。"""
     print("=" * 40)
-    print(u"  5 问恢复检查")
+    print(u"  6 问恢复检查")
     print("=" * 40)
 
 
@@ -350,7 +369,7 @@ def main():
         print_footer()
         return 0
 
-    # 输出完整 5 问报告
+    # 输出完整 6 问报告
     print_header()
 
     print_q1(tasks)
@@ -363,6 +382,9 @@ def main():
         ("findings.md", findings_path),
     ])
     print_q5(tasks)
+
+    handoff_path = os.path.join(harness_dir, "handoff.json")
+    print_q6(handoff_path)
 
     print_footer()
 

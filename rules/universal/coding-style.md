@@ -84,3 +84,13 @@
 - [ ] 无魔法数字
 - [ ] 无深层嵌套（>4 层）
 - [ ] 无调试残留、无无用注释代码
+
+## 9. 并行任务开发规范
+
+当 features.json 中存在多个不同 parallel_group 的 in_progress 任务时：
+
+1. 每个 group 独占一个独立的 Claude Code 会话
+2. group 之间不允许修改同一文件（如有冲突，阻塞方等待另一方完成）
+3. 公共依赖（接口定义、数据结构）优先完成，再并行实现各 group
+4. 每个 group 完成后再合并，由 code-reviewer 整体审查
+5. parallel_group 为空或"default"的任务视为串行

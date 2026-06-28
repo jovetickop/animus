@@ -188,6 +188,12 @@ $ConfigFile = Join-Path $StateDir "project-config.json"
 $Config = @{
     "project-type" = $ProjectType
     "detected-at"  = $Today
+    "auto-update-plugin" = $true
+    "verify_config" = @{
+        "verify_enabled"        = $false
+        "verify_command"        = ""
+        "verify_timeout_seconds" = 120
+    }
     "build-command" = ""
     "test-command"  = ""
     "run-command"   = ""
@@ -213,11 +219,6 @@ Write-Step "写入 features.json..."
 $FeaturesFile = Join-Path $StateDir "features.json"
 
 $Features = @{
-    "verify_config" = @{
-        "verify_enabled"        = $false
-        "verify_command"        = ""
-        "verify_timeout_seconds" = 120
-    }
     "tasks" = @()
 }
 

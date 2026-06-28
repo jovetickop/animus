@@ -1,15 +1,26 @@
 # oracle-runner.ps1 — Oracle 验证模块
 # 执行构建/测试命令，验证状态机状态转换是否被批准
 
+function Get-ProjectVerifyConfig {
+    param([string]$ProjectRoot = '.')
+    $configPath = Join-Path $ProjectRoot '.claude' 'harness-cc' 'project-config.json'
+    if (Test-Path $configPath) {
+        try {
+            $config = Get-Content -Raw $configPath -Encoding UTF8 | ConvertFrom-Json
+            return $config.verify_config
+        } catch { }
+    }
+    return $null
+}
+
 function Invoke-OracleVerify {
     param(
         [Parameter(Mandatory = $true)][object]$Features,
         [Parameter(Mandatory = $true)][string]$TaskId,
-        [Parameter(Mandatory = $true)][string]$ProgressPath
+        [Parameter(Mandatory = $true)][string]$ProgressPath,
+        [Parameter(Mandatory = $false)][string]$ProjectRoot = '.'
     )
-    $verifyConfig = $null
-    if ($Features -is [PSCustomObject]) { $verifyConfig = $Features.verify_config }
-
+    $verifyConfig = Get-ProjectVerifyConfig -ProjectRoot $ProjectRoot
     if (-not $verifyConfig) { return @{ Failed = $false } }
 
     $verifyEnabled = [bool]($verifyConfig.verify_enabled -eq $true)

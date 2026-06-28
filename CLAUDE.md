@@ -1,5 +1,18 @@
 # CLAUDE.md
 
+## Rule: Gap Analysis（功能差距分析）
+规划前必须输出"已实现 vs 原定计划"差距清单，标注缺失项和影响，
+经用户确认后才能进入实施。
+
+## Rule: Sync Docs（指南文档同步）
+每次功能变更后，必须同步更新 README.md、CLAUDE.md 和相关模板、
+规则文件、Agent 定义中的文档引用。否则视为变更不完整。
+
+## Rule: Use RTK for file operations
+文件读取用 `rtk read --level minimal`，内容搜索用 `rtk grep`，
+目录列表用 `rtk ls`，差异查看用 `rtk git diff`。
+仅在需要完整精确内容时使用 Read/Grep/Glob 内置工具。
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## 仓库性质

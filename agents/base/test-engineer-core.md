@@ -33,4 +33,4 @@
 - 不得标记任务为 passed 之前跳过验证
 - 必须执行 verify_command 并确认 exit 0
 - 将验证输出追加到 harness-history.jsonl（至少最后3条）
-- 不得修改 verify_config 中的 verify_command
+- 不得修改 project-config.json 中的 verify_config
