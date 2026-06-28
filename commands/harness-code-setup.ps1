@@ -69,7 +69,7 @@ if (-not (Test-Path $readmePath)) {
 .claude\harness-cc\
 ├── README.md                # 本文件
 ├── features.json            # 任务状态列表
-├── claude-progress.txt      # 进度日志
+├── harness-history.jsonl    # 状态流转日志
 ├── project-config.json      # 项目配置
 └── docs\reports\            # 任务报告
 ```
@@ -159,24 +159,22 @@ if (-not (Test-Path $featuresPath)) {
     Write-Host "[harness]   features.json already exists, skipped"
 }
 
-# === 7. 初始化 claude-progress.txt（如果不存在） ===
-Write-Progress -Activity "CodeHarness Setup" -Status "Initializing progress log" -PercentComplete 80
+# === 7. 初始化 domain-lexicon.md（如果不存在） ===
+Write-Progress -Activity "CodeHarness Setup" -Status "Initializing domain lexicon" -PercentComplete 80
 
-$progressPath = Join-Path $StateDir "claude-progress.txt"
-if (-not (Test-Path $progressPath)) {
-    $progressHeader = @"
-========================================
- CodeHarness Progress Log
- Created: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
- Project Type: $projectType
- Plugin Root: $PluginRoot
-========================================
+$lexiconPath = Join-Path $StateDir "domain-lexicon.md"
+if (-not (Test-Path $lexiconPath)) {
+    $lexiconHeader = @"
+# 领域术语表（迭代 I1）
+
+| 术语 | 英文 | 定义 | 别名 | 来源 |
+|------|------|------|------|------|
 
 "@
-    [System.IO.File]::WriteAllText($progressPath, $progressHeader)
-    Write-Host "[harness]   Initialized claude-progress.txt"
+    [System.IO.File]::WriteAllText($lexiconPath, $lexiconHeader)
+    Write-Host "[harness]   Initialized domain-lexicon.md"
 } else {
-    Write-Host "[harness]   claude-progress.txt already exists, skipped"
+    Write-Host "[harness]   domain-lexicon.md already exists, skipped"
 }
 
 # === 8. 旧状态文件迁移 ===
@@ -185,8 +183,6 @@ Write-Progress -Activity "CodeHarness Setup" -Status "Migrating old state files"
 $oldPaths = @(
     @{Src = Join-Path $ProjectDir ".claude\harness\features.json"}
     @{Src = Join-Path $ProjectDir ".claude\state\features.json"}
-    @{Src = Join-Path $ProjectDir ".claude\harness\claude-progress.txt"}
-    @{Src = Join-Path $ProjectDir ".claude\state\claude-progress.txt"}
 )
 
 $migrationDone = $false
