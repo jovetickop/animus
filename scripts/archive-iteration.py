@@ -70,12 +70,16 @@ def main():
     iter_dir_name = "iteration-{}-{}".format(iter_num, iter_name)
     iter_dir = os.path.join(archive_dir, iter_dir_name)
 
-    # 创建归档目录
-    os.makedirs(iter_dir, exist_ok=True)
+    # 创建归档目录（同名冲突时报错不覆盖）
+    if os.path.isdir(iter_dir):
+        print(u"错误: 归档目录已存在: {}".format(iter_dir))
+        return 1
+    os.makedirs(iter_dir)
 
     # 复制运行时文件
     files_to_archive = ["features.json", "harness-history.jsonl",
-                        "feature-detail.md", "task_plan.md", "findings.md"]
+                        "feature-detail.md", "domain-lexicon.md",
+                        "task_plan.md", "findings.md"]
     for fname in files_to_archive:
         src = os.path.join(harness_dir, fname)
         if os.path.isfile(src):
@@ -115,8 +119,9 @@ def main():
         f.write(summary)
     print(u"  生成: iteration-summary.md")
 
-    # 清理运行时残留（plan-context.md 来自模板，claude-progress.txt 已迁移到 JSONL）
-    for fname in ["plan-context.md", "claude-progress.txt"]:
+    # 清理运行时残留（plan-context.md 和 domain-lexicon.md 来自模板，
+    # claude-progress.txt 已迁移到 JSONL）
+    for fname in ["plan-context.md", "domain-lexicon.md", "claude-progress.txt"]:
         fpath = os.path.join(harness_dir, fname)
         if os.path.isfile(fpath):
             os.remove(fpath)
