@@ -13,6 +13,7 @@
     "./commands/harness-code-plan.md",
     "./commands/harness-code-review.md",
     "./commands/harness-code-handoff.md",
-    "./commands/harness-code-continue.md"
+    "./commands/harness-code-continue.md",
+    "./commands/harness-code-archive.md"
   ]
 }

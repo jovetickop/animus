@@ -187,6 +187,7 @@ def main():
         "id", "name", "status", "depends_on", "priority",
         "last_error", "updated_at"
     ]
+    valid_statuses = {"pending", "in_progress", "passed", "failed", "completed"}
 
     all_ids = set()
     in_progress_count = 0
@@ -231,6 +232,10 @@ def main():
             except (TypeError, ValueError):
                 errors.append(u"[ERROR] {0}: priority 必须为整数，当前值: {1}".format(task_id, priority))
 
+        # 检查 description（可选，如果存在则应为字符串）
+        desc = task.get("description")
+        if desc is not None and not isinstance(desc, (str, type(None))):
+            errors.append(u"[ERROR] {0}: description 应为字符串类型".format(task_id))
 
     # ============================================================
     # 检查 depends_on 引用

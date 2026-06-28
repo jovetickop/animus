@@ -218,9 +218,7 @@ Write-Step "写入 features.json..."
 
 $FeaturesFile = Join-Path $StateDir "features.json"
 
-$Features = @{
-    "tasks" = @()
-}
+$Features = @()
 
 if (-not (Test-Path $FeaturesFile)) {
     $Features | ConvertTo-Json -Depth 3 | Set-Content $FeaturesFile -Encoding UTF8

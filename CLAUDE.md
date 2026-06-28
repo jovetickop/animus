@@ -13,6 +13,10 @@
 目录列表用 `rtk ls`，差异查看用 `rtk git diff`。
 仅在需要完整精确内容时使用 Read/Grep/Glob 内置工具。
 
+## Rule: Review after command（执行后审查）
+每个斜杠命令执行完后，必须用 code-reviewer agent 审查确认：
+改了哪些文件、是否改对、是否有遗漏或错误。审查通过后才能继续下一步。
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## 仓库性质

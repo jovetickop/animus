@@ -4,9 +4,14 @@
 
 CONFIG_FILE=".claude/harness-cc/project-config.json"
 
-# 检查开关
-if [ -f "$CONFIG_FILE" ] && grep -q '"auto-update-plugin": *false' "$CONFIG_FILE" 2>/dev/null; then
-    exit 0
+# 检查开关（用 Python 解析 JSON，避免 grep 误匹配）
+if [ -f "$CONFIG_FILE" ]; then
+  python -c "
+import json, sys
+with open('$CONFIG_FILE') as f:
+    cfg = json.load(f)
+sys.exit(0 if not cfg.get('auto-update-plugin', True) else 1)
+" 2>/dev/null && exit 0
 fi
 
 echo "=== 更新插件 harness-cc ==="
