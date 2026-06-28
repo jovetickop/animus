@@ -1,4 +1,4 @@
-﻿# oracle-runner.ps1 — Oracle 验证模块
+# oracle-runner.ps1 — Oracle 验证模块
 # 执行构建/测试命令，验证状态机状态转换是否被批准
 
 function Invoke-OracleVerify {
@@ -39,7 +39,7 @@ function Invoke-OracleVerify {
     $verifyLog = @("", "--- Oracle 验证门 ---", "时间: $verifyTimestamp", "任务: $TaskId -> passed", "验证命令: $verifyCommand", "退出码: $verifyExitCode")
     if (-not [string]::IsNullOrWhiteSpace($verifyOutput)) { $verifyLog += "标准输出:"; $verifyLog += $verifyOutput.Trim() }
     if (-not [string]::IsNullOrWhiteSpace($verifyError)) { $verifyLog += "错误输出:"; $verifyLog += $verifyError.Trim() }
-    Add-Content -LiteralPath $ProgressPath -Value (($verifyLog -join "`r`n"))
+    Add-Content -LiteralPath $ProgressPath -Encoding UTF8 -Value (($verifyLog -join "`r`n"))
 
     if ($verifyExitCode -ne 0) {
         Write-Host "[Oracle 验证] 未通过 (exit code: $verifyExitCode)，状态将被设为 failed"

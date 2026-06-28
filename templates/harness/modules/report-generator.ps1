@@ -50,7 +50,7 @@ function Write-TaskReport {
     $historyLines = @()
     if (Test-Path -LiteralPath $ProgressPath) {
         $taskPattern = "\|\s*$([regex]::Escape($taskId))\s*\|"
-        $historyLines = @(Get-Content -LiteralPath $ProgressPath | Where-Object { $_ -match $taskPattern })
+        $historyLines = @(Get-Content -LiteralPath $ProgressPath -Encoding UTF8 | Where-Object { $_ -match $taskPattern })
     }
     if ($historyLines.Count -eq 0) { $historyLines = @("暂无任务历史记录") }
 

@@ -36,9 +36,13 @@ def can_run(task, status_by_id):
 
 
 def read_json(path):
-    """读取 JSON 文件，兼容 Python 2/3。"""
+    """读取 JSON 文件，兼容 Python 2/3 以及 UTF-8 BOM。"""
     with open(path, "rb") as f:
-        return json.load(f)
+        raw = f.read()
+    # 处理可能存在的 UTF-8 BOM（PowerShell 5.1 的 -Encoding UTF8 会添加 BOM）
+    if raw.startswith(b'\xef\xbb\xbf'):
+        raw = raw[3:]
+    return json.loads(raw)
 
 
 def get_tasks(data):

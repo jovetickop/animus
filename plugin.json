@@ -1,0 +1,31 @@
+{
+  "name": "harness-cc",
+  "description": "状态机驱动的编码工作流引擎，支持 C++/Qt、Python、Node.js、Rust、Go 等多语言项目。提供任务编排、代码审查、测试验证等完整工作流。",
+  "version": "1.0.0",
+  "min_claude_version": "1.0.0",
+  "commands": [
+    {
+      "name": "harness-code-setup",
+      "description": "检测项目类型并为目标项目创建 .claude/harness-cc/ 运行时目录",
+      "path": "commands/harness-code-setup.md"
+    },
+    {
+      "name": "harness-code-plan",
+      "description": "将 PRD 或方案文档转为 harness 任务列表，并更新 .claude/harness-cc/features.json",
+      "path": "commands/harness-code-plan.md"
+    },
+    {
+      "name": "harness-code-review",
+      "description": "执行通用检查 + 按项目类型的专项验收检查",
+      "path": "commands/harness-code-review.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "harness-cc",
+      "description": "复杂任务的编码工作流技能。输入 PRD+方案文档，自动拆解为可执行任务列表，按状态机逐个推进，验收后提交。支持 C++/Qt、Python、Node.js、Rust、Go。",
+      "path": "SKILL.md"
+    }
+  ],
+  "hooks": "hooks/hooks.json"
+}

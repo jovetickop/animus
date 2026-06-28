@@ -50,7 +50,7 @@ $features | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $FeaturesPath -E
 
 $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
 $logLine = "$timestamp | $TaskId | $currentStatus -> $finalStatus | $finalMessage"
-Add-Content -LiteralPath $ProgressPath -Value $logLine
+Add-Content -LiteralPath $ProgressPath -Encoding UTF8 -Value $logLine
 
 $reportPath = Write-TaskReport -Task $targetTask -ProjectRoot $ProjectRoot -ProgressPath $ProgressPath -CurrentStatus $currentStatus -NewStatus $finalStatus -LogMessage $finalMessage
 

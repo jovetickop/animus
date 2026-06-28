@@ -9,7 +9,7 @@
 5. 执行 `CLAUDE.md` 里的构建命令和当前任务的 `test_command`。
 6. 构建或测试失败时，记录失败原因并将任务标记为 `failed`。
 7. 构建和测试都通过时，将任务标记为 `passed`，并写入验证结果。
-8. 按 `.claude/rules/git-workflow.md` 执行 `git add`、`git commit`、`git push`；若无 Git 管理则跳过并记录原因。
+8. 按 `$SKILL_DIR/rules/git-workflow.md` 执行 `git add`、`git commit`、`git push`；若无 Git 管理则跳过并记录原因。
 9. 如需重试失败任务，先将其从 `failed` 改为 `in_progress`，再继续执行。
 10. 重复步骤 1，直到没有 `in_progress` 且没有 `pending` 任务。
 
