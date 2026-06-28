@@ -1,5 +1,5 @@
 #!/bin/bash
-# PreCompact 钩子 — 上下文压缩前刷新进度到 claude-progress.txt
+# PreCompact 钩子 — 上下文压缩前刷新进度到 task_plan.md
 # 追加时间戳 [COMPACT] 标记行，并输出 features.json 任务完成摘要
 # 始终以 exit 0 退出，不影响压缩流程
 
@@ -48,6 +48,35 @@ if [ -f "$features_path" ] && command -v jq >/dev/null 2>&1; then
             timestamp=$(date "+%Y-%m-%d %H:%M:%S")
             echo "{\"type\":\"compact\",\"timestamp\":\"$timestamp\",\"reason\":\"context_window_reached\",\"summary\":\"$stats\"}" >> "$history_path"
         fi
+    fi
+fi
+
+# 4) 自动同步 features.json → task_plan.md
+task_plan_path="$project_root/.claude/harness-cc/task_plan.md"
+if [ -f "$task_plan_path" ]; then
+    modified=false
+    # 通过 python 解析 JSON 获取已完成任务 id（兼容 initial_tasks/tasks）
+    for task in $(python -c "
+import json, sys
+with open('$features_path', 'r') as f:
+    data = json.load(f)
+tasks = data.get('initial_tasks', data.get('tasks', []))
+for t in tasks:
+    if t.get('status') in ('passed', 'completed'):
+        print(t['id'])
+" 2>/dev/null); do
+        # 在当前 task_plan 中查找 [ ] Txxx 并替换为 [x]
+        if grep -q "\[ \].*${task}" "$task_plan_path" 2>/dev/null; then
+            if sed -i "s/\[ \]\(.*${task}\)/[x]\1/" "$task_plan_path" 2>/dev/null; then
+                modified=true
+            fi
+        fi
+    done
+    if [ "$modified" = true ]; then
+        # 记录 sync 事件到 JSONL
+        sync_record="{\"type\":\"sync\",\"timestamp\":\"$(date '+%Y-%m-%dT%H:%M:%S')\",\"action\":\"task_plan_checkbox_auto_synced\"}"
+        echo "---" >> "$history_path"
+        echo "$sync_record" >> "$history_path"
     fi
 fi
 

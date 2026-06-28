@@ -2,7 +2,7 @@
 
 只按下面流程执行。
 
-1. 读取 `.claude/harness-cc/features.json`，优先选择 `in_progress` 任务；若不存在，从 `pending` 中选择“依赖已满足且 `priority` 最大”的任务。
+1. 读取 `.claude/harness-cc/features.json` 和 `.claude/harness-cc/task_plan.md`，优先选择 `in_progress` 任务；若不存在，从 `pending` 中选择”依赖已满足且 `priority` 最大”的任务。
 2. 若任务是 `pending`，将其标记为 `in_progress`；若已是 `in_progress`，直接续做并写入进度日志。
 3. 只实现当前任务，不跨任务修改
 4. 如果当前任务支持多智能体/Teams执行，请自动进行

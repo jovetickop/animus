@@ -271,7 +271,7 @@ harness-cc/                              ← 仓库根目录
 │   └── tdd-workflow/SKILL.md             ← TDD 工作流指南
 │
 └── templates/                            ← 安装时使用的模板
-    ├── harness/                          ← 状态机运行时引擎（安装时复制到 .claude/harness-cc/）
+    ├── harness/                          ← 状态机脚本 + 状态文件（安装时复制到 .claude/harness-cc/）
     │   ├── update-progress.ps1           ← 状态流转主入口（薄编排器，59 行）
     │   ├── modules/                      ← 5 个领域模块
     │   │   ├── validate-transition.ps1   ← 状态机转换校验
@@ -284,6 +284,9 @@ harness-cc/                              ← 仓库根目录
     │   ├── init.ps1                      ← 首次初始化
     │   ├── show-status.py                ← 状态概览
     │   ├── project-config.json           ← 项目类型配置
+    │   ├── task_plan.md                  ← 任务子步骤追踪
+    │   ├── findings.md                   ← 知识积累
+    │   ├── plan-context.md               ← 规划上下文
     │   └── README.md                     ← 运行时说明
     ├── .mcp.json                         ← MCP 服务器配置模板
     └── existing_project/                 ← 已有项目参考模板

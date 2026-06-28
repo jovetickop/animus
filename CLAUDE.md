@@ -28,7 +28,7 @@ ty-qt-ai-plugin/                       仓库根（插件发布源）
 ├── scripts/                           Python 脚本（session-catchup 5问重启、format-log JSONL渲染、状态显示等）
 ├── skills/tdd-workflow/               子技能（/tdd-workflow）
 └── templates/                         安装时使用的模板
-    ├── harness/                       状态机脚本（features.json + 7 个脚本）
+    ├── harness/                       状态机脚本 + 状态文件（含 task_plan.md 子步骤追踪、findings.md 知识积累、plan-context.md 规划上下文等 10 个文件）
     ├── existing_project/              CLAUDE.md / review-checklist / cmake-adapter 模板
     ├── .clang-format                  C++ 格式化配置
     ├── .mcp.json                      MCP 服务器模板
@@ -489,7 +489,8 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 - `features.active.json` — 当前活动任务 (Token 优化分片)
 - `features.archive.json` — 已完成/失败归档
 - `harness-history.jsonl` — 统一结构化日志
-- `harness-history.jsonl` — 失败历史分析
+- `task_plan.md` — 子步骤追踪
+- `findings.md` — 知识积累
 
 ```
 

@@ -39,7 +39,7 @@ Test-TransitionValid -TargetTask $targetTask -NewStatus $Status -Tasks $tasks
 $finalStatus = $Status
 $finalMessage = $Message
 if ($Status -eq 'passed') {
-    $verifyResult = Invoke-OracleVerify -Features $features -TaskId $TaskId -ProgressPath $ProgressPath
+    $verifyResult = Invoke-OracleVerify -Features $features -TaskId $TaskId
     if ($verifyResult.Failed) { $finalStatus = 'failed'; $finalMessage = $verifyResult.Message }
 }
 
@@ -48,10 +48,6 @@ $targetTask.updated_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm
 $targetTask.last_error = if ($finalStatus -eq 'failed') { $finalMessage } else { '' }
 
 $features | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $FeaturesPath -Encoding UTF8
-
-$timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
-$logLine = "$timestamp | $TaskId | $currentStatus -> $finalStatus | $finalMessage"
-Add-Content -LiteralPath $ProgressPath -Encoding UTF8 -Value $logLine
 
 # JSONL 日志（multi-line pretty 格式）
 $historyVerification = if ($Status -eq 'passed' -and $verifyResult) { @{ exit_code = if ($verifyResult.Failed) { 1 } else { 0 } } } else { $null }
@@ -62,4 +58,4 @@ $reportPath = Write-TaskReport -Task $targetTask -ProjectRoot $ProjectRoot -Prog
 Write-Host ("已将 " + ($TaskId) + " 从 " + ($currentStatus) + " 更新为 " + ($finalStatus))
 Write-Host ("已输出任务报告: " + ($reportPath))
 
-if ($AutoPush) { Invoke-GitCommit -FeaturesPath $FeaturesPath -ProgressPath $ProgressPath -ReportPath $reportPath -TaskId $TaskId -Status $finalStatus }
+if ($AutoPush) { Invoke-GitCommit -FeaturesPath $FeaturesPath -ReportPath $reportPath -TaskId $TaskId -Status $finalStatus }

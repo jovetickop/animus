@@ -60,6 +60,8 @@ python "${CLAUDE_PLUGIN_ROOT}/scripts/format-log.py" --project-dir . --recent 20
 
 - `.claude/harness-cc/features.json`
 - `.claude/harness-cc/harness-history.jsonl`
+- `.claude/harness-cc/task_plan.md`
+- `.claude/harness-cc/findings.md`
 - `.claude/harness-cc/docs/reports/`
 
 ## 需要人工补充的项目特有信息

@@ -7,7 +7,7 @@ $projectRoot = if ($env:CLAUDE_PROJECT_ROOT) {
     $env:CLAUDE_PROJECT_ROOT
 } else {
     # 从脚本路径 .claude/hooks/scripts/ 向上三级到项目根
-    Resolve-Path "$PSScriptRoot/../../.."
+    (Resolve-Path "$PSScriptRoot/../../..").Path
 }
 
 # 统一路径查找：features.json 固定在 .claude/harness-cc/
@@ -58,7 +58,7 @@ if (Test-Path -LiteralPath $featuresPath) {
                 try {
                     $compactRecord = @{
                         type = "compact"
-                        timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+                        timestamp = (Get-Date -Format "yyyy-MM-ddTHH:mm:ss")
                         reason = "context_window_reached"
                         summary = "$doneCount/$totalCount 任务完成"
                     }
@@ -76,8 +76,9 @@ if (Test-Path -LiteralPath $featuresPath) {
                     foreach ($task in $tasks) {
                         if ($task.status -eq "passed" -or $task.status -eq "completed") {
                             $taskId = [string]$task.id
+                            $escapedId = [regex]::Escape($taskId)
                             # 查找 [ ] Txxx 样式的 checkbox 并标记为 [x]
-                            $pattern = "\[ \] ([^\]]*${taskId}[^\]]*)"
+                            $pattern = "\[ \] ([^\]]*${escapedId}[^\]]*)"
                             $newContent = $planContent -replace $pattern, '[x] $1'
                             if ($newContent -ne $planContent) {
                                 $planContent = $newContent
@@ -90,7 +91,7 @@ if (Test-Path -LiteralPath $featuresPath) {
                         # 记录 sync 事件
                         $syncRecord = @{
                             type = "sync"
-                            timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+                            timestamp = (Get-Date -Format "yyyy-MM-ddTHH:mm:ss")
                             action = "task_plan_checkbox_auto_synced"
                         }
                         "---" | Add-Content -LiteralPath $historyPath -Encoding UTF8

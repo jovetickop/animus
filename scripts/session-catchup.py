@@ -16,7 +16,14 @@ import io
 import json
 import os
 import sys
+import argparse
 import datetime
+
+
+# ---------- 模块级常量 ----------
+_RECENT_FAILED_COUNT = 3      # get_recent_failed_events 尾部取 3 条
+_FINDINGS_PREVIEW_LINES = 5   # print_q3 中 findings.md 预览行数
+_DEFAULT_PRIORITY = 999       # print_q5 中无优先级任务的默认值
 
 
 def _ensure_utf8():
@@ -87,7 +94,7 @@ def read_jsonl(path):
         return None
     events = []
     try:
-        with io.open(path, "r", encoding="utf-8") as f:
+        with io.open(path, "r", encoding="utf-8-sig") as f:
             content = f.read()
             blocks = content.split('---\n')
             for block in blocks:
@@ -136,8 +143,8 @@ def get_failed(tasks):
 
 def get_recent_failed_events(events):
     """提取最近的 3 条 failed 事件（从事件列表尾部取）。"""
-    failed = [e for e in events if e.get("status") == "failed"]
-    return failed[-3:]
+    failed = [e for e in events if e.get("to_status") == "failed"]
+    return failed[-_RECENT_FAILED_COUNT:]
 
 
 def get_file_mtime(path):
@@ -237,7 +244,7 @@ def print_q3(events, findings_content):
         last_section = sections[-1].strip() if sections else ""
         if last_section:
             print(u"  错误经验（来自 findings.md）:")
-            for line in last_section.split("\n")[:5]:
+            for line in last_section.split("\n")[:_FINDINGS_PREVIEW_LINES]:
                 print(u"    {0}".format(line.strip()))
 
 
@@ -276,7 +283,7 @@ def print_q5(tasks):
                 t.get("id", "?"), t.get("name", t.get("id", ""))
             ))
     elif pending:
-        pending_sorted = sorted(pending, key=lambda t: t.get("priority", 999))
+        pending_sorted = sorted(pending, key=lambda t: t.get("priority", _DEFAULT_PRIORITY))
         next_task = pending_sorted[0]
         print(u"  建议: 开始最高优先级的待处理任务（{0} — {1}，优先级 {2}）。".format(
             next_task.get("id", "?"), next_task.get("name", ""),
@@ -305,16 +312,10 @@ def print_header():
 
 def main():
     """主函数：解析参数、读取状态文件、输出 5 问恢复检查报告。"""
-    # 解析命令行参数
-    project_dir = os.getcwd()
-    args = sys.argv[1:]
-    i = 0
-    while i < len(args):
-        if args[i] == "--project-dir" and i + 1 < len(args):
-            project_dir = args[i + 1]
-            i += 2
-        else:
-            i += 1
+    parser = argparse.ArgumentParser(description="5 问恢复检查")
+    parser.add_argument("--project-dir", default=".", help="项目根目录，默认当前目录")
+    args = parser.parse_args()
+    project_dir = args.project_dir
 
     # 拼装 .claude/harness-cc/ 路径
     harness_dir = os.path.join(project_dir, ".claude", "harness-cc")

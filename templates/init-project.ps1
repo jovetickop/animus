@@ -229,29 +229,7 @@ if (-not (Test-Path $FeaturesFile)) {
 }
 
 # ============================================================
-# 步骤 8: 写入 claude-progress.txt
-# ============================================================
-Write-Step "写入 claude-progress.txt..."
-
-$ProgressFile = Join-Path $StateDir "claude-progress.txt"
-
-if (-not (Test-Path $ProgressFile)) {
-    $ProgressContent = @"
-# harness-cc 进度日志
-创建时间: $Today
-项目类型: $ProjectType
-技能目录: $SkillRoot
-================================================
-
-"@
-    Set-Content -Path $ProgressFile -Value $ProgressContent -Encoding UTF8
-    Write-Info "  claude-progress.txt 已创建"
-} else {
-    Write-Info "  claude-progress.txt 已存在，跳过"
-}
-
-# ============================================================
-# 步骤 8b: 写入 harness-history.jsonl
+# 步骤 8: 写入 harness-history.jsonl
 # ============================================================
 Write-Step "写入 harness-history.jsonl..."
 
@@ -275,7 +253,6 @@ Write-Host ""
 Write-Host "已创建:" -ForegroundColor Green
 Write-Host "  - $StateDir\README.md"
 Write-Host "  - $StateDir\features.json"
-Write-Host "  - $StateDir\claude-progress.txt"
 Write-Host "  - $StateDir\harness-history.jsonl"
 Write-Host "  - $StateDir\project-config.json"
 Write-Host "  - $StateDir\docs\reports\"

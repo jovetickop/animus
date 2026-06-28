@@ -17,6 +17,7 @@ import io
 import json
 import os
 import sys
+import datetime
 
 # ---------- 编码兼容层 ----------
 
@@ -41,6 +42,10 @@ else:
             pass
 
 
+# ---------- 模块级常量 ----------
+_TS_MARKDOWN_LEN = 16  # format_timestamp_markdown 截断到 "YYYY-MM-DD HH:MM"
+
+
 # ---------- JSONL 读取 ----------
 
 def read_jsonl(filepath):
@@ -51,7 +56,7 @@ def read_jsonl(filepath):
     events = []
 
     # 尝试多种编码读取
-    encodings = ["utf-8"]
+    encodings = ["utf-8-sig", "utf-8"]
     file_content = None
     for enc in encodings:
         try:
@@ -90,7 +95,6 @@ def format_timestamp(ts):
     if ts is None:
         return ""
     if isinstance(ts, (int, float)):
-        import datetime
         try:
             dt = datetime.datetime.fromtimestamp(ts)
             return dt.strftime("%Y-%m-%d %H:%M:%S")
@@ -106,7 +110,7 @@ def format_timestamp_markdown(ts):
     """格式化时间戳为 Markdown 表格用：截断到分。"""
     s = format_timestamp(ts)
     if len(s) >= 16:
-        return s[:16]
+        return s[:_TS_MARKDOWN_LEN]
     return s
 
 
@@ -133,8 +137,6 @@ def _format_event(event, print_row):
     elif event_type == "note":
         print_row(ts, event_type, task_id, "", message)
     elif event_type == "subtask_update":
-        print_row(ts, event_type, task_id, "", message)
-    elif event_type == "sync":
         print_row(ts, event_type, task_id, "", message)
     else:
         print_row(ts, event_type, task_id, "", message)

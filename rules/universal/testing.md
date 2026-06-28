@@ -34,4 +34,4 @@
 - 相关测试通过
 - 结果已经追加到 `.claude/harness-cc/harness-history.jsonl`
 
-如果构建或测试失败，先把失败摘要写入 JSONL 日志，再把任务回退到 `pending`。
+如果构建或测试失败，先把失败摘要写入 JSONL 日志，再把任务标记为 `failed`。

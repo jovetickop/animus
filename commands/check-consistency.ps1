@@ -23,7 +23,8 @@ try {
 
 $taskStatus = @{}
 if ($data -isnot [array]) {
-    $data = $data.tasks
+    if ($data.PSObject.Properties['initial_tasks']) { $data = $data.initial_tasks }
+    elseif ($data.PSObject.Properties['tasks']) { $data = $data.tasks }
 }
 foreach ($task in $data) {
     $taskStatus[$task.id] = @{
