@@ -121,7 +121,7 @@ Write-Step "写入 README.md..."
 $ReadmeFile = Join-Path $StateDir "README.md"
 
 $ReadmeContent = @"
-# CodeHarness (harness-cc)
+# harness-cc
 
 ## 目录位置
 
