@@ -54,7 +54,7 @@ python "${CLAUDE_PLUGIN_ROOT}/scripts/format-log.py" --project-dir . --recent 20
 - 每轮只推进一个任务
 - 每个任务结束都要构建和测试
 - 每次结果都追加到 `.claude/harness-cc/harness-history.jsonl`
-- 每次状态流转后自动更新 `.claude/harness-cc/docs/reports/<任务编号>-任务描述.md`
+- 每次状态流转后自动更新 `.claude/harness-cc/docs/<任务编号>-任务描述.md`
 
 ## 必须长期维护的文件
 
@@ -65,7 +65,7 @@ python "${CLAUDE_PLUGIN_ROOT}/scripts/format-log.py" --project-dir . --recent 20
 - `.claude/harness-cc/task_plan.md`
 - `.claude/harness-cc/findings.md`
 - `.claude/harness-cc/adr/`
-- `.claude/harness-cc/docs/reports/`
+- `.claude/harness-cc/docs/`
 
 ## 需要人工补充的项目特有信息
 

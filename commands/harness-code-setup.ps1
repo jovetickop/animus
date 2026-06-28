@@ -41,7 +41,7 @@ Write-Host "[harness] Detected project type: $projectType"
 
 # === 2. 计算路径 ===
 $StateDir = Join-Path $ProjectDir ".claude\harness-cc"
-$ReportsDir = Join-Path $StateDir "docs\reports"
+$ReportsDir = Join-Path $StateDir "docs"
 
 Write-Progress -Activity "harness-cc Setup" -Status "Creating directories" -PercentComplete 15
 

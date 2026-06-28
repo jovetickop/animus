@@ -23,7 +23,6 @@ $modulesDir = Join-Path $PSScriptRoot 'modules'
 
 $ClaudeRoot = Join-Path $ProjectRoot '.claude'
 $FeaturesPath = Join-Path $ClaudeRoot 'harness-cc\features.json'
-$ProgressPath = Join-Path $ClaudeRoot 'harness-cc\claude-progress.txt'
 $HistoryPath = Join-Path $ClaudeRoot 'harness-cc\harness-history.jsonl'
 
 $features = Read-FeaturesJson -FeaturesPath $FeaturesPath
@@ -39,7 +38,7 @@ Test-TransitionValid -TargetTask $targetTask -NewStatus $Status -Tasks $tasks
 $finalStatus = $Status
 $finalMessage = $Message
 if ($Status -eq 'passed') {
-    $verifyResult = Invoke-OracleVerify -Features $features -TaskId $TaskId -ProgressPath $ProgressPath -ProjectRoot $ProjectRoot
+    $verifyResult = Invoke-OracleVerify -Features $features -TaskId $TaskId -ProjectRoot $ProjectRoot
     if ($verifyResult.Failed) { $finalStatus = 'failed'; $finalMessage = $verifyResult.Message }
 }
 
@@ -53,7 +52,7 @@ $features | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $FeaturesPath -E
 $historyVerification = if ($Status -eq 'passed' -and $verifyResult) { @{ exit_code = if ($verifyResult.Failed) { 1 } else { 0 } } } else { $null }
 Append-HistoryJsonl -HistoryPath $HistoryPath -TaskId $TaskId -FromStatus $currentStatus -ToStatus $finalStatus -Message $finalMessage -Verification $historyVerification
 
-$reportPath = Write-TaskReport -Task $targetTask -ProjectRoot $ProjectRoot -ProgressPath $ProgressPath -CurrentStatus $currentStatus -NewStatus $finalStatus -LogMessage $finalMessage
+$reportPath = Write-TaskReport -Task $targetTask -ProjectRoot $ProjectRoot -CurrentStatus $currentStatus -NewStatus $finalStatus -LogMessage $finalMessage
 
 Write-Host ("已将 " + ($TaskId) + " 从 " + ($currentStatus) + " 更新为 " + ($finalStatus))
 Write-Host ("已输出任务报告: " + ($reportPath))

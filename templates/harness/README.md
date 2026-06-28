@@ -18,7 +18,7 @@
 - 没有构建和测试结果，禁止标记 `passed`。
 - `moc`/`uic`/`rcc` 失败等价于任务失败。
 - 每轮都必须追加日志到 `.claude/harness-cc/harness-history.jsonl`。
-- 每次任务状态流转后，必须自动更新 `.claude/harness-cc/docs/reports/<任务编号>-任务描述.md`，沉淀“功能描述 + 最新验证结果”。
+- 每次任务状态流转后，必须自动更新 `.claude/harness-cc/docs/<任务编号>-任务描述.md`，沉淀“功能描述 + 最新验证结果”。
 - 失败任务默认保持 `failed`，不要自动回退到 `pending`。
 - `depends_on` 只写直接依赖；依赖任务必须先 `passed`，当前任务才能进入 `in_progress`。
 - `updated_at` 与 `last_error` 由 `update-progress.ps1` 自动维护，不要手工批量改写。
@@ -39,7 +39,7 @@
 - Claude Code 能明确找到当前任务
 - 每个任务都有可执行的验证命令
 - 构建失败时能回写进度日志
-- 每次状态流转后自动生成/更新 `.claude/harness-cc/docs/reports/<任务编号>-描述.md`
+- 每次状态流转后自动生成/更新 `.claude/harness-cc/docs/<任务编号>-描述.md`
 - 现有源码目录和架构不被模板误改
 
 ---

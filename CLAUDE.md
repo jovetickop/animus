@@ -23,7 +23,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 本仓库是 **harness-cc 插件的源码发布仓库**，不是使用该插件的目标工程。用户通过 `/plugin marketplace add` + `/plugin install` 或手动克隆后 `/plugin install <path>` 安装，插件目录通过 `${CLAUDE_PLUGIN_ROOT}` 环境变量解析。仓库根目录包含插件所有源代码（agents/, commands/, rules/, hooks/, templates/, scripts/, skills/, docs/），没有 `CMakeLists.txt` / `Cargo.toml` / `package.json` 等业务工程文件。
 
-`.claude-plugin/plugin.json` 是插件入口，6 个斜杠命令（`/harness-code-setup`、`/harness-code-plan`、`/harness-code-review`、`/harness-code-handoff`、`/harness-code-continue`、`/harness-code-archive`）是主要工作流入口。`templates/init-project.ps1` 是手动安装入口（用户执行后为目标项目创建 `.claude/harness-cc/` 运行时目录）。
+`.claude-plugin/plugin.json` 是插件入口，7 个斜杠命令（`/harness-code-setup`、`/harness-code-plan`、`/harness-code-review`、`/harness-code-handoff`、`/harness-code-continue`、`/harness-code-archive`、`/harness-code-debug`）是主要工作流入口。`templates/init-project.ps1` 是手动安装入口（用户执行后为目标项目创建 `.claude/harness-cc/` 运行时目录）。
 
 ## 仓库根结构
 
@@ -38,7 +38,7 @@ harness-cc/                             仓库根（插件发布源）
 │   ├── qt/ / cpp-cmake/               C++ 专项
 │   ├── python/ / node/ / rust/ / go/   各语言专项
 │   └── frontend/                      前端专项
-├── commands/                          6 个斜杠命令 + 验证脚本
+├── commands/                          7 个斜杠命令 + 验证脚本
 ├── docs/                              开发文档（编码策略、Hook 调试、模板说明）
 ├── hooks/                             PostToolUse 自动 clang-format 等运行时钩子
 ├── rules/                             8 个编码规范文件（按语言分组）
@@ -56,9 +56,10 @@ harness-cc/                             仓库根（插件发布源）
 插件按"插件清单 → 编排命令 → 执行 Agent + 规则"组织：
 
 1. **插件清单** (`.claude-plugin/plugin.json`)：声明插件元信息、3 个斜杠命令入口和自动发现组件。
-2. **编排命令** (`commands/`)：6 个斜杠命令驱动工作流
+2. **编排命令** (`commands/`)：7 个斜杠命令驱动工作流
    - `harness-code-setup`：检测项目类型（CMake/Qt/Cargo/npm/pip）+ 创建 `.claude/harness-cc/` 运行时目录
    - `harness-code-plan`：PRD+方案 → `features.json` 任务列表
+   - `harness-code-debug`：系统化调试——根因调查→模式分析→假设验证→修复规划→自动审查
    - `harness-code-review`：通用 + 语言专项验收
    - `harness-code-handoff`：保存 session 上下文快照到 handoff.json
    - `harness-code-continue`：从 handoff.json 恢复 session 上下文
@@ -90,7 +91,7 @@ harness-cc/                             仓库根（插件发布源）
 - 同时只能有一个 `in_progress` 任务（脚本会拒绝第二个）。
 - `in_progress → passed` 必须有构建/测试证据，否则违反工作流硬规则。
 - `depends_on` 必须是直接前置任务 ID；前置任务未 `passed` 时不能进入 `in_progress`。
-- 每次状态流转自动追加 `.claude/harness-cc/harness-history.jsonl` 一行 + 生成 `.claude/harness-cc/docs/reports/<TaskId>-<name>.md` 报告。
+- 每次状态流转自动追加 `.claude/harness-cc/harness-history.jsonl` 一行 + 生成 `.claude/harness-cc/docs/<TaskId>-<name>.md` 报告。
 - `updated_at` / `last_error` 由脚本维护，不要手工批量改写。
 - 状态非法流转脚本会 `exit 1` 并打印原因——这是契约，不应放宽。
 
@@ -460,6 +461,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 | `/harness-code-setup` | 项目初始化 + 类型检测 + 创建 `.claude/harness-cc/` 运行时目录 | `commands/harness-code-setup.md` |
 | `/harness-code-plan` | PRD/方案文档 -> features.json 任务列表 | `commands/harness-code-plan.md` |
 | `/harness-code-review` | 通用验收 + 语言专项验收 | `commands/harness-code-review.md` |
+| `/harness-code-debug` | 系统化调试——根因调查→模式分析→假设验证→实施修复 | `commands/harness-code-debug.md` |
 | `/harness-code-handoff` | 保存 session 上下文快照到 handoff.json | `commands/harness-code-handoff.md` |
 | `/harness-code-continue` | 从 handoff.json 恢复 session 上下文 | `commands/harness-code-continue.md` |
 | `/harness-code-archive` | 归档当前迭代，清空并开始新迭代 | `commands/harness-code-archive.md` |
@@ -586,7 +588,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 - Oracle 门控防止任务被过早标记完成
 - 状态机校验防止非法流转
 - hooks 双平台互为降级，单点失败不阻塞
-- 每次状态流转生成 `docs/reports/` 报告 + 追加 JSONL 日志
+- 每次状态流转生成 `.claude/harness-cc/docs/` 报告 + 追加 JSONL 日志
 
 ### 跨会话持久性
 

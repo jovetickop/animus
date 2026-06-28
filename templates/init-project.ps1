@@ -38,7 +38,7 @@ if (-not [System.IO.Path]::IsPathRooted($ProjectRoot)) {
 $ProjectRoot = $ProjectRoot -replace '/', '\'
 
 $StateDir  = Join-Path $ProjectRoot ".claude\harness-cc"
-$ReportsDir = Join-Path $StateDir "docs\reports"
+$ReportsDir = Join-Path $StateDir "docs"
 
 Write-Host "========================================" -ForegroundColor Magenta
 Write-Host "  harness-cc 项目初始化（精简模式）" -ForegroundColor Magenta
@@ -136,7 +136,7 @@ $ReadmeContent = @"
 ├── features.json            # 任务状态列表
 ├── harness-history.jsonl    # 结构化日志
 ├── project-config.json      # 项目配置
-└── docs\reports\            # 任务报告
+└── docs\                    # 任务报告
 ```
 
 ## 工作流命令
@@ -254,7 +254,7 @@ Write-Host "  - $StateDir\README.md"
 Write-Host "  - $StateDir\features.json"
 Write-Host "  - $StateDir\harness-history.jsonl"
 Write-Host "  - $StateDir\project-config.json"
-Write-Host "  - $StateDir\docs\reports\"
+Write-Host "  - $StateDir\docs\"
 Write-Host ""
 Write-Host "项目类型: $ProjectType" -ForegroundColor Cyan
 Write-Host "技能目录: $SkillRoot" -ForegroundColor Cyan

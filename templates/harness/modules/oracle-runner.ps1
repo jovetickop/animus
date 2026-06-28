@@ -17,7 +17,6 @@ function Invoke-OracleVerify {
     param(
         [Parameter(Mandatory = $true)][object]$Features,
         [Parameter(Mandatory = $true)][string]$TaskId,
-        [Parameter(Mandatory = $true)][string]$ProgressPath,
         [Parameter(Mandatory = $false)][string]$ProjectRoot = '.'
     )
     $verifyConfig = Get-ProjectVerifyConfig -ProjectRoot $ProjectRoot
@@ -50,7 +49,7 @@ function Invoke-OracleVerify {
     $verifyLog = @("", "--- Oracle 验证门 ---", "时间: $verifyTimestamp", "任务: $TaskId -> passed", "验证命令: $verifyCommand", "退出码: $verifyExitCode")
     if (-not [string]::IsNullOrWhiteSpace($verifyOutput)) { $verifyLog += "标准输出:"; $verifyLog += $verifyOutput.Trim() }
     if (-not [string]::IsNullOrWhiteSpace($verifyError)) { $verifyLog += "错误输出:"; $verifyLog += $verifyError.Trim() }
-    Add-Content -LiteralPath $ProgressPath -Encoding UTF8 -Value (($verifyLog -join "`r`n"))
+    # 验证日志打印到控制台，持久化由 update-progress.ps1 通过 harness-history.jsonl 完成
 
     if ($verifyExitCode -ne 0) {
         Write-Host "[Oracle 验证] 未通过 (exit code: $verifyExitCode)，状态将被设为 failed"

@@ -11,18 +11,20 @@
 /plugin install harness-cc@harness-cc
 ```
 
-安装后可用三个斜杠命令：
+安装后可用七条斜杠命令：
 
 | 命令 | 什么时候用 |
 |------|-----------|
 | `/harness-code-setup` | 首次接入：初始化目标项目的运行时状态 |
 | `/harness-code-plan` | 有新需求：PRD/方案 → 可执行任务列表 |
+| `/harness-code-debug` | 遇到 Bug：系统化调试（根因调查→分析→修复→规划→审查） |
 | `/harness-code-review` | 实现完成：通用 + 语言专项验收检查 |
 | `/harness-code-handoff` | session 结束时：保存上下文快照到 handoff.json |
 | `/harness-code-continue` | 新 session 中：从 handoff.json 恢复上下文 |
 | `/harness-code-archive` | 阶段完成时：归档当前迭代，清空并开始新迭代 |
 
 日常开发：`/harness-code-plan`（拆任务）→ 实现 → `/harness-code-review`（验收）
+调试修复：`/harness-code-debug`（根因→修复→规划→审查）
 
 ---
 

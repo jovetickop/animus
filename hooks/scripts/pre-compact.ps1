@@ -23,17 +23,9 @@ if (Test-Path -LiteralPath $oldHarnessPath) {
     Write-Host "[harness-cc] WARNING: features.json 在旧路径 .claude/harness/ (deprecated). 请迁移到 .claude/harness-cc/" -ForegroundColor Yellow
 }
 
-$progressPath = Join-Path $projectRoot ".claude" "harness-cc" "claude-progress.txt"
 $historyPath = Join-Path $projectRoot ".claude" "harness-cc" "harness-history.jsonl"
 
-# 1) 如果 claude-progress.txt 存在，追加时间戳 [COMPACT] 标记行
-if (Test-Path -LiteralPath $progressPath) {
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $marker = "[COMPACT] 上下文压缩于 $timestamp"
-    Add-Content -LiteralPath $progressPath -Value $marker -Encoding UTF8
-}
-
-# 2) 如果 features.json 存在，统计任务完成情况并输出摘要
+# 1) 如果 features.json 存在，统计任务完成情况并输出摘要
 if (Test-Path -LiteralPath $featuresPath) {
     try {
         $features = Get-Content -Raw -LiteralPath $featuresPath -Encoding UTF8 | ConvertFrom-Json

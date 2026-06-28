@@ -86,12 +86,12 @@ def main():
             shutil.copy2(src, os.path.join(iter_dir, fname))
             print(u"  归档: {}".format(fname))
 
-    # 复制 reports
-    reports_src = os.path.join(harness_dir, "docs", "reports")
-    reports_dst = os.path.join(iter_dir, "reports")
-    if os.path.isdir(reports_src):
-        shutil.copytree(reports_src, reports_dst, dirs_exist_ok=True)
-        print(u"  归档: docs/reports/")
+    # 复制 docs 目录（报告等）
+    docs_src = os.path.join(harness_dir, "docs")
+    docs_dst = os.path.join(iter_dir, "docs")
+    if os.path.isdir(docs_src):
+        shutil.copytree(docs_src, docs_dst, dirs_exist_ok=True)
+        print(u"  归档: docs/")
 
     # 生成总结
     git_stats = get_git_stats(project_dir)
@@ -105,7 +105,7 @@ def main():
 - harness-history.jsonl
 - task_plan.md
 - findings.md
-- docs/reports/
+- docs/
 
 ## Git 统计（近期变更）
 ```
@@ -119,9 +119,8 @@ def main():
         f.write(summary)
     print(u"  生成: iteration-summary.md")
 
-    # 清理运行时残留（plan-context.md 和 domain-lexicon.md 来自模板，
-    # claude-progress.txt 已迁移到 JSONL）
-    for fname in ["plan-context.md", "domain-lexicon.md", "claude-progress.txt"]:
+    # 清理运行时残留（以下文件归档后删除运行时副本）
+    for fname in ["plan-context.md", "domain-lexicon.md", "feature-detail.md"]:
         fpath = os.path.join(harness_dir, fname)
         if os.path.isfile(fpath):
             os.remove(fpath)

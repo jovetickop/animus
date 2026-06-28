@@ -1,5 +1,5 @@
 ﻿# report-generator.ps1 — 报告生成模块
-# 生成 Markdown 格式的任务报告，存储到 .claude/harness-cc/docs/reports/ 目录
+# 生成 Markdown 格式的任务报告，存储到 .claude/harness-cc/docs/ 目录
 
 function Convert-ToSafeFileName {
     param([Parameter(Mandatory = $true)][string]$Name)
@@ -14,12 +14,11 @@ function Write-TaskReport {
     param(
         [Parameter(Mandatory = $true)][object]$Task,
         [Parameter(Mandatory = $true)][string]$ProjectRoot,
-        [Parameter(Mandatory = $true)][string]$ProgressPath,
         [Parameter(Mandatory = $true)][string]$CurrentStatus,
         [Parameter(Mandatory = $true)][string]$NewStatus,
         [Parameter(Mandatory = $true)][string]$LogMessage
     )
-    $reportsDir = Join-Path $ProjectRoot ".claude\harness-cc\docs\reports"
+    $reportsDir = Join-Path $ProjectRoot ".claude\harness-cc\docs"
     New-Item -ItemType Directory -Force -Path $reportsDir | Out-Null
 
     $taskId = [string]$Task.id
@@ -47,12 +46,7 @@ function Write-TaskReport {
         default { "等待执行" }
     }
 
-    $historyLines = @()
-    if (Test-Path -LiteralPath $ProgressPath) {
-        $taskPattern = "\|\s*$([regex]::Escape($taskId))\s*\|"
-        $historyLines = @(Get-Content -LiteralPath $ProgressPath -Encoding UTF8 | Where-Object { $_ -match $taskPattern })
-    }
-    if ($historyLines.Count -eq 0) { $historyLines = @("暂无任务历史记录") }
+    $historyLines = @("暂无任务历史记录（已迁移到 JSONL）")
 
     $criteriaSection = ($acceptanceCriteria | ForEach-Object { "- $_" }) -join "`r`n"
     $historySection = ($historyLines | ForEach-Object { "- $_" }) -join "`r`n"
@@ -81,7 +75,7 @@ $criteriaSection
 - 说明：$displayMessage
 - 最近失败原因：$lastError
 
-## 过程记录（claude-progress）
+## 任务历史（已迁移到 JSONL）
 $historySection
 "@
 

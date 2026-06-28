@@ -258,7 +258,7 @@ def check_stall(history_path, task_id):
     return fail_count >= 3
 
 
-def write_report(reports_dir, task, project_root, progress_path, current_status, new_status, log_message):
+def write_report(reports_dir, task, project_root, current_status, new_status, log_message):
     """生成任务报告 Markdown 文件"""
     if not os.path.exists(reports_dir):
         os.makedirs(reports_dir)
@@ -283,18 +283,8 @@ def write_report(reports_dir, task, project_root, progress_path, current_status,
         criteria_list = ["- (无)"]
     criteria_section = "\n".join(criteria_list)
 
-    # 历史记录
-    history_lines = []
-    if os.path.exists(progress_path):
-        task_pattern = re.escape(task_id)
-        with open(progress_path, "rb") as f:
-            for raw_line in f:
-                line = raw_line.decode("utf-8").rstrip("\r\n")
-                if re.search(r'\|\s*' + task_pattern + r'\s*\|', line):
-                    history_lines.append("- " + line)
-    if not history_lines:
-        history_lines.append("- (无历史记录)")
-    history_section = "\n".join(history_lines)
+    # 历史记录（已迁移到 JSONL）
+    history_section = "- (无历史记录)"
 
     # 状态摘要
     status_summary = {
@@ -327,7 +317,7 @@ def write_report(reports_dir, task, project_root, progress_path, current_status,
 - 说明: {11}
 - 错误信息: {12}
 
-## claude-progress.txt 历史
+## 任务历史（已迁移到 JSONL）
 {13}
 """.format(
         task_id, task_name, new_status, deps_text, priority, test_command,
@@ -364,9 +354,8 @@ def main():
     legacy_path = os.path.join(features_root, "features.json")
     features_path = active_path if os.path.exists(active_path) else legacy_path
     archive_path = os.path.join(features_root, "features.archive.json")
-    progress_path = os.path.join(features_root, "claude-progress.txt")
     history_path = os.path.join(features_root, "harness-history.jsonl")
-    reports_dir = os.path.join(project_root, "docs", "reports")
+    reports_dir = os.path.join(claude_root, "harness-cc", "docs")
 
     # ============================================================
     # 检查状态文件是否存在
@@ -457,7 +446,6 @@ def main():
                 verify_log.append(stderr_text.strip())
 
             verify_log_text = "\n".join(verify_log)
-            append_text(progress_path, verify_log_text)
 
             if exit_code != 0:
                 print(u"[Oracle 验证门] 验证失败 (exit code: {0})，转为 failed".format(exit_code))
@@ -540,14 +528,6 @@ def main():
             print(u"警告: 归档任务 {0} 失败: {1}".format(task_id, e))
 
     # ============================================================
-    # 追加日志到 claude-progress.txt
-    # ============================================================
-    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-    progress_line = "{0} | {1} | {2} -> {3} | {4}".format(
-        timestamp, task_id, current_status, new_status, log_message)
-    append_text(progress_path, progress_line)
-
-    # ============================================================
     # P1-1: 追加状态转换历史到 harness-history.jsonl
     # ============================================================
     append_history(features_root, task_id, current_status, new_status, log_message)
@@ -565,7 +545,7 @@ def main():
     report_path = ""
     if new_status in ("passed", "completed"):
         report_path = write_report(
-            reports_dir, target, project_root, progress_path,
+            reports_dir, target, project_root,
             current_status, new_status, log_message
         )
 
