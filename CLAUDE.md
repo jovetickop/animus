@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 仓库根结构
 
 ```
-ty-qt-ai-plugin/                       仓库根（插件发布源）
+harness-cc/                             仓库根（插件发布源）
 ├── .claude-plugin/plugin.json          插件清单（插件入口）
 ├── README.md                          中文使用文档
 ├── .gitignore                         排除 CLAUDE.md、本地 settings、worktrees、运行时状态
@@ -122,7 +122,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 ## Project
 
-**ty-qt-ai-plugin (harness-cc)**
+**harness-cc**
 
 `harness-cc` 是一个 Claude Code 技能插件式的编码工作流引擎。采用微内核 + 插件风格架构，核心层提供状态机引擎和运行时钩子，语言专属插件通过 Agent 定义和编码规则扩展支持 6 种语言生态（C++/Qt、C++/CMake、Python、Node.js、Rust、Go）。该仓库是插件本身的开发仓库，而非使用该插件的目标工程。
 
