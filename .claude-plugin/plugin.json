@@ -12,6 +12,5 @@
     "./commands/harness-code-setup.md",
     "./commands/harness-code-plan.md",
     "./commands/harness-code-review.md"
-  ],
-  "hooks": "./hooks/hooks.json"
+  ]
 }
