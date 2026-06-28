@@ -6,11 +6,13 @@
 $ClaudeRoot = Join-Path $ProjectRoot ".claude"
 $StateRoot = Join-Path $ClaudeRoot "harness-cc"
 $FeaturesFile = Join-Path $StateRoot "features.json"
-$ShowStatus = Join-Path $StateRoot "show-status.py"
+# show-status.py 位于插件源码目录，使用环境变量定位
+$PluginRoot = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { Split-Path $PSScriptRoot -Parent }
+$ShowStatus = Join-Path $PluginRoot "scripts" "show-status.py"
 
 # ===== 1. 运行原有的状态展示脚本 =====
 if (-not (Test-Path $ShowStatus)) {
-    Write-Host "错误: 在 $StateRoot 未找到 show-status.py"
+    Write-Host "错误: 在 $PluginRoot/scripts/ 未找到 show-status.py"
     exit 1
 }
 

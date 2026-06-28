@@ -10,3 +10,10 @@ temp_utf8.ps1
 
 node_modules/
 .claude/harness-cc/
+
+# Claude Code 会话记忆
+.remember/
+
+# Windows 系统文件
+Thumbs.db
+Desktop.ini

@@ -57,8 +57,8 @@ def main():
 
     project_root = os.path.abspath(args.project_root)
     claude_root = os.path.join(project_root, ".claude")
-    harness_root = os.path.join(claude_root, "harness")
-    state_root = os.path.join(claude_root, "state")
+    harness_root = os.path.join(claude_root, "harness-cc")
+    state_root = os.path.join(claude_root, "harness-cc")
 
     config_path = os.path.join(harness_root, "project-config.json")
     features_path = os.path.join(state_root, "features.json")

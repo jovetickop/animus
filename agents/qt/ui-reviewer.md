@@ -14,7 +14,7 @@ description: 专注 Qt 桌面界面的可用性与实现质量，适合审查布
 - 对话框、主窗口、侧边面板的职责边界是否合理。
 - 长耗时操作是否提供状态栏、进度条、日志或行内反馈。
 - 用户可见文案是否中性、明确、无歧义。
-- 审查时参考 `$SKILL_DIR/rules/qt/ui-architecture.md` 中的 UI 架构规范。
+- 审查时参考 `${CLAUDE_PLUGIN_ROOT}/rules/qt/ui-architecture.md` 中的 UI 架构规范。
 
 ## Qt 结合项
 

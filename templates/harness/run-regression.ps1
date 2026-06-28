@@ -35,7 +35,7 @@ if (Test-Path $ConfigPath) {
 # 回退：从 features.json 提取 test_command
 if (Test-Path $FeaturesPath) {
     $features = Get-Content -Raw -LiteralPath $FeaturesPath -Encoding UTF8 | ConvertFrom-Json
-    $firstTask = $features | Select-Object -First 1
+    $firstTask = $features.tasks | Select-Object -First 1
     $testCmd = [string]$firstTask.test_command
     if (-not [string]::IsNullOrWhiteSpace($testCmd)) {
         Write-Host "执行测试: $testCmd"

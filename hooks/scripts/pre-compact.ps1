@@ -5,8 +5,6 @@
 # 确定项目根目录（优先使用环境变量，否则从脚本路径推导）
 $projectRoot = if ($env:CLAUDE_PROJECT_ROOT) {
     $env:CLAUDE_PROJECT_ROOT
-} elseif ($env:CLAUDE_PLUGIN_ROOT) {
-    $env:CLAUDE_PLUGIN_ROOT
 } else {
     # 从脚本路径 .claude/hooks/scripts/ 向上三级到项目根
     Resolve-Path "$PSScriptRoot/../../.."

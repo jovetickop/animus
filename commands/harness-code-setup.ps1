@@ -2,7 +2,7 @@
     [Parameter(Mandatory=$true)]
     [string]$ProjectDir,
     [Parameter(Mandatory=$true)]
-    [string]$SkillDir
+    [string]$PluginRoot
 )
 
 $ErrorActionPreference = "Stop"
@@ -60,7 +60,7 @@ if (-not (Test-Path $readmePath)) {
 
 ## 目录位置
 
-- **技能安装目录**: $SkillDir
+- **技能安装目录**: $PluginRoot
 - **项目状态目录**: `.claude\harness-cc\`（本目录）
 
 ## 目录结构
@@ -78,17 +78,17 @@ if (-not (Test-Path $readmePath)) {
 
 ### 查看状态
 ```
-python "$SkillDir/scripts/show-status.py"
+python "$PluginRoot/scripts/show-status.py"
 ```
 
 ### 更新任务状态
 ```
-powershell -File "$SkillDir/templates/harness/update-progress.ps1" <TaskId> <status> "描述"
+powershell -File "$PluginRoot/templates/harness/update-progress.ps1" <TaskId> <status> "描述"
 ```
 
 ### 运行回归测试
 ```
-powershell -File "$SkillDir/templates/harness/run-regression.ps1"
+powershell -File "$PluginRoot/templates/harness/run-regression.ps1"
 ```
 
 ### 状态说明
@@ -98,12 +98,12 @@ powershell -File "$SkillDir/templates/harness/run-regression.ps1"
 - `failed` - 失败
 
 ## Agent 索引
-- 通用 Agent: `$SkillDir/agents/universal/`
-- 各语言专项: `$SkillDir/agents/{lang}/`
+- 通用 Agent: `$PluginRoot/agents/universal/`
+- 各语言专项: `$PluginRoot/agents/{lang}/`
 
 ## 规则索引
-- 通用规则: `$SkillDir/rules/universal/`
-- 各语言专项: `$SkillDir/rules/{lang}/`
+- 通用规则: `$PluginRoot/rules/universal/`
+- 各语言专项: `$PluginRoot/rules/{lang}/`
 "@
     [System.IO.File]::WriteAllText($readmePath, $readmeContent)
     Write-Host "[harness]   Created README.md"
@@ -170,7 +170,7 @@ if (-not (Test-Path $progressPath)) {
  CodeHarness Progress Log
  Created: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
  Project Type: $projectType
- Skill Dir: $SkillDir
+ Plugin Root: $PluginRoot
 ========================================
 
 "@

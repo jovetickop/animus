@@ -38,4 +38,4 @@ templates/
 2. 创建 `.claude/harness-cc/` 运行时目录
 3. 从 `templates/harness/` 复制状态机脚本和初始模板
 4. 回填检测到的构建/测试命令到 `project-config.json`
-5. **不再修改目标项目的 CLAUDE.md**（Agent 通过 `$SKILL_DIR` 从技能安装目录加载）
+5. **不再修改目标项目的 CLAUDE.md**（Agent 通过 `${CLAUDE_PLUGIN_ROOT}` 从技能安装目录加载）

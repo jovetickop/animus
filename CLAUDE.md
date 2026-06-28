@@ -4,18 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 仓库性质
 
-本仓库是 **harness-cc 技能插件的源码发布仓库**，不是使用该插件的目标工程。用户克隆到 `~/.claude/skills/harness-cc` 作为全局技能使用。仓库根目录包含技能所有源代码（agents/, commands/, rules/, hooks/, templates/, scripts/, skills/, docs/），没有 `CMakeLists.txt` / `Cargo.toml` / `package.json` 等业务工程文件。
+本仓库是 **harness-cc 插件的源码发布仓库**，不是使用该插件的目标工程。用户通过 `/plugin marketplace add` + `/plugin install` 或手动克隆后 `/plugin install <path>` 安装，插件目录通过 `${CLAUDE_PLUGIN_ROOT}` 环境变量解析。仓库根目录包含插件所有源代码（agents/, commands/, rules/, hooks/, templates/, scripts/, skills/, docs/），没有 `CMakeLists.txt` / `Cargo.toml` / `package.json` 等业务工程文件。
 
-`SKILL.md` 是技能入口（被 Claude Code 通过 `/harness-cc` 激活时读取），`templates/init-project.ps1` 是安装入口（用户执行后为目标项目创建 `.claude/harness-cc/` 运行时目录）。
+`.claude-plugin/plugin.json` 是插件入口，3 个斜杠命令（`/harness-code-setup`、`/harness-code-plan`、`/harness-code-review`）是主要工作流入口。`templates/init-project.ps1` 是手动安装入口（用户执行后为目标项目创建 `.claude/harness-cc/` 运行时目录）。
 
 ## 仓库根结构
 
 ```
 ty-qt-ai-plugin/                       仓库根（插件发布源）
-├── SKILL.md                           技能入口（/harness-cc 触发）
+├── .claude-plugin/plugin.json          插件清单（插件入口）
 ├── README.md                          中文使用文档
 ├── .gitignore                         排除 CLAUDE.md、本地 settings、worktrees、运行时状态
-├── agents/                            16 个 Agent 定义（按语言分组）
+├── agents/                            22 个 Agent 定义（按语言分组）
 │   ├── base/                          基础核心（被各语言 agent 引用）
 │   ├── universal/                     跨语言通用 Agent（5 个）
 │   ├── qt/ / cpp-cmake/               C++ 专项
@@ -37,14 +37,14 @@ ty-qt-ai-plugin/                       仓库根（插件发布源）
 
 ## 三层架构
 
-插件按"技能入口 → 编排命令 → 执行 Agent + 规则"组织：
+插件按"插件清单 → 编排命令 → 执行 Agent + 规则"组织：
 
-1. **技能入口** (`SKILL.md`)：被 `/harness-cc` 激活后判定项目状态。
+1. **插件清单** (`.claude-plugin/plugin.json`)：声明插件元信息、3 个斜杠命令入口和自动发现组件。
 2. **编排命令** (`commands/`)：3 个斜杠命令驱动工作流
    - `harness-code-setup`：检测项目类型（CMake/Qt/Cargo/npm/pip）+ 创建 `.claude/harness-cc/` 运行时目录
    - `harness-code-plan`：PRD+方案 → `features.json` 任务列表
    - `harness-code-review`：通用 + 语言专项验收
-3. **执行层** (`agents/` + `rules/`)：agents/commands/rules 不再复制到目标项目，直接从技能安装目录 `~/.claude/skills/harness-cc/` 加载。universal 5 个通用 + 各语言专项 Agent；rules 约束编码规范。
+3. **执行层** (`agents/` + `rules/`)：agents/commands/rules 不再复制到目标项目，直接从插件安装目录（通过 `${CLAUDE_PLUGIN_ROOT}` 环境变量解析）加载。universal 5 个通用 + 各语言专项 Agent；rules 约束编码规范。
 
 ## Agent 索引（按职责）
 
@@ -109,7 +109,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 ## 开发/提交约定
 
 - 用户全局规则要求 **不在本仓库自动 push 远程**，只本地提交，由用户自行推送。
-- 修改 harness 技能后需走"全语言回归"：至少 3 种语言（C++/Qt、Rust、Python）跑 `Setup → Plan → Implement → Review → Verify → commit` 完整链路，最后用 `skill-creator` 评估。
+- 修改 harness 技能后需走"全语言回归"：至少 3 种语言（C++/Qt、Rust、Python）跑 `Setup → Plan → Implement → Review → Verify → commit` 完整链路，最后用 `plugin-validator` 验证。
 - commit 信息遵循 `rules/universal/git-workflow.md` 的 Conventional Commits 风格。
 - 新增 Agent 描述要写明触发场景，否则 Claude Code 不会自动委派。
 
@@ -142,7 +142,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 |------|------|------|
 | PowerShell | ~45% | 核心状态机引擎、项目初始化编排、会话管理、回归测试运行器、hook 脚本 |
 | Python | ~30% | 状态显示、状态机替代实现、编码桥接（GBK/UTF-8）、多语言格式化分发、会话恢复、验证脚本 |
-| Markdown | ~20% | Agent 定义（16 个）、技能入口（SKILL.md）、编码规范规则、命令文档 |
+| Markdown | ~20% | Agent 定义（22 个）、插件清单（plugin.json）、编码规范规则、命令文档 |
 | JSON | ~5% | 配置（hooks.json、settings.local.json、.mcp.json、project-config.json、features.json） |
 | Shell (Bash) | ~3% | 跨平台 hook 降级脚本（clang-format、pre-tool-use、pre-compact、stop-check） |
 | YAML / TOML | 无 | 不在本仓库中使用 |
@@ -192,7 +192,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 | `templates/.mcp.json` | MCP 服务器连接配置模板（filesystem/git/memory/linear） |
 | `templates/harness/project-config.json` | 目标项目类型配置（frontend/backend/verify 字段） |
 | `templates/.clang-format` | C++ 格式化规则模板 |
-| `SKILL.md` | 技能入口（被 `/harness-cc` 命令触发时读取） |
+| `.claude-plugin/plugin.json` | 插件清单，声明元信息、斜杠命令和自动发现组件 |
 | `.gitignore` | 排除 CLAUDE.md、settings.local.json、worktrees、.codegraph/ |
 
 ## 构建系统
@@ -305,7 +305,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 ### Agent 定义文件命名
 
-- Agent 文件位于 `agents/{lang}/` 目录，使用蛇形命名：`task-implementer.md`、`test-engineer.md`、`code-reviewer.md`。
+- Agent 文件位于 `agents/{lang}/` 目录，使用连字符命名（kebab-case）：`task-implementer.md`、`test-engineer.md`、`code-reviewer.md`。
 - 新增 Agent 时需在 frontmatter 包含 `description` 字段——这是 Claude Code 触发 Agent 的关键匹配文本。
 
 ## 文件组织约定
@@ -394,7 +394,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 ## 代码审查标准
 
-### 审查流程 (SKILL.md / `agents/universal/code-reviewer.md`)
+### 审查流程 (`commands/harness-code-review.md` / `agents/universal/code-reviewer.md`)
 
 ### 严重级别输出
 
@@ -437,12 +437,12 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 ## 架构分层/模块划分
 
-### 1. 技能入口层
+### 1. 插件入口层
 
 | 模块 | 职责 | 文件 |
 |------|------|------|
-| 技能激活 | `/harness-cc` 命令触发，检测项目状态 | `SKILL.md` |
-| 项目状态判定 | 判断目标项目是否已初始化，引导进入不同分支 | `SKILL.md` |
+| 插件清单 | 声明插件元信息、斜杠命令和自动发现组件 | `.claude-plugin/plugin.json` |
+| 项目状态判定 | 目标项目状态判定由 `commands/harness-code-setup.md` 处理 | `commands/harness-code-setup.md` |
 
 ### 2. 编排层 (Commands)
 
@@ -535,7 +535,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 | 决策 | 理由 | 体现位置 |
 |------|------|----------|
-| 所有技能资产放在仓库根目录下 | 技能源码仓库，被克隆到 ~/.claude/skills/harness-cc 全局安装 | agents/, commands/, rules/ 等目录 |
+| 所有插件资产放在仓库根目录下 | 插件源码仓库，通过 `/plugin install` 安装，路径由 `${CLAUDE_PLUGIN_ROOT}` 解析 | agents/, commands/, rules/ 等目录 |
 | 使用 PowerShell 作为主脚本语言 | Windows 优先的用户群体，PS 5.1 兼容 | `templates/harness/` |
 | 核心脚本从 PS 迁移到 Python | 跨平台 + Python 2/3 兼容 | `scripts/` 中的 `.py` 文件 |
 | HTML 注释引用替代原生 include | Markdown 缺乏 include 机制，HTML 注释是最便携方式 | `agents/base/*.md` |

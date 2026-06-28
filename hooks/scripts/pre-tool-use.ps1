@@ -13,7 +13,7 @@ try {
 }
 
 # 仅处理 Write/Edit 操作
-$operation = $tool -or $name
+$operation = if ($tool) { $tool } else { $name }
 if (-not $operation) { exit 0 }
 if ($operation -notmatch '^(Write|Edit)$') { exit 0 }
 

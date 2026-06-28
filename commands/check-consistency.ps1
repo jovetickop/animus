@@ -35,7 +35,7 @@ foreach ($task in $data) {
 # Read claude-progress.txt
 $progressStatus = @{}
 if (Test-Path $progressPath) {
-    $lines = Get-Content $progressPath
+    $lines = Get-Content $progressPath -Encoding UTF8
     foreach ($line in $lines) {
         # Match patterns: Txxx -> status, Txxx: status, Txxx = status
         if ($line -match '(T\d{3})\s*(->|:|=)\s*(\w+)') {

@@ -8,7 +8,7 @@ description: 围绕当前 harness 任务实现最小闭环，适合处理单个 
 
 ## 工作方式
 
-- 修改代码时遵守 `$SKILL_DIR/rules/universal/coding-style.md`、`$SKILL_DIR/rules/qt/best-practices.md`、`$SKILL_DIR/rules/universal/testing.md`。
+- 修改代码时遵守 `${CLAUDE_PLUGIN_ROOT}/rules/universal/coding-style.md`、`${CLAUDE_PLUGIN_ROOT}/rules/qt/best-practices.md`、`${CLAUDE_PLUGIN_ROOT}/rules/universal/testing.md`。
 
 ## 必须检查
 

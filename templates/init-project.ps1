@@ -54,14 +54,14 @@ Write-Step "确定 harness-cc 技能目录..."
 # 脚本在 templates/ 下，技能根是父目录
 $SkillRoot = Split-Path $PSScriptRoot -Parent
 
-if (-not (Test-Path (Join-Path $SkillRoot "SKILL.md"))) {
-    $SkillRoot = Join-Path $env:USERPROFILE ".claude\skills\harness-cc"
+if (-not (Test-Path (Join-Path $SkillRoot ".claude-plugin\plugin.json"))) {
+    $SkillRoot = Join-Path $env:USERPROFILE ".claude\plugins\harness-cc"
 }
 
-if (-not (Test-Path (Join-Path $SkillRoot "SKILL.md"))) {
+if (-not (Test-Path (Join-Path $SkillRoot ".claude-plugin\plugin.json"))) {
     Write-Host "[错误] 无法找到 harness-cc 技能目录" -ForegroundColor Red
     Write-Host "请确保已安装 harness-cc 技能：" -ForegroundColor Red
-    Write-Host "git clone https://github.com/jovetickop/Harness-CC.git `"$env:USERPROFILE\.claude\skills\harness-cc`"" -ForegroundColor Yellow
+    Write-Host "git clone https://github.com/jovetickop/Harness-CC.git `"$env:USERPROFILE\.claude\plugins\harness-cc`"" -ForegroundColor Yellow
     exit 1
 }
 
@@ -195,7 +195,7 @@ $Config = @{
 
 # 如果文件已存在，保留已有的 build/test/run-command 值
 if (Test-Path $ConfigFile) {
-    $ExistingConfig = Get-Content $ConfigFile -Encoding UTF8 | ConvertFrom-Json
+    $ExistingConfig = Get-Content $ConfigFile -Raw -Encoding UTF8 | ConvertFrom-Json
     if ($ExistingConfig."build-command") { $Config."build-command" = $ExistingConfig."build-command" }
     if ($ExistingConfig."test-command")  { $Config."test-command"  = $ExistingConfig."test-command" }
     if ($ExistingConfig."run-command")   { $Config."run-command"   = $ExistingConfig."run-command" }

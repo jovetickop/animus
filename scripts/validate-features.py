@@ -141,7 +141,7 @@ def main():
         features_path = os.path.abspath(args.path)
     else:
         project_root = os.path.abspath(args.project_root)
-        features_path = os.path.join(project_root, ".claude", "state", "features.json")
+        features_path = os.path.join(project_root, ".claude", "harness-cc", "features.json")
 
     errors = []
     warnings = []

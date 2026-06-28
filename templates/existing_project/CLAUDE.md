@@ -1,8 +1,8 @@
 # 项目上下文
 
-当前项目以 `harness-cc` 的长任务工作流插件模式运行。技能安装目录 `$SKILL_DIR`（默认为 `$env:USERPROFILE\.claude\skills\harness-cc`）。
+当前项目以 `harness-cc` 的长任务工作流插件模式运行。技能安装目录 `${CLAUDE_PLUGIN_ROOT}`（Claude Code 自动设置）。
 
-> **路径约定**：`$SKILL_DIR` = 技能安装根目录。本文件中的 `$SKILL_DIR` 需要替换为实际路径后再使用。
+> **路径约定**：`${CLAUDE_PLUGIN_ROOT}` = 技能安装根目录（Claude Code 自动设置）。
 > 目标项目运行时状态文件在 `.claude/harness-cc/` 目录中。
 
 ## 自动识别命令（/harness-code-setup 回填）
@@ -17,8 +17,8 @@
 每次编码会话开始前，执行：
 
 ```powershell
-& "$SKILL_DIR\templates\harness\coding-session.ps1"
-python "$SKILL_DIR/templates/harness/show-status.py" .claude/harness-cc
+& "${CLAUDE_PLUGIN_ROOT}\templates\harness\coding-session.ps1"
+python "${CLAUDE_PLUGIN_ROOT}/templates/harness/show-status.py" .claude/harness-cc
 Get-Content .claude/harness-cc/claude-progress.txt -Tail 20 -Encoding UTF8
 ```
 
@@ -26,9 +26,9 @@ Get-Content .claude/harness-cc/claude-progress.txt -Tail 20 -Encoding UTF8
 
 - 优先继续 `in_progress` 任务。
 - 若无 `in_progress`，选择依赖已满足且优先级最高的 `pending` 任务。
-- 开始任务：`& "$SKILL_DIR\templates\harness\update-progress.ps1" <TaskId> in_progress "说明"`
-- 完成任务：`& "$SKILL_DIR\templates\harness\update-progress.ps1" <TaskId> passed "完成说明"`
-- 任务受阻：`& "$SKILL_DIR\templates\harness\update-progress.ps1" <TaskId> failed "失败原因与下一步"`
+- 开始任务：`& "${CLAUDE_PLUGIN_ROOT}\templates\harness\update-progress.ps1" <TaskId> in_progress "说明"`
+- 完成任务：`& "${CLAUDE_PLUGIN_ROOT}\templates\harness\update-progress.ps1" <TaskId> passed "完成说明"`
+- 任务受阻：`& "${CLAUDE_PLUGIN_ROOT}\templates\harness\update-progress.ps1" <TaskId> failed "失败原因与下一步"`
 
 状态仅允许：`pending | in_progress | passed | failed`。
 - `.claude/harness-cc/features.json` 任务字段需包含：`depends_on`、`priority`、`last_error`、`updated_at`（后两项由 `update-progress.ps1` 自动维护）。
@@ -45,7 +45,7 @@ Get-Content .claude/harness-cc/claude-progress.txt -Tail 20 -Encoding UTF8
 
 ## Git 提交
 
-- 每个任务完成并通过验收后，按 `$SKILL_DIR/rules/universal/git-workflow.md` 执行提交。
+- 每个任务完成并通过验收后，按 `${CLAUDE_PLUGIN_ROOT}/rules/universal/git-workflow.md` 执行提交。
 - 提交信息格式：`<type>: <description>`，例如 `feat: 完成主窗口菜单行为`。
 - 如果当前目录不是 Git 仓库，可跳过提交，但必须在 `.claude/harness-cc/claude-progress.txt` 记录原因。
 

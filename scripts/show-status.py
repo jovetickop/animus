@@ -170,12 +170,12 @@ def main():
         state_root = args[0]
     else:
         # 自动检测 state 目录
-        default_root = os.path.join(".claude", "state")
+        default_root = os.path.join(".claude", "harness-cc")
         if os.path.exists(default_root):
             state_root = default_root
         else:
             script_dir = os.path.dirname(os.path.abspath(__file__))
-            state_root = os.path.join(script_dir, "..", "state")
+            state_root = os.path.join(script_dir, "..", ".claude", "harness-cc")
 
     # P1-5: 优先使用 features.active.json，向后兼容 features.json
     active_path = os.path.join(state_root, "features.active.json")

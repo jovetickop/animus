@@ -344,7 +344,7 @@ def main():
     # 路径定义
     # ============================================================
     claude_root = os.path.join(project_root, ".claude")
-    features_root = os.path.join(claude_root, "state")
+    features_root = os.path.join(claude_root, "harness-cc")
     # P1-5: 优先使用 features.active.json，向后兼容 features.json
     active_path = os.path.join(features_root, "features.active.json")
     legacy_path = os.path.join(features_root, "features.json")
