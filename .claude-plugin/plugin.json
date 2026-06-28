@@ -9,21 +9,9 @@
   "homepage": "https://github.com/jovetickop/Harness-CC",
   "min_claude_version": "1.0.0",
   "commands": [
-    {
-      "name": "harness-code-setup",
-      "description": "检测项目类型并为目标项目创建 .claude/harness-cc/ 运行时目录",
-      "path": "commands/harness-code-setup.md"
-    },
-    {
-      "name": "harness-code-plan",
-      "description": "将 PRD 或方案文档转为 harness 任务列表，并更新 .claude/harness-cc/features.json",
-      "path": "commands/harness-code-plan.md"
-    },
-    {
-      "name": "harness-code-review",
-      "description": "执行通用检查 + 按项目类型的专项验收检查",
-      "path": "commands/harness-code-review.md"
-    }
+    "./commands/harness-code-setup.md",
+    "./commands/harness-code-plan.md",
+    "./commands/harness-code-review.md"
   ],
-  "hooks": "hooks/hooks.json"
+  "hooks": "./hooks/hooks.json"
 }
