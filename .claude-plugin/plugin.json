@@ -1,6 +1,6 @@
 {
   "name": "harness-cc",
-  "description": "状态机驱动的编码工作流引擎，支持 C++/Qt、Python、Node.js、Rust、Go 等多语言项目。提供任务编排、代码审查、测试验证等完整工作流。",
+  "description": "状态机驱动的编码工作流引擎。任务拆解编排、进度持久化、JSONL 日志追踪、跨会话上下文恢复、自动代码审查门控。面向需要多轮会话的复杂开发场景。",
   "version": "1.0.7",
   "author": {
     "name": "JiangJie",
