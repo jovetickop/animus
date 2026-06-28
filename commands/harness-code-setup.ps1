@@ -60,8 +60,6 @@ if (Test-Path $readmePath) {
     Write-Host "[harness]   Removed obsolete README.md"
 }
 
-}
-
 # === 5. 写入 project-config.json ===
 Write-Progress -Activity "harness-cc Setup" -Status "Writing project config" -PercentComplete 50
 
