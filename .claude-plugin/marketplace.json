@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "harness-cc",
+  "description": "状态机驱动的编码工作流引擎，支持 C++/Qt、Python、Node.js、Rust、Go 等多语言项目",
+  "owner": {
+    "name": "JiangJie",
+    "url": "https://github.com/jovetickop"
+  },
+  "plugins": [
+    {
+      "name": "harness-cc",
+      "source": "./",
+      "version": "1.0.0",
+      "description": "状态机驱动的编码工作流引擎，支持 C++/Qt、Python、Node.js、Rust、Go",
+      "category": "development",
+      "tags": ["workflow", "code-review", "task-management"]
+    }
+  ]
+}
