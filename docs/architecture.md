@@ -77,6 +77,10 @@
 | `templates/animus/project-config.json` | 目标项目类型配置（frontend/backend/verify 字段） |
 | `templates/.clang-format` | C++ 格式化规则模板 |
 | `.claude-plugin/plugin.json` | 插件清单，声明元信息、斜杠命令和自动发现组件 |
+| `.claude/animus/config.toml` | 三层团队配置（defaults → team → user 层覆盖），控制 dev/review/party_mode 等行为 |
+| `.claude/animus/config.user.toml` | 用户个人配置（gitignored），覆盖 team 层 |
+| `scripts/config_loader.py` | 三层配置加载合并工具，支持 `load_config()`、`get_config_value()`、`validate_config()` |
+| `.claude/animus/memlog/` | 单一事件源目录，每事件一个中文 Markdown 文件（append-only，永不删除） |
 | `.gitignore` | 排除 CLAUDE.md、settings.local.json、worktrees、.codegraph/ |
 
 ## 构建系统
@@ -109,11 +113,12 @@
 | 命令 | 职责 | 文件 |
 |------|------|------|
 | `/animus-setup` | 项目初始化 + 类型检测 + 创建 `.claude/animus/` 运行时目录 | `commands/animus-setup.md` |
-| `/animus-plan` | PRD/方案文档 -> features.json 任务列表 | `commands/animus-plan.md` |
+| `/animus-dev` | 统一开发入口（五路路由：debug/oneshot/fast/light/full） | `commands/animus-dev.md` |
+| ~~`/animus-plan`~~ | ~~已移除，改用 `/animus-dev --full`~~ | — |
 | `/animus-review` | 通用验收 + 语言专项验收 | `commands/animus-review.md` |
-| `/animus-debug` | 系统化调试——根因调查→模式分析→假设验证→实施修复 | `commands/animus-debug.md` |
-| `/animus-handoff` | 保存 session 上下文快照到 handoff.json | `commands/animus-handoff.md` |
-| `/animus-continue` | 从 handoff.json 恢复 session 上下文 | `commands/animus-continue.md` |
+| ~~`/animus-debug`~~ | ~~已移除，功能合并入 `/animus-dev` 的 debug-path~~ | — |
+| ~~`/animus-handoff`~~ | ~~已移除，memlog 自动接管~~ | — |
+| ~~`/animus-continue`~~ | ~~已移除，/animus-dev 自动恢复~~ | — |
 | `/animus-archive` | 归档当前迭代，清空并开始新迭代 | `commands/animus-archive.md` |
 | 验证辅助 | features.json 结构校验 | `commands/validate-features.ps1` |
 | 一致性检查 | 检查状态文件一致性 | `commands/check-consistency.ps1` |
@@ -140,7 +145,9 @@
 
 ### 6. 运行时引擎 (animus)
 
-- `update-progress.ps1` — 核心状态机引擎，执行状态流转校验、Oracle 验证门控
+- `update-progress.ps1` — 核心状态机引擎（逐步迁移到 `engine/cmd_transition.py`）
+- `animus-engine.py` — 统一 CLI 入口，调度所有 engine 子命令
+- `engine/` — 子命令模块目录：cmd_status.py、cmd_transition.py、cmd_validate.py、cmd_archive.py、cmd_rebuild.py
 - `show-status.py` — 状态概览显示
 - `run-regression.ps1` — 一键构建+测试
 - `init.ps1` — 首次初始化引导
@@ -153,6 +160,7 @@
 - `features.active.json` — 当前活动任务 (Token 优化分片)
 - `features.archive.json` — 已完成/失败归档
 - `animus-history.jsonl` — 统一结构化日志
+- `memlog/` — 单一事件源目录，每事件一个中文 Markdown 文件（append-only，永不删除）
 - `task_plan.md` — 子步骤追踪
 - `findings.md` — 知识积累
 

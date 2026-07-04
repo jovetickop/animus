@@ -1,0 +1,42 @@
+# animus 团队配置文件
+# 在项目根目录 .claude/animus/config.toml
+# git 跟踪，团队共享
+# 文件不存在时回退到硬编码默认值
+
+[dev]
+# 默认行为路径：AI 自动检测时的倾向
+default_path = "auto"         # auto / fast / light / full / oneshot
+# 自主模式：true 时 AI 全权决策，不询问用户
+autonomous = false
+
+[review]
+# 审查严格度
+strictness = "normal"         # low / normal / high
+# 跳过的审查类别
+skip_categories = []          # 可选: naming, formatting, performance, security
+# 每次审查最多输出多少条问题
+max_findings = 20
+
+[gates]
+# 写代码前必须要有 in_progress 任务
+require_task_before_write = true
+
+[ponytail]
+# 启用精简审查
+enabled = true
+# 文件超过此行数建议拆分
+max_lines_per_file = 500
+
+[party_mode]
+# 默认运行模式
+default_mode = "subagent"     # session / subagent / auto / agent-team
+# 默认模板 ID
+default_party = "arch-review" # arch-review / code-review
+# 自动触发场景
+auto_trigger = ["dev-full", "review-controversial"]
+# 触发前是否询问用户
+ask_before_start = true
+# 最大辩论轮数
+max_rounds = 3
+# 持久记忆
+memory_enabled = true
