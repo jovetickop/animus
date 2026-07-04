@@ -44,14 +44,15 @@
 
 ### 2.1 `/animus-init` — 项目初始化
 
-**原理：** 检测目标项目的技术栈类型（CMakeList.txt → cpp-qt/cpp-cmake、Cargo.toml → rust、go.mod → go、package.json → node、pyproject.toml → python），创建 `.claude/animus/` 运行时目录，写入默认配置。
+**原理：** 检测目标项目的技术栈类型（CMakeList.txt → cpp-qt/cpp-cmake、Cargo.toml → rust、go.mod → go、package.json → node、pyproject.toml → python）。如果根目录未检测到项目类型，会自动扫描一级子目录，识别多子项目。
 
 **执行内容：**
 1. 检测项目根目录
 2. 按文件列表判定语言栈
-3. 创建 `.claude/animus/` 目录
-4. 写入默认 `config.toml`（含 `[project]` 段）
-5. 生成初始 `features.json`
+3. 如果根目录未识别（generic），扫描子目录中的各项目
+4. 创建 `.claude/animus/` 目录
+5. 写入默认 `config.toml`（含 `[project]` 段，如有子项目则含 `sub_projects` 列表）
+6. 生成初始 `features.json`
 
 ---
 

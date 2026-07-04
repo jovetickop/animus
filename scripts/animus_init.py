@@ -168,9 +168,29 @@ def detect_project_type(project_root):
 
 # ---------------------------------------------------------------------------
 # 配置模板
+
+
+def detect_sub_projects(project_root):
+    """扫描一级子目录，检测各子项目类型。返回 [(dir_name, type), ...]"""
+    sub_projects = []
+    if not os.path.isdir(project_root):
+        return sub_projects
+    try:
+        entries = sorted(os.listdir(project_root))
+    except Exception:
+        return sub_projects
+    for entry in entries:
+        subdir = os.path.join(project_root, entry)
+        if not os.path.isdir(subdir) or entry.startswith("."):
+            continue
+        sub_type = detect_project_type(subdir)
+        if sub_type != "generic":
+            sub_projects.append((entry, sub_type))
+    return sub_projects
+
 # ---------------------------------------------------------------------------
 
-def _make_project_config(project_type):
+def _make_project_config(project_type, sub_projects=None):
     """根据项目类型生成 [project] 配置。"""
     config = {
         "type": project_type,
@@ -179,13 +199,15 @@ def _make_project_config(project_type):
         "run_command": "",
         "auto_update_plugin": True,
     }
+    if sub_projects:
+        config["sub_projects"] = [{"dir": d, "type": t} for d, t in sub_projects]
     return config
 
 
-def _make_full_toml(project_type):
+def _make_full_toml(project_type, sub_projects=None):
     """生成完整的 config.toml 内容（含注释头）。"""
     sections = {
-        "project": _make_project_config(project_type),
+        "project": _make_project_config(project_type, sub_projects),
     }
     return sections
 
@@ -206,10 +228,19 @@ def animus_init(project_root):
     sys.stdout.flush()
     try:
         project_type = detect_project_type(project_root)
+        sub_projects = []
+        if project_type == "generic":
+            sub_projects = detect_sub_projects(project_root)
+            if sub_projects:
+                names = ", ".join(p[0] for p in sub_projects)
+                print("generic (sub: {})".format(names))
+            else:
+                print(project_type)
+        else:
+            print(project_type)
     except Exception as e:
         print("FAILED - {}".format(e))
         return False
-    print(project_type)
 
     # === 2. 准备路径 ===
     state_dir = os.path.join(project_root, ".claude", "animus")
@@ -249,7 +280,7 @@ def animus_init(project_root):
             # 已存在 → 跳过，保留现有配置（含注释和所有配置段）
             print("skipped (exists)")
         else:
-            new_config = _make_full_toml(project_type)
+            new_config = _make_full_toml(project_type, sub_projects)
             _write_toml(config_path, new_config)
             print("created")
     except Exception as e:

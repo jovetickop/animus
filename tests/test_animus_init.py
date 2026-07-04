@@ -122,6 +122,72 @@ class TestAnimusInitDetectProjectType(unittest.TestCase):
         self.assertEqual(result, "generic")
 
 
+class TestDetectSubProjects(unittest.TestCase):
+    """测试 detect_sub_projects() 子项目检测"""
+
+    def test_no_sub_projects(self):
+        """无子项目时返回空列表"""
+        import tempfile
+        from scripts import animus_init as ai
+        with tempfile.TemporaryDirectory() as tmp:
+            result = ai.detect_sub_projects(tmp)
+            self.assertEqual(result, [])
+
+    def test_one_sub_project(self):
+        """有一个子项目时正确识别"""
+        import tempfile
+        from scripts import animus_init as ai
+        with tempfile.TemporaryDirectory() as tmp:
+            sub = os.path.join(tmp, "frontend")
+            os.makedirs(sub)
+            with open(os.path.join(sub, "package.json"), "w") as f:
+                f.write("{}")
+            result = ai.detect_sub_projects(tmp)
+            self.assertEqual(len(result), 1)
+            self.assertEqual(result[0][0], "frontend")
+            self.assertEqual(result[0][1], "node")
+
+    def test_multiple_sub_projects(self):
+        """多子项目时全部识别"""
+        import tempfile
+        from scripts import animus_init as ai
+        with tempfile.TemporaryDirectory() as tmp:
+            fe = os.path.join(tmp, "frontend")
+            os.makedirs(fe)
+            with open(os.path.join(fe, "package.json"), "w") as f:
+                f.write("{}")
+            be = os.path.join(tmp, "backend")
+            os.makedirs(be)
+            with open(os.path.join(be, "Cargo.toml"), "w") as f:
+                f.write("")
+            result = ai.detect_sub_projects(tmp)
+            self.assertEqual(len(result), 2)
+            types = {t for _, t in result}
+            self.assertIn("node", types)
+            self.assertIn("rust", types)
+
+    def test_ignores_hidden_dirs(self):
+        """隐藏目录和 generic 子目录跳过"""
+        import tempfile
+        from scripts import animus_init as ai
+        with tempfile.TemporaryDirectory() as tmp:
+            hidden = os.path.join(tmp, ".git")
+            os.makedirs(hidden)
+            empty = os.path.join(tmp, "docs")
+            os.makedirs(empty)
+            result = ai.detect_sub_projects(tmp)
+            self.assertEqual(result, [])
+
+    def test_sub_projects_in_config(self):
+        """_make_project_config 有子项目时生成 sub_projects 字段"""
+        from scripts import animus_init as ai
+        cfg = ai._make_project_config("generic", [("fe", "node"), ("be", "rust")])
+        self.assertIn("sub_projects", cfg)
+        self.assertEqual(len(cfg["sub_projects"]), 2)
+        self.assertEqual(cfg["sub_projects"][0]["dir"], "fe")
+        self.assertEqual(cfg["sub_projects"][0]["type"], "node")
+
+
 class TestAnimusInitMakeFullToml(unittest.TestCase):
     """测试 _make_full_toml"""
 
