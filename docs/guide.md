@@ -43,52 +43,190 @@
 
 ### `/animus-dev` — 统一开发入口
 
-处理所有开发场景。五路路由自动分流：
+**原理：** 根据用户输入的意图描述，AI 自动判断改动范围和类型，选择最合适的开发路径。所有路径都会写入 memlog 和 features.json，确保任务全程可追溯。
 
-| 路径 | 触发条件 | 流程 |
-|------|---------|------|
-| debug | bug 报告/异常/回归 | 3 问调试 → features.json → implement → review |
-| oneshot | 零爆炸半径（改颜色值） | 1 句确认 → implement → review |
-| fast | 1-2 文件/小改动 | 1 句确认 → implement → review |
-| light | 3-10 文件/新增功能 | 3 问 → features.json → implement → review |
-| full | 跨模块/架构改动 | 7 问 + 可选脑暴 → 拆任务 → implement → review |
+**五路自动分流：**
 
-AI 自动选路后输出「将使用 XX 路径」让用户确认。`config.toml` 中 `autonomous = true` 时跳过确认。
+| 路径 | 触发条件 | 流程 | 用途示例 |
+|------|---------|------|---------|
+| debug | bug 报告/异常/回归 | 3 问（复现→根因→修复策略）→ features.json → implement → review | "PDF 导出崩溃" |
+| oneshot | 零爆炸半径（改颜色值） | 1 句确认 → implement → review | "把按钮改成红色" |
+| fast | 1-2 文件/小改动 | 1 句确认 → implement → review | "加一个 tooltip" |
+| light | 3-10 文件/新增功能 | 3 问 → features.json → 拆任务 → implement → review | "加导出功能" |
+| full | 跨模块/架构改动 | 7 问 + 可选脑暴 → 拆任务队列 → implement → review | "重构数据层" |
 
-启动时自动检测 memlog→若有历史事件则自动恢复 features.json。
+**路径确认：** AI 选路后输出「检测到 XX，将使用 XX 路径」，用户确认后执行。`config.toml` 中 `dev.autonomous = true` 时跳过确认，AI 全权决策。
+
+**自动恢复：** 启动时检测 `.claude/animus/memlog/` 是否有事件。有 → 自动执行 `python animus-engine.py rebuild` 恢复 features.json，输出「检测到上次进度，已恢复」。
+
+**debug 路径 3 问：**
+1. 复现步骤与影响范围 — 什么操作触发的？预期 vs 实际？影响哪些用户？
+2. 根因初步推断 — 根据症状怀疑哪层的问题？有日志或堆栈吗？
+3. 修复策略与副作用评估 — 修复会影响哪些已有功能？需要加什么测试？
+
+**full 路径 7 问：**
+1. 验收标准 — 从用户视角描述，完成后怎么验证
+2. 前置依赖 — 已有模块、数据表、第三方服务
+3. 异常流程 — 错误提示策略、回滚、降级
+4. 性能/安全 — 加密、限流、超时、并发量级
+5. 架构约束 — 分层、设计模式、技术栈限制
+6. 风险 — 并发竞争、边界条件、第三方依赖
+7. 测试策略 — 单元测试、集成测试、E2E
+
+**配置：**
+```toml
+[dev]
+default_path = "auto"    # 默认路径倾向
+autonomous = false       # true=AI全权决策，不询问
+```
+
+---
 
 ### `/animus-review` — 代码审查
 
-4 agent 并行审查：
+**原理：** 并行启动 4 个审查 agent，分别从正确性、边界条件、验收标准、精简度四个维度审查代码。审查结果汇总后按严重度分级裁决。
 
-| Agent | 重点 |
-|-------|------|
-| 审查官 (Review) | 正确性、安全、竞态 |
-| 边界猎手 | 空值、溢出、并发、资源泄露 |
-| 验收审计官 | 逐条核对 features.json spec.success |
-| 精简审查官 | 过度工程、可删减代码 |
+**4 agent 并行审查：**
 
-审查分级：HIGH 阻塞 / MEDIUM 人工确认 / LOW 自动通过。不合格可退回 implementer 修复后重审（最多 3 轮）。
+| Agent | 重点检查项 | 输出示例 |
+|-------|-----------|---------|
+| 审查官 (Review) | 正确性 bug、安全漏洞、竞态条件、空指针 | `src/main.cpp:42: HIGH 空指针解引用` |
+| 边界猎手 | 空值、溢出、并发、资源泄露、超时、零值 | `src/calc.cpp:15: MEDIUM 整数溢出风险` |
+| 验收审计官 | 逐条核对 features.json spec.success | `T005: PASS 导出路径可选` |
+| 精简审查官 | 过度工程、可删减抽象、重复代码 | `src/parser.cpp:88: LOW 接口多一层包装` |
+
+**门控规则：**
+
+| 审查结果 | 处理 |
+|---------|------|
+| 全部 agent 无 high 级问题 | ✅ 允许 passed |
+| 有 high 级问题 | ❌ 阻塞，退回 implementer 修复 |
+| 有 medium 问题 | ⚠️ 标记待人工确认，不阻塞 |
+| 有 low 问题 | ✅ 自动通过，计入报告 |
+
+**循环回退：** 审查不通过 → 退回 implementer 修复 → 重新审查，最多 3 轮。超限后审查终止，报错人工介入。
+
+**超时降级：** 任何 agent 超时 → 自动重试最多 3 次 → 仍失败 → 审查终止。
+
+**配置：**
+```toml
+[review]
+strictness = "normal"    # low/normal/high
+max_findings = 20
+```
+
+---
 
 ### `/animus-status` — 状态看板
 
-显示任务统计 + 每个任务明细 + 推荐下一步。
+**原理：** 读取 features.json，统计任务状态分布，按优先级排序输出每个任务明细，底部推荐下一步命令。
+
+**输出格式：**
+```
+======================================================
+  Animus — 任务状态报告
+======================================================
+  统计概览
+  ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+  总任务数  : 7
+  已通过    : 4
+  进行中    : 1
+  待办事项  : 2
+
+  任务明细
+  ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+  [RUN ] [T004] 数据导出模块 (in_progress)
+  [PEND] [T005] 邮件通知服务 (pending)
+  ...
+
+======================================================
+  ✨ 推荐下一步：/animus-dev — 有进行中的任务，继续实施
+```
+
+**推荐规则（按优先级）：**
+1. 有 in_progress → 继续实施
+2. 有 failed → 修复重试
+3. 有 pending → 开始新任务
+4. 有 passed 未完成 → 需要审查
+5. 全部 passed 完成 → 归档迭代
+
+---
 
 ### `/animus-help` — 帮助与导航
 
-根据当前项目状态动态推荐命令。
+**原理：** 读取 `.claude/animus/` 目录状态，根据当前进度推荐最合适的命令。不需要记忆命令顺序，跟着推荐走即可。
+
+**推荐规则：**
+
+| 当前状态 | 推荐命令 |
+|---------|---------|
+| 无 features.json | `/animus-setup` |
+| features.json 无任务 | `/animus-dev` |
+| 有进行中任务 | `/animus-dev` 继续 |
+| 有完成未审查 | `/animus-review` |
+| 全部完成 | `/animus-archive` |
+
+---
 
 ### `/animus-setup` — 项目初始化
 
-检测项目类型（cpp-qt/cpp-cmake/rust/go/node/python），创建运行时目录。
+**原理：** 检测目标项目的技术栈类型（CMakeList.txt → cpp-qt/cpp-cmake、Cargo.toml → rust、go.mod → go、package.json → node、pyproject.toml → python），创建 `.claude/animus/` 运行时目录，写入默认配置。
+
+**执行内容：**
+1. 检测项目根目录
+2. 按文件列表判定语言栈
+3. 创建 `.claude/animus/` 目录
+4. 写入默认 `project-config.json`
+5. 生成初始 `features.json`
+
+---
 
 ### `/animus-archive` — 迭代归档
 
-归档当前 features.json → archive/iter-xxx/ 目录 + 清空 + 生成迭代总结。
+**原理：** 将当前 features.json 打包到 `archive/iter-xxx-名称/` 目录下，清空 features.json 开始新的迭代。归档目录保留完整的任务历史、审查报告和日志，可随时回溯。
+
+**执行流程：**
+1. 读取当前 features.json 的任务统计
+2. 创建 `archive/iter-{编号}-{名称}/` 目录
+3. 复制 features.json 到归档目录
+4. 生成 `iteration-summary.md`（含任务统计明细）
+5. 清空 features.json（仅保留 metadata）
+6. 向 memlog 写入归档事件
+
+**命令选项：**
+```
+/animus-archive                           # 交互式：输入名称
+/animus-archive --name "迭代 3-UI重构"     # 直接归档
+```
+
+---
 
 ### `/animus-config` — 配置管理
 
-查看当前生效的配置、校验合法性。
+**原理：** 读取 `.claude/animus/config.toml`，与硬编码默认值合并，输出当前生效的完整配置。也可校验配置文件合法性。
+
+**命令选项：**
+```
+/animus-config              # 显示当前配置
+/animus-config --validate   # 校验配置合法性
+```
+
+**输出示例：**
+```
+animus 配置（两层覆盖结果）
+==============================
+[dev]
+  default_path = auto
+  autonomous = false
+
+[review]
+  strictness = normal
+  max_findings = 20
+
+[gates]
+  require_task_before_write = true
+...
+```
 
 ---
 
