@@ -50,33 +50,56 @@
                     └──────┬──────┬───────┘
                      是    │     │   否
                ┌──────────▼┐  ┌─▼──────────────────────┐
-               │ 直接实施   │  │ 先提问理解意图，自动分流          │
-               │ implement │  └───┬────┬──────┬──────┘
-               │ → review  │ fast │light│ full │
-               └───────────┘  ┌─────▼────▼────▼──────▼─────┐
-                              │  Grilling（按路径深度）       │
-                              │  → 拆任务 → 用户确认          │
-                              │  → 写入 features.json        │
-                              │  → implement → review        │
-                              └──────────────────────────────┘
+               │ 直接实施   │  │ 先提问理解意图，自动分流              │
+               │ implement │  └───┬────┬──────┬───────┘
+               │ → review  │ debug│fast│light│ full │
+               └───────────┘  ┌─────▼────▼──────▼───────┐
+                              │  Grilling（按路径深度）   │
+                              │  → 创建 task             │
+                              │  → 写入 features.json    │
+                              │  → implement → review    │
+                              └──────────────────────────┘
 ```
 
-### 2.3 五路 Grilling 深度
+### 2.3 四路 Grilling 深度
 
-
-|--|-------|---------|------|-------|------|
-| **触发条件** | bug 报告/异常/回归 | 零爆炸半径（改个颜色值） | 1-2 文件 / 小改动 | 3-10 文件 / 新增 | 架构级 / 跨模块 |
-
-| **提问数** | 3 问（调试专用） | 0 问 | 1 句确认 | 3 问 | 7 问 + 技法 |
-| **提问内容** | 复现步骤/根因推断/修复策略 | "改什么？怎么改？" | "改什么？怎么改？" | "做什么？依赖什么？怎么验证？" | 验收/依赖/异常/性能/架构/风险/测试 |
-| **spec 填充** | why + repro + root_cause + success | why + success，其余 AI 推断 | why + success，其余 AI 推断 | 5 字段较完整 | 5 字段详尽 |
-| **任务条数** | 1 个 bugfix 任务 | 1 个轻量任务 | 1 个轻量任务 | 2-5 个任务 | 5+ 任务 |
+| | debug | fast | light | full |
+|--|-------|------|-------|------|
+| **触发条件** | bug 报告/异常/回归 | 1-2 文件 / 小改动 | 3-10 文件 / 新增 | 架构级 / 跨模块 |
+| **提问数** | 3 问（调试专用） | 1 句确认 | 3 问 | 7 问 + 技法 |
+| **提问内容** | 复现步骤/根因推断/修复策略 | "改什么？怎么改？" | "做什么？依赖什么？怎么验证？" | 验收/依赖/异常/性能/架构/风险/测试 |
+| **任务跟踪** | ✅ features.json + write-gate | ✅ features.json + write-gate | ✅ features.json + write-gate | ✅ features.json + write-gate |
+| **任务条数** | 1 个 bugfix 任务 | 1 个轻量任务 | 2-5 个任务 | 5+ 任务 |
 
 **3 问明细（debug）：**
 
 1. **复现步骤与影响范围** — 什么操作触发的？预期 vs 实际？
 2. **根因初步推断** — 你怀疑是哪层的问题？有日志/堆栈吗？
 3. **修复策略与副作用评估** — 修复会影响哪些已有功能？
+
+**无法复现？走穷举分析：**
+
+```
+日志狩猎 → 路径穷举（Edge Case Hunter）→ 埋点策略 → 环境差异排查
+```
+
+**分层诊断（判断 bug 来源层级）：**
+
+| 层级 | 判断标准 | 修复方式 |
+|------|---------|---------|
+| 意图层 | 需求理解本身不对 | 回到需求澄清，不在此层修代码 |
+| 规范层 | spec 边界不够强 | 回退修 spec 再重做 |
+| 实现层 | 代码写错了 | 直接补 patch |
+
+**审查分诊（5 类）：**
+
+| 标签 | 含义 | 处理 |
+|------|------|------|
+| `intent_gap` | 意图捕获不完整 | 回滚 → 找用户确认 |
+| `bad_spec` | spec 边界不够强 | 回滚 → 修 spec → 重做 |
+| `patch` | 局部代码缺陷 | 自动修复 |
+| `defer` | 存量问题 | 记入 `deferred-work.md` |
+| `reject` | 误报 | 丢弃 |
 
 **3 问明细（light）：**
 
@@ -150,7 +173,7 @@ full-path 的 7 问中集成 3 种技法：
 
 | 文件 | 改动 |
 |------|------|
-| 新建 `commands/animus-dev.md` | 主命令，五路路由 |
+| 新建 `commands/animus-dev.md` | 主命令，四路路由 |
 | 删除 `commands/animus-plan.md` | 直接移除，不留 deprecated |
 | 删除 `commands/animus-debug.md` | 功能合并入 `/animus-dev` 的 debug-path |
 | `plugin.json` | 注册新命令，删除旧注册 |
@@ -185,6 +208,6 @@ AI 自动选路后，先输出「将使用 XX 路径」让用户确认：
 1. `/animus-dev PDF 导出崩溃` → 确认 debug-path，3 问调试专用 Grilling
 2. `/animus-dev 修按钮颜色` → 确认 fast-path，1 问后创建轻量任务
 3. `/animus-dev --full 加 PDF 导出` → 确认走完整 7 问
-5. 确认 debug-path 创建的 features.json 有 type/severity/repro_steps/root_cause
-6. 确认 implementer 在没有任务时拒绝写代码
-7. 确认 `/animus-plan` 和 `/animus-debug` 已移除
+4. 确认 debug-path 创建的 features.json 有 type/severity/repro_steps/root_cause
+5. 确认 implementer 在没有任务时拒绝写代码
+6. 确认 `/animus-plan` 和 `/animus-debug` 已移除
