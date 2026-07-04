@@ -1,7 +1,7 @@
 {
   "name": "animus",
-  "description": "状态机驱动的 AI 编码工作流引擎。任务拆解编排、进度持久化、JSONL 日志追踪、跨会话上下文恢复、自动代码审查门控、系统化调试工作流。面向需要多轮 AI 辅助会话的复杂多语言开发场景。",
-  "version": "1.3.0",
+  "description": "状态机驱动的 AI 编码工作流引擎。包含 6 大角色：规划师(Plan)、架构师(Qt/Rust/Go/...)、实现者、测试官、审查官(Review)、构建师(Build)。面向需要多轮 AI 辅助会话的复杂多语言开发场景。",
+  "version": "1.4.0",
   "author": {
     "name": "JiangJie",
     "url": "https://github.com/jovetickop"
@@ -10,13 +10,11 @@
   "min_claude_version": "1.0.0",
   "commands": [
     "./commands/animus-setup.md",
-    "./commands/animus-plan.md",
+    "./commands/animus-dev.md",
     "./commands/animus-review.md",
-    "./commands/animus-handoff.md",
-    "./commands/animus-continue.md",
     "./commands/animus-archive.md",
-    "./commands/animus-debug.md",
     "./commands/animus-status.md",
-    "./commands/animus-config.md"
+    "./commands/animus-config.md",
+    "./commands/animus-help.md"
   ]
 }
