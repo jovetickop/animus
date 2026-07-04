@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$Arg = ""
 )
 
@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 $startTime = Get-Date
 
 # === 1. 确定状态目录路径 ===
-$StateDir = Join-Path $PWD ".claude" "animus"
+$StateDir = Join-Path (Join-Path $PWD ".claude") "animus"
 $featuresPath = Join-Path $StateDir "features.json"
 
 # === 2. 检查 features.json 是否存在 ===
@@ -17,10 +17,14 @@ if (-not (Test-Path $featuresPath)) {
 }
 
 # === 3. 调用 Python 状态展示脚本 ===
-$scriptPath = Join-Path $PSScriptRoot ".." "templates" "animus" "show-status.py"
+$scriptPath = $PSScriptRoot
+$scriptPath = Join-Path $scriptPath ".."
+$scriptPath = Join-Path $scriptPath "templates"
+$scriptPath = Join-Path $scriptPath "animus"
+$scriptPath = Join-Path $scriptPath "show-status.py"
+$pythonCmd = "python"
 
 # 解析 Python 命令（兼容 python / python3）
-$pythonCmd = "python"
 try {
     $null = Get-Command "python" -ErrorAction Stop
 } catch {
@@ -51,5 +55,6 @@ try {
 Write-Progress -Activity "animus Status" -Status "Done" -PercentComplete 100
 
 $elapsed = [DateTime](Get-Date) - [DateTime]$startTime
+$elapsedStr = $elapsed.TotalSeconds.ToString('0.0')
 Write-Host ""
-Write-Host "[animus] 状态查询完成，耗时 $($elapsed.TotalSeconds.ToString('0.0'))s"
+Write-Host "[animus] 状态查询完成，耗时 ${elapsedStr}s"
