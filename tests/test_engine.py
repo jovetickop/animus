@@ -763,27 +763,26 @@ class TestCmdValidateCycleDetection:
 # ============================================================
 
 class TestConfigLoaderEncoding:
-    """config_loader 在 TOML 解析异常、部分配置、Unicode 值的边界行为。"""
+    """config_loader 在 JSON 解析异常、部分配置、Unicode 值的边界行为。"""
 
     # ----------------------------------------------------------
     # 辅助：在临时目录中创建 .claude/animus/ 结构
     # ----------------------------------------------------------
 
-    def _setup_animus(self, toml_content):
+    def _setup_animus(self, json_content):
         """
-        创建临时 .claude/animus/，写入 config.toml，
+        创建临时 .claude/animus/，写入 config.json，
         返回 animus_dir 路径。
         """
         tmpdir = tempfile.mkdtemp(prefix="cfg_enc_")
         animus_dir = os.path.join(tmpdir, ".claude", "animus")
         os.makedirs(animus_dir)
-        if toml_content is not None:
-            cfg_path = os.path.join(animus_dir, "config.toml")
-            with open(cfg_path, "wb") as f:
-                if isinstance(toml_content, str):
-                    f.write(toml_content.encode("utf-8"))
-                else:
-                    f.write(toml_content)
+        if json_content is not None:
+            cfg_path = os.path.join(animus_dir, "config.json")
+            if isinstance(json_content, bytes):
+                json_content = json_content.decode("utf-8", errors="replace")
+            with open(cfg_path, "w", encoding="utf-8") as f:
+                f.write(json_content)
         return animus_dir, tmpdir
 
     def _cleanup(self, tmpdir):
@@ -792,34 +791,31 @@ class TestConfigLoaderEncoding:
         shutil.rmtree(tmpdir, ignore_errors=True)
 
     # ----------------------------------------------------------
-    # test_toml_parse_error
+    # test_json_parse_error
     # ----------------------------------------------------------
 
-    def test_toml_parse_error(self):
-        """TOML 文件解析错误时降级到默认配置。"""
+    def test_json_parse_error(self):
+        """JSON 文件解析错误时降级到默认配置。"""
         from scripts.config_loader import load_config, DEFAULT_CONFIG
-        animus_dir, tmpdir = self._setup_animus(b": invalid toml [[[\n")
+        animus_dir, tmpdir = self._setup_animus(": invalid json {{{")
         try:
             cfg = load_config(animus_dir)
-            # 解析失败 → 返回 DEFAULT_CONFIG
-            assert cfg == DEFAULT_CONFIG, "TOML 解析错误应降级到默认配置"
+            assert cfg == DEFAULT_CONFIG, "JSON 解析错误应降级到默认配置"
         finally:
             self._cleanup(tmpdir)
 
     # ----------------------------------------------------------
-    # test_toml_partial_config
+    # test_json_partial_config
     # ----------------------------------------------------------
 
-    def test_toml_partial_config(self):
+    def test_json_partial_config(self):
         """只有部分配置段时合并正确的默认值。"""
         from scripts.config_loader import load_config, DEFAULT_CONFIG
-        # 只覆盖 project.type，其余段应保留默认
-        toml_content = b'[project]\ntype = "cpp-qt"\n'
-        animus_dir, tmpdir = self._setup_animus(toml_content)
+        json_content = '{"project": {"type": "cpp-qt"}}'
+        animus_dir, tmpdir = self._setup_animus(json_content)
         try:
             cfg = load_config(animus_dir)
             assert cfg["project"]["type"] == "cpp-qt"
-            # 未覆盖的字段保留默认
             assert cfg["project"]["build_command"] == DEFAULT_CONFIG["project"]["build_command"]
             assert cfg["dev"]["default_path"] == DEFAULT_CONFIG["dev"]["default_path"]
             assert cfg["review"]["strictness"] == DEFAULT_CONFIG["review"]["strictness"]
@@ -829,28 +825,21 @@ class TestConfigLoaderEncoding:
             self._cleanup(tmpdir)
 
     # ----------------------------------------------------------
-    # test_toml_unicode_values
+    # test_json_unicode_values
     # ----------------------------------------------------------
 
-    def test_toml_unicode_values(self):
-        """TOML 含中文等 Unicode 值能正确加载。"""
+    def test_json_unicode_values(self):
+        """JSON 含中文等 Unicode 值能正确加载。"""
         from scripts.config_loader import load_config
-        toml_content = (
-            b'[project]\n'
-            b'type = "cpp-qt"\n'
-            b'build_command = "cmake --build ."\n'
-            b'test_command = "test_unicode_test_command"\n'
-            b'\n'
-            b'[review]\n'
-            b'strictness = "high"\n'
-            b'max_findings = 50\n'
-            b'[ponytail]\n'
-            b'max_lines_per_file = 800\n'
+        json_content = (
+            '{"project": {"type": "cpp-qt", "build_command": "cmake --build .", '
+            '"test_command": "test_unicode_test_command"}, '
+            '"review": {"strictness": "high", "max_findings": 50}, '
+            '"ponytail": {"max_lines_per_file": 800}}'
         )
-        animus_dir, tmpdir = self._setup_animus(toml_content)
+        animus_dir, tmpdir = self._setup_animus(json_content)
         try:
             cfg = load_config(animus_dir)
-            # 中文值正确加载
             assert cfg["project"]["test_command"] == "test_unicode_test_command"
             # 英文 ASCII 值正确加载
             assert cfg["project"]["type"] == "cpp-qt"

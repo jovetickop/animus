@@ -5,8 +5,8 @@ audience: regular-user
 
 # 配置参考
 
-> Animus 全部配置项说明 — `.claude/animus/config.toml`。
-> 两层覆盖：硬编码默认值 ← `config.toml`（只写需要覆盖的项即可）。
+> Animus 全部配置项说明 — `.claude/animus/config.json`。
+> 两层覆盖：硬编码默认值 ← `config.json`（只写需要覆盖的项即可）。
 
 ---
 

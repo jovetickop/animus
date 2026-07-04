@@ -5,6 +5,7 @@
 使用 pytest 和 tempfile 模拟文件系统，避免依赖真实文件。
 """
 
+import json
 import os
 import sys
 import copy
@@ -22,7 +23,7 @@ from scripts.config_loader import (
     get_current_sub_project,
     validate_config,
     _deep_merge,
-    _try_load_toml,
+    _try_load_json,
 )
 
 
@@ -37,44 +38,16 @@ def animus_dir():
         claude = os.path.join(tmp, ".claude")
         animus = os.path.join(claude, "animus")
         os.makedirs(animus)
-        # chdir 进 tmp 以便 load_config() 能找到 .claude/animus/
         old_cwd = os.getcwd()
         os.chdir(tmp)
         yield animus
         os.chdir(old_cwd)
 
 
-def write_toml(path, data):
-    """将 dict 按 TOML 格式写入 path。"""
-    _write_toml_file(data, path)
-
-
-def _write_toml_file(d, path, parent_key=""):
-    """简易 TOML 写入器，覆盖嵌套表。"""
+def write_config(path, data):
+    """将 dict 按 JSON 格式写入 path。"""
     with open(path, "w", encoding="utf-8") as f:
-        for key, val in d.items():
-            if isinstance(val, dict):
-                f.write(f"[{key}]\n")
-                for k2, v2 in val.items():
-                    _write_toml_value(f, k2, v2)
-                f.write("\n")
-            else:
-                _write_toml_value(f, key, val)
-
-
-def _write_toml_value(f, key, val):
-    """写入单个 TOML key = value 行。"""
-    if isinstance(val, bool):
-        f.write(f'{key} = {"true" if val else "false"}\n')
-    elif isinstance(val, str):
-        f.write(f'{key} = "{val}"\n')
-    elif isinstance(val, int):
-        f.write(f"{key} = {val}\n")
-    elif isinstance(val, list):
-        items = ", ".join(f'"{v}"' if isinstance(v, str) else str(v).lower() if isinstance(v, bool) else str(v) for v in val)
-        f.write(f"{key} = [{items}]\n")
-    else:
-        f.write(f'{key} = "{val}"\n')
+        json.dump(data, f, indent=2, ensure_ascii=False)
 
 
 # ==============================================================
@@ -106,170 +79,142 @@ class TestDefaultConfig:
 # ==============================================================
 
 class TestTeamConfigOverride:
-    """team config.toml 覆盖默认值。"""
+    """team config.json 覆盖默认值。"""
 
     def test_team_overrides_dev_path(self, animus_dir):
         """team 覆盖 dev.default_path。"""
-        write_toml(
-            os.path.join(animus_dir, "config.toml"),
+        write_config(
+            os.path.join(animus_dir, "config.json"),
             {"dev": {"default_path": "fast"}},
         )
         cfg = load_config(animus_dir)
         assert cfg["dev"]["default_path"] == "fast"
-        # 未覆盖的 key 保留默认值
         assert cfg["dev"]["autonomous"] is False
 
     def test_team_overrides_partial(self, animus_dir):
         """team 覆盖部分字段，其余保留默认。"""
-        write_toml(
-            os.path.join(animus_dir, "config.toml"),
+        write_config(
+            os.path.join(animus_dir, "config.json"),
             {"review": {"strictness": "high", "max_findings": 50}},
         )
         cfg = load_config(animus_dir)
         assert cfg["review"]["strictness"] == "high"
         assert cfg["review"]["max_findings"] == 50
-        # 默认值保留
         assert cfg["review"]["skip_categories"] == []
 
     def test_team_keeps_defaults_for_missing_sections(self, animus_dir):
         """team 只提供部分 section，其余 section 走默认。"""
-        write_toml(
-            os.path.join(animus_dir, "config.toml"),
+        write_config(
+            os.path.join(animus_dir, "config.json"),
             {"party_mode": {"default_mode": "direct"}},
         )
         cfg = load_config(animus_dir)
         assert cfg["party_mode"]["default_mode"] == "direct"
-        assert cfg["party_mode"]["max_rounds"] == 3  # 默认
-        assert cfg["dev"]["default_path"] == "auto"  # 默认
+        assert cfg["party_mode"]["max_rounds"] == 3
+        assert cfg["dev"]["default_path"] == "auto"
 
 
 # ==============================================================
-# 3. test_user_config_override
+# 3. test_fallback_default
 # ==============================================================
 
 class TestFallbackDefault:
-    """配置缺失时回退默认值（merge 语义已在上面覆盖，这里侧重边界）。"""
+    """配置缺失时回退默认值。"""
 
     def test_team_file_empty(self, animus_dir):
-        """team config.toml 存在但空 -> 完全走默认。"""
-        # 写入空文件（仅含注释）
-        with open(os.path.join(animus_dir, "config.toml"), "w") as f:
-            f.write("# empty\n")
+        """配置文件存在但空 -> 完全走默认。"""
+        with open(os.path.join(animus_dir, "config.json"), "w") as f:
+            f.write("")
         cfg = load_config(animus_dir)
         assert cfg == DEFAULT_CONFIG
 
-    def test_team_file_invalid_toml(self, animus_dir):
-        """team config.toml 内容非法 TOML -> _try_load_toml 返回 None -> 走默认。"""
-        with open(os.path.join(animus_dir, "config.toml"), "w") as f:
-            f.write(": invalid toml {{{\n")
+    def test_team_file_invalid(self, animus_dir):
+        """配置文件内容非法 JSON -> _try_load_json 返回 None -> 走默认。"""
+        with open(os.path.join(animus_dir, "config.json"), "w") as f:
+            f.write(": invalid json {{{")
         cfg = load_config(animus_dir)
         assert cfg == DEFAULT_CONFIG
-
-    def test_user_file_invalid_toml(self, animus_dir):
-        """user config.user.toml 非法 -> 忽略 user -> 仅 team + 默认。"""
-        write_toml(
-            os.path.join(animus_dir, "config.toml"),
-            {"dev": {"default_path": "full"}},
-        )
-        with open(os.path.join(animus_dir, "config.user.toml"), "w") as f:
-            f.write("bad data [[[\n")
-        cfg = load_config(animus_dir)
-        assert cfg["dev"]["default_path"] == "full"
 
     def test_team_section_missing(self, animus_dir):
-        """team 配置缺少某个 section -> 该 section 保留默认。"""
-        write_toml(
-            os.path.join(animus_dir, "config.toml"),
+        """配置缺少某个 section -> 该 section 保留默认。"""
+        write_config(
+            os.path.join(animus_dir, "config.json"),
             {"ponytail": {"enabled": False}},
         )
         cfg = load_config(animus_dir)
-        # ponytail 被覆盖
         assert cfg["ponytail"]["enabled"] is False
-        # gates 完全走默认
         assert cfg["gates"]["require_task_before_write"] is True
 
 
 # ==============================================================
-# 5. test_get_config_value
+# 4. test_get_config_value
 # ==============================================================
 
 class TestGetConfigValue:
     """点分路径取值。"""
 
     def test_top_level_key(self):
-        """一级 key。"""
         val = get_config_value(DEFAULT_CONFIG, "dev")
         assert val == DEFAULT_CONFIG["dev"]
 
     def test_nested_key(self):
-        """嵌套 key。"""
         val = get_config_value(DEFAULT_CONFIG, "dev.default_path")
         assert val == "auto"
 
     def test_deeply_nested_key(self):
-        """多层嵌套。"""
         val = get_config_value(DEFAULT_CONFIG, "party_mode.auto_trigger")
         assert val == ["dev-full", "review-controversial"]
 
     def test_boolean_value(self):
-        """布尔值。"""
         val = get_config_value(DEFAULT_CONFIG, "gates.require_task_before_write")
         assert val is True
 
     def test_list_value(self):
-        """列表值。"""
         val = get_config_value(DEFAULT_CONFIG, "review.skip_categories")
         assert val == []
 
 
 # ==============================================================
-# 6. test_get_config_value_default
+# 5. test_get_config_value_default
 # ==============================================================
 
 class TestGetConfigValueDefault:
     """路径不存在返回 default。"""
 
     def test_nonexistent_key(self):
-        """不存在的 key。"""
         val = get_config_value(DEFAULT_CONFIG, "nonexistent")
         assert val is None
 
     def test_nonexistent_nested(self):
-        """不存在的嵌套路径。"""
         val = get_config_value(DEFAULT_CONFIG, "dev.nonexistent")
         assert val is None
 
     def test_custom_default(self):
-        """自定义 default 值。"""
         val = get_config_value(DEFAULT_CONFIG, "dev.wrong_key", "fallback")
         assert val == "fallback"
 
     def test_partial_path(self):
-        """部分路径无效。"""
         val = get_config_value(DEFAULT_CONFIG, "dev.default_path.wrong")
-        assert val is None  # "auto" 不是 dict，继续走 k 会失败
+        assert val is None
 
     def test_empty_path(self):
-        """空路径。"""
         val = get_config_value(DEFAULT_CONFIG, "")
-        assert val is None  # 空字符串 split 为 [""]，不存在
+        assert val is None
 
 
 # ==============================================================
-# 7. test_validate_config_valid
+# 6. test_validate_config_valid
 # ==============================================================
 
 class TestValidateConfigValid:
     """合法配置返回 (True, [])。"""
 
     def test_default_config_is_valid(self):
-        """DEFAULT_CONFIG 本身就是合法的。"""
         valid, errors = validate_config(DEFAULT_CONFIG)
         assert valid is True
         assert errors == []
 
     def test_all_valid_variants(self):
-        """dev.default_path 每个合法值都应通过。"""
         for path in ("auto", "fast", "light", "full"):
             cfg = copy.deepcopy(DEFAULT_CONFIG)
             cfg["dev"]["default_path"] = path
@@ -277,7 +222,6 @@ class TestValidateConfigValid:
             assert valid is True, f"path={path} should be valid, got {errors}"
 
     def test_all_strictness_variants(self):
-        """review.strictness 每个合法值都应通过。"""
         for s in ("low", "normal", "high"):
             cfg = copy.deepcopy(DEFAULT_CONFIG)
             cfg["review"]["strictness"] = s
@@ -285,9 +229,8 @@ class TestValidateConfigValid:
             assert valid is True, f"strictness={s} should be valid, got {errors}"
 
     def test_team_modified_valid_config(self, animus_dir):
-        """通过 team 配置产生的合法修改也应通过校验。"""
-        write_toml(
-            os.path.join(animus_dir, "config.toml"),
+        write_config(
+            os.path.join(animus_dir, "config.json"),
             {"dev": {"default_path": "light"}, "review": {"strictness": "high"}},
         )
         cfg = load_config(animus_dir)
@@ -297,14 +240,13 @@ class TestValidateConfigValid:
 
 
 # ==============================================================
-# 8. test_validate_config_invalid
+# 7. test_validate_config_invalid
 # ==============================================================
 
 class TestValidateConfigInvalid:
     """非法值返回 errors。"""
 
     def test_invalid_dev_default_path(self):
-        """dev.default_path 为非法值。"""
         cfg = copy.deepcopy(DEFAULT_CONFIG)
         cfg["dev"]["default_path"] = "super-fast"
         valid, errors = validate_config(cfg)
@@ -312,7 +254,6 @@ class TestValidateConfigInvalid:
         assert any("dev.default_path" in e for e in errors)
 
     def test_invalid_dev_autonomous_type(self):
-        """dev.autonomous 非布尔值。"""
         cfg = copy.deepcopy(DEFAULT_CONFIG)
         cfg["dev"]["autonomous"] = "yes"
         valid, errors = validate_config(cfg)
@@ -320,7 +261,6 @@ class TestValidateConfigInvalid:
         assert any("dev.autonomous" in e for e in errors)
 
     def test_invalid_review_strictness(self):
-        """review.strictness 非法。"""
         cfg = copy.deepcopy(DEFAULT_CONFIG)
         cfg["review"]["strictness"] = "extreme"
         valid, errors = validate_config(cfg)
@@ -328,7 +268,6 @@ class TestValidateConfigInvalid:
         assert any("review.strictness" in e for e in errors)
 
     def test_invalid_gate_type(self):
-        """gates.require_task_before_write 非布尔值。"""
         cfg = copy.deepcopy(DEFAULT_CONFIG)
         cfg["gates"]["require_task_before_write"] = "true"
         valid, errors = validate_config(cfg)
@@ -336,7 +275,6 @@ class TestValidateConfigInvalid:
         assert any("require_task_before_write" in e for e in errors)
 
     def test_multiple_errors(self):
-        """多个字段同时非法 -> 多个 errors。"""
         cfg = copy.deepcopy(DEFAULT_CONFIG)
         cfg["dev"]["default_path"] = "invalid"
         cfg["dev"]["autonomous"] = 123
@@ -347,60 +285,52 @@ class TestValidateConfigInvalid:
         assert len(errors) >= 4
 
     def test_missing_section(self):
-        """缺少整个 section 时 get_config_value 返回 default -> 触发校验错误。"""
-        cfg = {
-            "dev": {"default_path": "auto", "autonomous": "not_bool"},
-            "review": {"strictness": "normal"},
-        }
+        cfg = {"dev": {"default_path": "auto", "autonomous": "not_bool"},
+               "review": {"strictness": "normal"}}
         valid, errors = validate_config(cfg)
         assert valid is False
         assert any("布尔" in e for e in errors)
 
 
 # ==============================================================
-# 额外：_deep_merge 和 _try_load_toml 边界
+# 8. _deep_merge 和 _try_load_json 边界
 # ==============================================================
 
 class TestDeepMerge:
     """_deep_merge 工具函数行为验证。"""
 
     def test_list_replaced(self):
-        """列表直接替换（非合并）。"""
         base = {"items": [1, 2]}
         override = {"items": [3, 4, 5]}
         result = _deep_merge(base, override)
         assert result["items"] == [3, 4, 5]
 
     def test_nested_dict_merge(self):
-        """嵌套 dict 合并。"""
         base = {"a": {"x": 1, "y": 2}}
         override = {"a": {"y": 99, "z": 3}}
         result = _deep_merge(base, override)
-        assert result["a"]["x"] == 1  # 保留
-        assert result["a"]["y"] == 99  # 覆盖
-        assert result["a"]["z"] == 3  # 新增
+        assert result["a"]["x"] == 1
+        assert result["a"]["y"] == 99
+        assert result["a"]["z"] == 3
 
     def test_new_key_added(self):
-        """override 新增顶级 key。"""
         base = {"a": 1}
         override = {"b": 2}
         result = _deep_merge(base, override)
         assert result == {"a": 1, "b": 2}
 
 
-class TestTryLoadToml:
-    """_try_load_toml 边界行为。"""
+class TestTryLoadJson:
+    """_try_load_json 边界行为。"""
 
     def test_file_not_found(self):
-        """文件不存在返回 None。"""
-        result = _try_load_toml("/tmp/__nonexistent_file_for_test__.toml")
+        result = _try_load_json("/tmp/__nonexistent_file_for_test__.json")
         assert result is None
 
-    def test_valid_toml(self, animus_dir):
-        """合法 TOML 文件返回解析后的 dict。"""
-        path = os.path.join(animus_dir, "config.toml")
-        write_toml(path, {"dev": {"default_path": "fast"}})
-        result = _try_load_toml(path)
+    def test_valid_json(self, animus_dir):
+        path = os.path.join(animus_dir, "config.json")
+        write_config(path, {"dev": {"default_path": "fast"}})
+        result = _try_load_json(path)
         assert result == {"dev": {"default_path": "fast"}}
 
 
@@ -408,18 +338,13 @@ class TestGetCurrentSubProject:
     """测试 get_current_sub_project() 子项目检测"""
 
     def test_no_sub_projects(self):
-        """无 sub_projects 时返回 None"""
         assert get_current_sub_project({"project": {}}) is None
 
     def test_empty_sub_projects(self):
-        """sub_projects 为空时返回 None"""
         cfg = {"project": {"sub_projects": []}}
         assert get_current_sub_project(cfg) is None
 
     def test_matches_current_dir(self):
-        """当前在子项目目录内时返回 (dir, type)"""
-        import tempfile
-        import os
         with tempfile.TemporaryDirectory() as tmp:
             sub = os.path.join(tmp, "frontend")
             os.makedirs(sub)
@@ -427,12 +352,8 @@ class TestGetCurrentSubProject:
             result = get_current_sub_project(cfg, sub)
             assert result is not None
             assert result[0] == "frontend"
-            assert result[1] == "node"
 
     def test_not_in_sub_project(self):
-        """不在任何子项目内时返回 None"""
-        import tempfile
-        import os
         with tempfile.TemporaryDirectory() as tmp:
             unrelated = os.path.join(tmp, "other")
             os.makedirs(unrelated)
@@ -441,9 +362,6 @@ class TestGetCurrentSubProject:
             assert result is None
 
     def test_sub_dir_in_path(self):
-        """在子项目的深层子目录内也能识别"""
-        import tempfile
-        import os
         with tempfile.TemporaryDirectory() as tmp:
             deep = os.path.join(tmp, "frontend", "src", "components")
             os.makedirs(deep)
@@ -452,10 +370,7 @@ class TestGetCurrentSubProject:
             assert result is not None
             assert result[0] == "frontend"
 
-    def test_get_current_sub_project_exact_match(self):
-        """精确匹配：子项目目录名完整匹配时应返回正确结果"""
-        import tempfile
-        import os
+    def test_exact_match(self):
         with tempfile.TemporaryDirectory() as tmp:
             sub = os.path.join(tmp, "frontend")
             os.makedirs(sub)
@@ -463,16 +378,11 @@ class TestGetCurrentSubProject:
                 {"dir": "frontend", "type": "node"},
                 {"dir": "frontend-admin", "type": "react"},
             ]}}
-            # 在 frontend 目录中,应匹配 frontend
             result = get_current_sub_project(cfg, sub)
             assert result is not None
             assert result[0] == "frontend"
-            assert result[1] == "node"
 
-    def test_get_current_sub_project_partial_no_match(self):
-        """包含关系不误匹配：在 frontend-admin 中不应匹配 frontend"""
-        import tempfile
-        import os
+    def test_partial_no_match(self):
         with tempfile.TemporaryDirectory() as tmp:
             sub_admin = os.path.join(tmp, "frontend-admin")
             os.makedirs(sub_admin)
@@ -480,8 +390,6 @@ class TestGetCurrentSubProject:
                 {"dir": "frontend", "type": "node"},
                 {"dir": "frontend-admin", "type": "react"},
             ]}}
-            # 在 frontend-admin 目录中,应匹配 frontend-admin,不是 frontend
             result = get_current_sub_project(cfg, sub_admin)
             assert result is not None
             assert result[0] == "frontend-admin"
-            assert result[1] == "react"

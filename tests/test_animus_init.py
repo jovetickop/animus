@@ -280,12 +280,12 @@ class TestAnimusInitProject(unittest.TestCase):
         self.assertIn("version", data)
         self.assertIn("tasks", data)
 
-    def test_init_project_creates_config_toml(self):
-        """animus_init 应创建 config.toml"""
+    def test_init_project_creates_config(self):
+        """animus_init 应创建 config.json"""
         mod = self._import_module()
         result = mod.animus_init(self.tmpdir)
         self.assertTrue(result)
-        config_path = os.path.join(self.tmpdir, ".claude", "animus", "config.toml")
+        config_path = os.path.join(self.tmpdir, ".claude", "animus", "config.json")
         self.assertTrue(os.path.isfile(config_path))
 
     def test_init_project_skip_existing(self):

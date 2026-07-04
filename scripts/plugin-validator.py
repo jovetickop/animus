@@ -277,8 +277,8 @@ def check_r7_orphan_files(agents_dir, rules_dir):
     return findings
 
 
-def check_r8_config_keys(config_py_path, config_toml_path):
-    """R8: config_loader.py 中的配置键在 config.toml 中有声明"""
+def check_r8_config_keys(config_py_path, config_json_path):
+    """R8: config_loader.py 中的配置键在 config.json 中有声明"""
     findings = []
     text = _read_file(config_py_path)
     if not text:
@@ -297,14 +297,14 @@ def check_r8_config_keys(config_py_path, config_toml_path):
         if in_defaults and line.strip() == "}":
             break
 
-    toml_text = _read_file(config_toml_path)
-    if not toml_text:
-        return [Finding("R8", "warning", "config.toml 模板不存在", config_toml_path)]
+    json_text = _read_file(config_json_path)
+    if not json_text:
+        return [Finding("R8", "warning", "config.json 不存在", config_json_path)]
 
     for key in sorted(keys_in_code):
-        if key not in toml_text:
+        if key not in json_text:
             findings.append(Finding("R8", "warning",
-                                    "配置键 '{0}' 在 config.toml 中无声明".format(key), config_toml_path))
+                                    "配置键 '{0}' 在 config.json 中无声明".format(key), config_json_path))
     return findings
 
 
@@ -389,8 +389,8 @@ def run():
 
     # R8
     config_py = os.path.join(PROJECT_ROOT, "scripts", "config_loader.py")
-    config_toml = os.path.join(PROJECT_ROOT, ".claude", "animus", "config.toml")
-    findings.extend(check_r8_config_keys(config_py, config_toml))
+    config_json = os.path.join(PROJECT_ROOT, ".claude", "animus", "config.json")
+    findings.extend(check_r8_config_keys(config_py, config_json))
 
     # 自动修复（R2: 补 description）
     if fix_mode:

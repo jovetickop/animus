@@ -240,7 +240,7 @@ def animus_init(project_root):
     # === 2. 准备路径 ===
     state_dir = os.path.join(project_root, ".claude", "animus")
     reports_dir = os.path.join(state_dir, "docs")
-    config_path = os.path.join(state_dir, "config.toml")
+    config_path = os.path.join(state_dir, "config.json")
     features_path = os.path.join(state_dir, "features.json")
     lexicon_path = os.path.join(state_dir, "domain-lexicon.md")
     readme_path = os.path.join(state_dir, "README.md")
@@ -267,8 +267,8 @@ def animus_init(project_root):
         except Exception as e:
             print("[animus]   Warning: could not remove README.md - {}".format(e))
 
-    # === 5. 写入 config.toml ===
-    print("[animus]  3/5 写入 config.toml ... ", end="")
+    # === 5. 写入 config.json ===
+    print("[animus]  3/5 写入 config.json ... ", end="")
     sys.stdout.flush()
     try:
         if _path_exists(config_path):
@@ -276,7 +276,7 @@ def animus_init(project_root):
             print("skipped (exists)")
         else:
             new_config = _make_full_toml(project_type, sub_projects)
-            _write_toml(config_path, new_config)
+            _write_json(config_path, new_config)
             print("created")
     except Exception as e:
         print("FAILED - {}".format(e))

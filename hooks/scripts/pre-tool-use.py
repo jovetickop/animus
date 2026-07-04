@@ -12,10 +12,13 @@ pre-tool-use.py — PreToolUse 钩子脚本（Python 实现）
 
 from __future__ import print_function, unicode_literals
 
+import glob
+import json
 import os
 import shutil
 import subprocess
 import sys
+import time
 
 
 def get_script_dir():
@@ -24,14 +27,46 @@ def get_script_dir():
 
 
 def main():
+    script_dir = get_script_dir()
+
+    # ============================================================
+    # Step 0: 从 stdin 解析操作类型和文件路径（兼容 shell 钩子的输入格式）
+    # ============================================================
+    operation = ""
+    file_path = ""
+
+    try:
+        if not sys.stdin.isatty():
+            input_str = sys.stdin.read()
+            if input_str.strip():
+                data = json.loads(input_str)
+                operation = data.get("tool") or data.get("name") or ""
+                file_path = data.get("tool_input", {}).get("file_path") or ""
+    except (ValueError, IOError, OSError):
+        pass
+
+    # 仅处理 Write/Edit 操作
+    if operation not in ("Write", "Edit", ""):
+        sys.exit(0)
+
     # 确定项目根目录
-    if len(sys.argv) > 1:
-        root = sys.argv[1]
+    if file_path:
+        root = os.path.dirname(os.path.abspath(file_path))
+        # 从目标文件向上遍历，查找 .claude/animus/
+        current = root
+        while True:
+            candidate = os.path.join(current, ".claude", "animus", "features.json")
+            if os.path.isfile(candidate):
+                root = current
+                break
+            parent = os.path.dirname(current)
+            if parent == current:
+                break
+            current = parent
+    elif len(sys.argv) > 1:
+        root = os.path.abspath(sys.argv[1])
     else:
         root = os.getcwd()
-    root = os.path.abspath(root)
-
-    script_dir = get_script_dir()
 
     # ============================================================
     # Step 1: 调用 write-gate.py（门控检查）
@@ -51,14 +86,26 @@ def main():
               file=sys.stderr)
 
     # ============================================================
-    # Step 2: 备份 features.json → .features.backup.json
+    # Step 2: 备份 features.json（带时间戳，保留最近 5 个）
     # ============================================================
     features_path = os.path.join(root, ".claude", "animus", "features.json")
     if os.path.isfile(features_path):
-        backup_path = os.path.join(root, ".claude", "animus",
-                                   ".features.backup.json")
+        backup_dir = os.path.dirname(features_path)
+        timestamp = time.strftime("%Y%m%d%H%M%S")
+        backup_path = os.path.join(backup_dir, "features.json.bak.{0}".format(timestamp))
         try:
             shutil.copy2(features_path, backup_path)
+            # 清理旧备份：保留最近 5 个
+            all_backups = sorted(glob.glob(os.path.join(backup_dir, "features.json.bak.*")))
+            while len(all_backups) > 5:
+                old = all_backups.pop(0)
+                try:
+                    os.remove(old)
+                except (IOError, OSError):
+                    pass
+            # 同时保留一份无时间戳的快捷备份
+            simple_backup = os.path.join(backup_dir, ".features.backup.json")
+            shutil.copy2(features_path, simple_backup)
         except Exception as e:
             print(u"[pre-tool-use] 警告：备份 features.json 失败 - {0}".format(e),
                   file=sys.stderr)

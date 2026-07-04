@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-两层配置加载器：defaults → config.toml
-兼容 Python 3.11+（使用标准库 tomllib）和 Python 3.9-3.10（使用 tomli 或回退）。
+两层配置加载器：defaults → config.json
 """
 
+import json
 import os
 import copy
 
@@ -50,32 +50,16 @@ DEFAULT_CONFIG = {
 }
 
 
-def _try_load_toml(path):
-    """尝试用可用的 TOML 解析器加载文件，失败返回 None"""
+def _try_load_json(path):
+    """尝试用 json 加载配置文件，失败返回 None"""
     if not os.path.isfile(path):
         return None
 
-    # Python 3.11+：标准库
     try:
-        import tomllib
         with open(path, "rb") as f:
-            return tomllib.load(f)
-    except ImportError:
-        pass
+            return json.loads(f.read())
     except Exception:
         return None
-
-    # Python 3.9-3.10：第三方 tomli
-    try:
-        import tomli
-        with open(path, "rb") as f:
-            return tomli.load(f)
-    except ImportError:
-        pass
-    except Exception:
-        return None
-
-    return None
 
 
 def _deep_merge(base, override):
@@ -96,7 +80,7 @@ def load_config(animus_dir=None):
     """
     加载两层配置，返回合并后的 dict。
 
-    优先级：defaults < config.toml
+    优先级：defaults < config.json
     
     参数：
         animus_dir: .claude/animus/ 目录路径。默认从当前目录查找。
@@ -122,9 +106,9 @@ def load_config(animus_dir=None):
 
     config = copy.deepcopy(DEFAULT_CONFIG)
 
-    # 加载 config.toml（覆盖 defaults）
-    team_path = os.path.join(animus_dir, "config.toml")
-    team_cfg = _try_load_toml(team_path)
+    # 加载 config.json（覆盖 defaults）
+    team_path = os.path.join(animus_dir, "config.json")
+    team_cfg = _try_load_json(team_path)
     if team_cfg:
         config = _deep_merge(config, team_cfg)
 
@@ -217,9 +201,9 @@ if __name__ == "__main__":
         cfg = load_config()
         valid, errors = validate_config(cfg)
         if valid:
-            print("config.toml 校验通过")
+            print("config.json 校验通过")
         else:
-            print("config.toml 校验失败：")
+            print("config.json 校验失败：")
             for e in errors:
                 print(f"  - {e}")
         sys.exit(0 if valid else 1)

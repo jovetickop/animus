@@ -5,7 +5,7 @@ audience: plugin-developer
 
 # 如何调整代码审查严格度
 
-> 通过修改 `config.toml` 控制审查的行为和严格程度。
+> 通过修改 `config.json` 控制审查的行为和严格程度。
 
 ---
 

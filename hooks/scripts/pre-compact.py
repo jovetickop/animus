@@ -290,4 +290,17 @@ def main():
         except Exception:
             pass
 
-  
+    # 5. 同步 features.json 到 task_plan.md
+    try:
+        sync_to_task_plan(tasks, task_plan_path, history_path)
+    except Exception:
+        pass
+
+    # 6. Append-only 检测
+    try:
+        append_only_check(tasks, history_path)
+    except Exception:
+        pass
+
+    # 全部失败安全
+    sys.exit(0)
