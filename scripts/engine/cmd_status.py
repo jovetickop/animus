@@ -9,6 +9,82 @@ import json
 import os
 import sys
 
+# ---------- 工作流依赖图 ----------
+
+WORKFLOW_GRAPH = {
+    "animus-setup": {
+        "pre": [],
+        "post": [".claude/animus/features.json 存在"],
+        "next": ["animus-dev"],
+    },
+    "animus-dev": {
+        "pre": [".claude/animus/features.json 存在"],
+        "post": ["features.json 有 in_progress 任务"],
+        "next": ["animus-review", "animus-status"],
+    },
+    "animus-review": {
+        "pre": ["features.json 有 passed 任务"],
+        "post": ["审查报告已生成"],
+        "next": ["animus-archive"],
+    },
+    "animus-archive": {
+        "pre": ["所有任务已完成"],
+        "post": ["features.json 已清空"],
+        "next": ["animus-dev"],
+    },
+    "animus-status": {
+        "pre": [],
+        "post": [],
+        "next": [],
+    },
+    "animus-config": {
+        "pre": [],
+        "post": [],
+        "next": [],
+    },
+    "animus-help": {
+        "pre": [],
+        "post": [],
+        "next": [],
+    },
+}
+
+
+def _recommend_next(features):
+    """根据 features.json 当前状态推荐下一步。返回 (命令, 理由)。"""
+    if not features:
+        return ("/animus-setup", "项目还没初始化，先运行 setup")
+
+    # 获取任务列表
+    tasks_data = features.get("tasks", features.get("initial_tasks", []))
+    tasks = []
+    if isinstance(tasks_data, dict):
+        tasks = [{"id": tid, **t} for tid, t in tasks_data.items()]
+    elif isinstance(tasks_data, list):
+        tasks = tasks_data
+
+    if not tasks:
+        return ("/animus-dev", "还没有任务，开始规划第一个功能")
+
+    has_pending = any(t.get("status") == "pending" for t in tasks)
+    has_in_progress = any(t.get("status") == "in_progress" for t in tasks)
+    has_passed = any(t.get("status") == "passed" for t in tasks)
+    has_failed = any(t.get("status") == "failed" for t in tasks)
+    all_done = all(t.get("status") in ("passed", "completed") for t in tasks)
+
+    if has_in_progress:
+        return ("/animus-dev", "有进行中的任务，继续实施")
+    if has_failed:
+        return ("/animus-dev", "有失败的任务，修复后重试")
+    if has_pending:
+        return ("/animus-dev", "有待办任务，开始实施")
+    if has_passed and not all_done:
+        return ("/animus-review", "有已完成任务，需要审查")
+    if all_done:
+        return ("/animus-archive", "所有任务已完成，归档迭代")
+
+    return ("/animus-dev", "开始新的开发")
+
 
 def _text(value):
     """将值强制转为 str（Python 2 下为字节串，Python 3 下为文本）。"""
@@ -165,6 +241,11 @@ def run():
 
     append("")
     append("=" * 54)
+    append("")
+    append(u"  \u2728 \u63a8\u8350\u4e0b\u4e00\u6b65\uff1a")
+    if isinstance(data, dict):
+        cmd, reason = _recommend_next(data)
+        append(u"     {0}  \u2014 {1}".format(cmd, reason))
 
     return "\n".join(result_lines)
 
