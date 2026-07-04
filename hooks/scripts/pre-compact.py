@@ -24,6 +24,21 @@ import re
 import subprocess
 import sys
 from datetime import datetime
+import importlib.util
+
+# 导入 memlog 模块
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+_plugin_root = os.path.abspath(os.path.join(_script_dir, "..", ".."))
+_memlog_path = os.path.join(_plugin_root, "scripts", "memlog.py")
+if os.path.isfile(_memlog_path):
+    try:
+        spec = importlib.util.spec_from_file_location("memlog_mod", _memlog_path)
+        memlog_mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(memlog_mod)
+    except Exception:
+        memlog_mod = None
+else:
+    memlog_mod = None
 
 
 def find_project_root(start_dir):
@@ -244,7 +259,21 @@ def main():
         marker = "├" if status != sorted(status_counts.keys())[-1] else "└"
         print(u"  {0}─ {1}: {2}".format(marker, status, count))
 
-    # 3. 调用 show-status.py --summary（如果存在）
+    # 3. 写入 memlog compact 事件
+    if memlog_mod is not None:
+        try:
+            status_str = ", ".join(
+                "{0}: {1}".format(k, v) for k, v in sorted(status_counts.items())
+            )
+            memlog_mod.write_event("compact", {
+                "total": total_count,
+                "status": status_str,
+                "done": done_count,
+            })
+        except Exception:
+            pass  # memlog 写入失败不阻塞
+
+    # 4. 调用 show-status.py --summary（如果存在）
     status_script = os.path.join(project_root, "templates", "animus", "show-status.py")
     if not os.path.isfile(status_script):
         status_script = os.path.join(get_script_dir(), "..", "..", "templates", "animus", "show-status.py")

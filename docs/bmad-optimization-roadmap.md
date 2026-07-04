@@ -92,7 +92,7 @@ Phase 0 (基础设施)       Phase 1 (核心体验)       Phase 2 (能力增强)
 
 ### 1.2 Memlog 模式状态持久化 [✅ 已完成 2026-07-04]
 
-**现状：** 状态分散在 `features.json`、`animus-history.jsonl`、`task_plan.md`、`handoff.json`。互相同步靠 PreCompact hook，容易不一致。
+**现状：** memlog 框架已就绪：`scripts/memlog.py`（事件写入）、`cmd_rebuild.py`（重建）
 
 **目标：** 引入 append-only memlog 作为单一事件源，状态文件从 memlog 派生（派生可删除重建，memlog 永不删除）。
 
@@ -102,10 +102,10 @@ Phase 0 (基础设施)       Phase 1 (核心体验)       Phase 2 (能力增强)
 |------|------|---------|
 | 1.2.1 | 定义 memlog 格式：`YYYY-MM-DD-HHmm-{event-type}.md`，append-only | 新建 `.claude/animus/memlog/` 目录 |
 | 1.2.2 | 事件类型定义：「创建任务」「状态变更」「决策」「交接」「归档」「辩论」 | `docs/architecture.md` 更新 |
-| 1.2.3 | 修改 `scripts/update-progress.py` 支持从 memlog 重建 features.json | `scripts/update-progress.py` |
-| 1.2.4 | 修改 PreCompact hook：新增 memlog 事件追加 | `hooks/scripts/pre-compact.py`、`.sh` |
+| 1.2.3 | `scripts/engine/cmd_rebuild.py` 从 memlog 重建 features.json | `scripts/engine/cmd_rebuild.py` |
+| 1.2.4 | PreCompact hook 已集成 memlog 事件追加 | `hooks/scripts/pre-compact.py` |
 | 1.2.5 | 删除 `/animus-handoff` 和 `/animus-continue`（已移除，memlog 自动接管） | 删除 `commands/animus-handoff.md` `commands/animus-continue.md` |
-| 1.2.6 | 添加 `scripts/rebuild-from-memlog.py` 恢复脚本 | 新建 `scripts/rebuild-from-memlog.py` |
+| 1.2.6 | `scripts/engine/cmd_rebuild.py` 恢复脚本 | `scripts/engine/cmd_rebuild.py` |
 
 **文件名示例：** `2026-07-04-1001-创建任务-T003-添加PDF导出功能.md`（中文文件名和内容）
 
