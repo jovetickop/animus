@@ -9,6 +9,9 @@
 | | `test-engineer` | 测试官 (Test) | 测试方案设计与验证 | universal | 通用测试设计 |
 | | `build-doctor` | 构建师 (Build) | 构建问题诊断与修复 | universal | 构建诊断 |
 | | `code-reviewer` | 审查官 (Review) | 代码质量门控审查 | universal | 通用代码审查 |
+| | `edge-case-hunter` | 边界猎手 | 空值/溢出/并发/资源泄露 | universal | 边界条件审查 |
+| | `acceptance-auditor` | 验收审计官 | 验收条件逐条核对 | universal | 验收审计 |
+| | `ponytail-reviewer` | 精简审查官 | 过度工程检查 | universal | 代码精简审查 |
 | `agents/qt/` | `architect` | 架构师 (Qt) | Qt 类设计与架构决策 | qt | C++/Qt 架构 |
 | | `task-implementer` | 实现者 (Qt) | Qt 增量编码实现 | qt | Qt 实现 |
 | | `test-engineer` | 测试官 (Qt) | Qt 测试验证 | qt | Qt 测试 |
