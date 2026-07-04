@@ -148,8 +148,8 @@
 - `engine/` — 子命令模块目录：cmd_status.py、cmd_transition.py、cmd_validate.py、cmd_archive.py、cmd_rebuild.py
 - `show-status.py` — 状态概览显示
 - `scripts/run-regression.py` — 一键构建+测试
-- `init.ps1` — 首次初始化引导
-- `coding-session.ps1` — 会话入口
+- `init.py` — 首次初始化引导
+- `coding_session.py` — 会话入口
 - `config.toml` 中 `[project]` 段 — 项目类型与构建命令配置（由 `/animus-init` 自动填入）
 - `animus-engine.py validate` — 结构校验 + 循环依赖检测 (Kahn 算法)
 
@@ -181,7 +181,7 @@
 ### 3. 模板 + 安装脚本的部署模式
 
 - 所有技能资产集中存储在仓库根目录下
-- `init-project.ps1` 是安装脚本，为目标项目创建 `.claude/animus/` 运行时目录
+- `init_project.py` 是安装脚本，为目标项目创建 `.claude/animus/` 运行时目录
 - 不再修改目标项目的 CLAUDE.md
 
 ### 4. 钩子自动化
@@ -211,10 +211,10 @@
 | 核心脚本从 PS 迁移到 Python | 跨平台 + Python 2/3 兼容 | `scripts/` 中的 `.py` 文件 |
 | HTML 注释引用替代原生 include | Markdown 缺乏 include 机制，HTML 注释是最便携方式 | `agents/base/*.md` |
 | 前置声明式 tasks.json | JSON 比 YAML 更宽泛的语言解析支持 | `templates/animus/features.json` |
-| 不修改目标项目的 CLAUDE.md | 目标项目保持独立，仅创建 .claude/animus/ 运行时目录 | `init-project.ps1` |
+| 不修改目标项目的 CLAUDE.md | 目标项目保持独立，仅创建 .claude/animus/ 运行时目录 | `init_project.py` |
 | 状态分片 (active/archive) | 缩减 Token 消耗约 78%，长项目更友好 | `.claude/animus/` 目录 |
 | 双平台钩子脚本 | Windows/Linux 开发环境都需支持 | `hooks/scripts/*.ps1 + *.sh` |
-| 项目类型自动检测 | 零配置上手，按项目文件判定语言栈 | `init-project.ps1` 步骤 5 |
+| 项目类型自动检测 | 零配置上手，按项目文件判定语言栈 | `init_project.py` 步骤 5 |
 | 空命令值保持空 | 不硬编码默认值，由用户首次运行时填写 | `config.toml [project]` 段 |
 
 ## 架构质量属性

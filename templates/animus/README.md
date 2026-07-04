@@ -65,7 +65,7 @@
 |------|------|
 | `animus-engine.py transition` | 状态机引擎 |
 | `show-status.py` | 状态概览显示 |
-| `init.ps1` | 首次初始化引导 |
-| `coding-session.ps1` | 会话入口 |
+| `init.py` | 首次初始化引导 |
+| `coding_session.py` | 会话入口 |
 | `gap-analysis.py` | 差距分析脚本（在 `scripts/` 下） |
 | `archive-iteration.py` | 归档脚本（在 `scripts/` 下） |
