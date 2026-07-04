@@ -910,3 +910,54 @@ class TestCmdArchive:
             # 不应抛出异常
             result = cmd_archive.run()
             assert result is None, "无 animus 目录时应返回 None"
+class TestSpecValidation:
+    """测试 features.json 中 SPEC 字段的 4 法则校验"""
+
+    def _run_validate(self, tasks_json):
+        """辅助函数：构造完整 features.json 并运行 validate"""
+        import json, tempfile, os
+        data = {"version": 1, "tasks": json.loads(tasks_json), "created_at": "", "updated_at": ""}
+        tmp = tempfile.mkdtemp()
+        animus = os.path.join(tmp, ".claude", "animus")
+        os.makedirs(animus)
+        fp = os.path.join(animus, "features.json")
+        with open(fp, "w") as f:
+            json.dump(data, f)
+        old_cwd = os.getcwd()
+        os.chdir(tmp)
+        try:
+            from scripts.engine import cmd_validate
+            result = cmd_validate.run()
+            return result
+        finally:
+            os.chdir(old_cwd)
+
+    def test_valid_spec(self):
+        """完整 spec 字段通过校验"""
+        tasks = '[{"id":"T001","name":"test","status":"pending","depends_on":[],"priority":100,"last_error":"","updated_at":"","spec":{"why":"purpose","capabilities":["A"],"constraints":[],"non_goals":[],"success":"testable"}}]'
+        assert self._run_validate(tasks) == True
+
+    def test_no_spec(self):
+        """无 spec 字段的任务向后兼容"""
+        tasks = '[{"id":"T001","name":"test","status":"pending","depends_on":[],"priority":100,"last_error":"","updated_at":""}]'
+        assert self._run_validate(tasks) == True
+
+    def test_missing_why(self):
+        """缺少 why 不通过"""
+        tasks = '[{"id":"T001","name":"test","status":"pending","depends_on":[],"priority":100,"last_error":"","updated_at":"","spec":{"capabilities":["A"],"success":"ok"}}]'
+        assert self._run_validate(tasks) == False
+
+    def test_missing_capabilities(self):
+        """缺少 capabilities 不通过"""
+        tasks = '[{"id":"T001","name":"test","status":"pending","depends_on":[],"priority":100,"last_error":"","updated_at":"","spec":{"why":"purpose","success":"ok"}}]'
+        assert self._run_validate(tasks) == False
+
+    def test_missing_success(self):
+        """缺少 success 不通过"""
+        tasks = '[{"id":"T001","name":"test","status":"pending","depends_on":[],"priority":100,"last_error":"","updated_at":"","spec":{"why":"purpose","capabilities":["A"]}}]'
+        assert self._run_validate(tasks) == False
+
+    def test_spec_not_dict(self):
+        """spec 非对象类型时报错"""
+        tasks = '[{"id":"T001","name":"test","status":"pending","depends_on":[],"priority":100,"last_error":"","updated_at":"","spec":"invalid"}]'
+        assert self._run_validate(tasks) == False

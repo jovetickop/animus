@@ -133,7 +133,7 @@ def run():
                 }
                 # 复制 frontmatter 中其他未知字段
                 for k, v in frontmatter.items():
-                    if k not in ("type", "timestamp", "id", "title", "status", "depends_on", "priority", "last_error", "updated_at"):
+                    if k not in ("type", "timestamp", "id", "title", "status", "depends_on", "priority", "spec", "test_command", "last_error", "updated_at"):
                         task_data[k] = v
                 features["tasks"][tid] = task_data
 

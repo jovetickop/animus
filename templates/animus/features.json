@@ -5,6 +5,14 @@
     "status": "pending",
     "depends_on": [],
     "priority": 100,
+    "spec": {
+      "why": "为什么要做这个任务？解决什么用户痛点？",
+      "capabilities": ["功能 A", "功能 B"],
+      "constraints": ["性能要求", "兼容性要求"],
+      "non_goals": ["本次不做的范围"],
+      "success": "可验证的完成标准"
+    },
+    "test_command": "",
     "last_error": "",
     "updated_at": ""
   }

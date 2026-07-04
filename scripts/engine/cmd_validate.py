@@ -160,6 +160,7 @@ def run():
       - depends_on 引用存在性
       - 多 in_progress 冲突
       - 循环依赖
+      - SPEC 字段完整性（4 法则校验）
 
     输出校验结果到 stdout，无返回值。
     """
@@ -300,6 +301,35 @@ def run():
             else:
                 errors.append(u"[ERROR] 检测到循环依赖，涉及任务: {0}".format(", ".join(sorted(cycle_nodes))))
 
+
+    # ----------------------------------------------------------
+    # SPEC 字段校验（4 法则）
+    # ----------------------------------------------------------
+    for task in tasks:
+        task_id = str(task.get("id", "?"))
+        spec = task.get("spec")
+        if spec is None:
+            continue
+        if not isinstance(spec, dict):
+            errors.append("[ERROR] {0}: spec 必须是对象类型".format(task_id))
+            continue
+
+        why = spec.get("why")
+        if not why or not str(why).strip():
+            errors.append("[ERROR] {0}: spec.why 必须填写目的说明".format(task_id))
+
+        caps = spec.get("capabilities")
+        if not caps or not isinstance(caps, list) or len(caps) == 0:
+            errors.append("[ERROR] {0}: spec.capabilities 必须为非空数组".format(task_id))
+
+        constraints = spec.get("constraints")
+        if constraints is not None and not isinstance(constraints, list):
+            errors.append("[ERROR] {0}: spec.constraints 必须为数组".format(task_id))
+
+        success = spec.get("success")
+        if not success or not str(success).strip():
+            errors.append("[ERROR] {0}: spec.success 必须填写可验证的成功标准".format(task_id))
+
     # ----------------------------------------------------------
     # 输出结果
     # ----------------------------------------------------------
@@ -314,6 +344,7 @@ def run():
     if warnings:
         for warn in warnings:
             print(u"  警告: {0}".format(warn))
+    return len(errors) == 0
 
 
 # ============================================================
