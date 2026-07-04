@@ -42,7 +42,20 @@
 
 ## 2. 命令详解
 
-### 2.1 `/animus-dev` — 统一开发入口
+### 2.1 `/animus-init` — 项目初始化
+
+**原理：** 检测目标项目的技术栈类型（CMakeList.txt → cpp-qt/cpp-cmake、Cargo.toml → rust、go.mod → go、package.json → node、pyproject.toml → python），创建 `.claude/animus/` 运行时目录，写入默认配置。
+
+**执行内容：**
+1. 检测项目根目录
+2. 按文件列表判定语言栈
+3. 创建 `.claude/animus/` 目录
+4. 写入默认 `config.toml`（含 `[project]` 段）
+5. 生成初始 `features.json`
+
+---
+
+### 2.2 `/animus-dev` — 统一开发入口
 
 **原理：** 根据用户输入的意图描述，AI 自动判断改动范围和类型，选择最合适的开发路径。所有路径都会写入 memlog 和 features.json，确保任务全程可追溯。
 
@@ -95,7 +108,7 @@ autonomous = false       # true=AI全权决策，不询问
 
 ---
 
-### 2.2 `/animus-review` — 代码审查
+### 2.3 `/animus-review` — 代码审查
 
 **原理：** 并行启动 4 个审查 agent，分别从正确性、边界条件、验收标准、精简度四个维度审查代码。审查结果汇总后按严重度分级裁决。
 
@@ -142,7 +155,26 @@ max_findings = 20
 
 ---
 
-### 2.3 `/animus-status` — 状态看板
+### 2.4 `/animus-party` — 辩论模式
+
+**原理：** 多 agent 并行辩论，从不同角度碰撞观点，暴露设计盲点。
+
+**模板：**
+
+| 模板 | 角色 | 人数 |
+|------|------|------|
+| `arch-review` | 架构师+审查官+测试官+构建师+规划师 | 5 |
+| `code-review` | 审查官+边界猎手+验收审计官+精简审查官 | 4 |
+
+**运行模式：** session / subagent（推荐）/ auto / agent-team
+
+**触发方式：**
+- 自动：`config.toml` 中 `[party_mode].auto_trigger` 配置
+- 手动：`/animus-party`（默认）/ `/animus-party 架构评审` / `/animus-party 代码审查 session`
+
+---
+
+### 2.5 `/animus-status` — 状态看板
 
 **原理：** 读取 features.json，统计任务状态分布，按优先级排序输出每个任务明细，底部推荐下一步命令。
 
@@ -177,7 +209,7 @@ max_findings = 20
 
 ---
 
-### 2.4 `/animus-help` — 帮助与导航
+### 2.6 `/animus-help` — 帮助与导航
 
 **原理：** 读取 `.claude/animus/` 目录状态，根据当前进度推荐最合适的命令。不需要记忆命令顺序，跟着推荐走即可。
 
@@ -193,20 +225,7 @@ max_findings = 20
 
 ---
 
-### 2.5 `/animus-init` — 项目初始化
-
-**原理：** 检测目标项目的技术栈类型（CMakeList.txt → cpp-qt/cpp-cmake、Cargo.toml → rust、go.mod → go、package.json → node、pyproject.toml → python），创建 `.claude/animus/` 运行时目录，写入默认配置。
-
-**执行内容：**
-1. 检测项目根目录
-2. 按文件列表判定语言栈
-3. 创建 `.claude/animus/` 目录
-4. 写入默认 `config.toml`（含 `[project]` 段）
-5. 生成初始 `features.json`
-
----
-
-### 2.6 `/animus-archive` — 迭代归档
+### 2.7 `/animus-archive` — 迭代归档
 
 **原理：** 将当前迭代的完整状态打包到 `archive/iter-xxx-名称/` 目录下，清空 features.json 开始新的迭代。归档目录保留完整的任务历史、memlog 事件和迭代总结，可随时回溯。
 
@@ -233,25 +252,6 @@ max_findings = 20
 /animus-archive                           # 交互式：输入名称
 /animus-archive --name "迭代 3-UI重构"     # 直接归档
 ```
-
-### 2.7 `/animus-party` — 辩论模式
-
-**原理：** 多 agent 并行辩论，从不同角度碰撞观点，暴露设计盲点。
-
-**模板：**
-
-| 模板 | 角色 | 人数 |
-|------|------|------|
-| `arch-review` | 架构师+审查官+测试官+构建师+规划师 | 5 |
-| `code-review` | 审查官+边界猎手+验收审计官+精简审查官 | 4 |
-
-**运行模式：** session / subagent（推荐）/ auto / agent-team
-
-**触发方式：**
-- 自动：`config.toml` 中 `[party_mode].auto_trigger` 配置
-- 手动：`/animus-party`（默认）/ `/animus-party 架构评审` / `/animus-party 代码审查 session`
-
----
 
 ## 3. 配置系统
 

@@ -14,12 +14,13 @@ description: 列出所有 animus 命令及推荐下一步
 
 | 命令 | 用途 |
 |------|------|
-| `/animus-dev` | 统一开发入口（五路路由） |
-| `/animus-review` | 代码审查 |
-| `/animus-status` | 状态看板 |
-| `/animus-archive` | 迭代归档 |
 | `/animus-init` | 项目初始化 |
+| `/animus-dev` | 统一开发入口（四路路由） |
+| `/animus-review` | 代码审查 |
 | `/animus-party` | 辩论模式 |
+| `/animus-status` | 状态看板 |
+| `/animus-help` | 帮助与导航 |
+| `/animus-archive` | 迭代归档 |
 
 ## 推荐逻辑
 
