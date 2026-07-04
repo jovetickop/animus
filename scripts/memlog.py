@@ -49,7 +49,7 @@ def write_event(event_type, content_dict):
         os.makedirs(memlog_dir)
 
     now = datetime.now()
-    timestamp = now.strftime("%Y-%m-%d-%H%M")
+    timestamp = now.strftime("%Y-%m-%d-%H-%M-%S")
     iso_time = now.isoformat()
 
     # 从内容中提取可选上下文（用于文件名）
