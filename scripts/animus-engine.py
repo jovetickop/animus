@@ -12,6 +12,7 @@ animus-engine.py — 统一 CLI 入口
 """
 
 import argparse
+import os
 import sys
 
 
@@ -33,7 +34,11 @@ def main():
     p.add_argument("--evidence", default="", help="状态变更证据（如测试日志路径）")
 
     # validate
-    sub.add_parser("validate", help="校验 features.json 结构")
+    p = sub.add_parser("validate", help="校验 features.json 结构")
+    p.add_argument("--plugin", action="store_true", help="校验插件自身完整性（plugin-validator）")
+    p.add_argument("--strict", action="store_true", help="CI 严格模式")
+    p.add_argument("--json", action="store_true", help="JSON 输出")
+    p.add_argument("--fix", action="store_true", help="自动修复简单问题")
 
     # archive
     p = sub.add_parser("archive", help="归档当前迭代")
@@ -54,8 +59,21 @@ def main():
             from engine.cmd_transition import run
             run(args.task_id, args.to, args.evidence)
         elif args.command == "validate":
-            from engine.cmd_validate import run
-            run()
+            if getattr(args, "plugin", False):
+                import subprocess
+                cmd = [sys.executable,
+                       os.path.join(os.path.dirname(__file__), "plugin-validator.py")]
+                if args.strict:
+                    cmd.append("--strict")
+                if getattr(args, "json", False):
+                    cmd.append("--json")
+                if args.fix:
+                    cmd.append("--fix")
+                ret = subprocess.call(cmd)
+                sys.exit(ret)
+            else:
+                from engine.cmd_validate import run
+                run()
         elif args.command == "archive":
             from engine.cmd_archive import run
             run(args.name, args.discard)

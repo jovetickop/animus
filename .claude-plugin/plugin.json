@@ -1,7 +1,7 @@
 {
   "name": "animus",
   "description": "状态机驱动的 AI 编码工作流引擎。包含 6 大角色：规划师(Plan)、架构师(Qt/Rust/Go/...)、实现者、测试官、审查官(Review)、构建师(Build)。面向需要多轮 AI 辅助会话的复杂多语言开发场景。",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "author": {
     "name": "JiangJie",
     "url": "https://github.com/jovetickop"

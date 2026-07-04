@@ -1,3 +1,10 @@
+---
+type: reference
+audience: plugin-developer
+deprecated: true
+deprecation-notice: "已拆分为 tutorials/ getting-started.md + reference/ commands.md + 各 explanation/ 和 reference/ 文件。请使用 docs/README.md 导航。"
+---
+
 # Animus 详细指南
 
 > 本指南包含用户操作说明和底层机制解析两部分。

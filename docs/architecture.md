@@ -1,3 +1,8 @@
+---
+type: explanation
+audience: maintainer
+---
+
 # Animus 架构文档
 
 本文档从 CLAUDE.md 迁移而来，包含架构分层、设计模式、决策记录、运行时要求等参考性内容。
@@ -254,3 +259,15 @@
 - 状态分片 (active/archive) 减少每次加载的 Token 量（约 78%）
 - Hook timeout 限制 (PreToolUse/PostToolUse: 10s, PostToolUse format-all: 15s)
 - `parallel_group` 支持并行任务执行
+
+---
+
+## 审查门控体系
+
+| 门控 | 级别 | 说明 |
+|------|------|------|
+| Write 前门控 | HARD | 无 in_progress 任务时拒绝 Write/Edit |
+| Oracle 验证 | HARD | to=passed 时执行 verify_command |
+| 并行审查 | HARD | 4 agent 审查，high 阻塞 |
+| 循环回退 | HARD | 最多 3 轮，超限终止 |
+| 超时等待 | SOFT | 超时自动延长等待，不中断；仅报错重试 3 次 |

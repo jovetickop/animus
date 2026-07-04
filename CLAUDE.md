@@ -121,6 +121,18 @@ python -m json.tool templates/animus/features.json > /dev/null
 
 本仓库无构建步骤；CI 在多语言目标工程上跑。
 
+## 插件自检
+
+修改 Agent、Rule、Hook 后运行验证：
+
+```bash
+python scripts/plugin-validator.py
+python scripts/animus-engine.py validate --plugin --strict  # CI 模式
+python scripts/plugin-validator.py --json                    # JSON 输出
+```
+
+大规模重构后请 AI 读取 `docs/plugin-validator-guide.md` 执行语义审查。
+
 ## 参考文档
 
 | 内容 | 位置 |

@@ -1,3 +1,8 @@
+---
+type: reference
+audience: all
+---
+
 # Agent 索引
 
 本文档从 CLAUDE.md 迁移而来，列出所有 Agent 的目录位置和职责。
@@ -29,6 +34,24 @@
 | `agents/rust/` | `architect` | 架构师 (Rust) | Rust 架构设计与选型 | rust | Rust 架构 |
 | | `test-engineer` | 测试官 (Rust) | Rust 测试方案 | rust | Rust 测试 |
 | `agents/frontend/` | `feature-planner-frontend` | 规划师 (FE) | 前端任务规划补充指南 | frontend | 前端任务规划 |
+
+## Agent 分组汇总
+
+| 组 | 数量 | Agent |
+|----|------|-------|
+| universal | 8 | 规划师/实现者/测试官/构建师/审查官/边界猎手/验收审计官/精简审查官 |
+| qt | 4 | 架构师/实现者/测试官/UI 审查官 |
+| cpp-cmake | 1 | 架构师 |
+| python | 2 | 架构师/测试官 |
+| node | 3 | 架构师/测试官/UI 审查官 |
+| rust | 2 | 架构师/测试官 |
+| go | 2 | 架构师/测试官 |
+| frontend | 1 | 规划师（前端补充） |
+| base | 2 | 核心模板（实现者核心/测试官核心） |
+
+## 菜单功能
+
+核心 Agent（实现者、规划师、审查官、测试官、构建师）激活后展示**编号菜单**，用户输入数字即可选择处理路径。意图明确时跳过菜单直接执行。
 
 ## 新增 Agent 规范
 
