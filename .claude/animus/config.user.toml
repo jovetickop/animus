@@ -1,0 +1,12 @@
+# animus 用户个人配置文件
+# 此文件被 .gitignore 排除，不会提交到仓库
+# 覆盖 team 层配置，优先级最高
+# 只需写你想要覆盖的字段，其他字段自动从 config.toml 继承
+
+# 示例：开启自主模式，跳过人工确认
+# [dev]
+# autonomous = true
+
+# 示例：关闭写代码门控
+# [gates]
+# require_task_before_write = false

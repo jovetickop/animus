@@ -48,7 +48,7 @@
 | 路径 | 触发条件 | 流程 |
 |------|---------|------|
 | debug | bug 报告/异常/回归 | 3 问调试 → features.json → implement → review |
-| oneshot | 零爆炸半径（改颜色值） | 直接实施，0 提问 |
+| oneshot | 零爆炸半径（改颜色值） | 1 句确认 → implement → review |
 | fast | 1-2 文件/小改动 | 1 句确认 → implement → review |
 | light | 3-10 文件/新增功能 | 3 问 → features.json → implement → review |
 | full | 跨模块/架构改动 | 7 问 + 可选脑暴 → 拆任务 → implement → review |
@@ -97,7 +97,7 @@ AI 自动选路后输出「将使用 XX 路径」让用户确认。`config.toml`
 ```
 用户输入 → AI 检测意图类型
   ├── bug 报告/异常 → debug-path（3 问调试专用）
-  ├── 零爆炸半径 → oneshot（0 问）
+  ├── 零爆炸半径 → oneshot（1 句确认）
   ├── 1-2 文件/小改动 → fast-path（1 句确认）
   ├── 3-10 文件/新增 → light-path（3 问）
   └── 跨模块/架构改动 → full-path（7 问 + 可选脑暴）

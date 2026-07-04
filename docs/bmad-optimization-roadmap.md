@@ -217,7 +217,7 @@ commands:
 ```
 用户输入 → 检测意图类型
   ├── bug 报告/异常 → debug-path（3 问调试专用）
-  ├── 零爆炸半径（改个颜色值）→ oneshot（0 问）
+  ├── 零爆炸半径（改个颜色值）→ oneshot（1 句确认）
   ├── 1-2 文件 / 小改动 → fast-path（1 句确认）
   ├── 3-10 文件 / 新增 → light-path（3 问）
   └── 跨模块 / 架构改动 → full-path（7 问 + 可选脑暴 + Party Mode）
