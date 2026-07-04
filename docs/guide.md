@@ -130,7 +130,7 @@ autonomous = false       # true=AI全权决策，不询问
 
 **循环回退：** 审查不通过 → 退回 implementer 修复 → 重新审查，最多 3 轮。超限后审查终止，报错人工介入。
 
-**超时降级：** 任何 agent 超时 → 自动重试最多 3 次 → 仍失败 → 审查终止。
+**超时等待：** agent 超时不等于失败。网络延迟或服务端繁忙时自动延长等待时间，继续等待不中断。仅在 agent 明确返回错误时重试（最多 3 次），仍错误则终止报错。
 
 **配置：**
 ```toml
@@ -452,7 +452,7 @@ python animus-engine.py rebuild
 | Oracle 验证 | HARD | to=passed 时执行 verify_command |
 | 并行审查 | HARD | 4 agent 审查，high 阻塞 |
 | 循环回退 | HARD | 最多 3 轮，超限终止 |
-| 超时降级 | HARD | 单 agent 重试 3 次，失败终止 |
+| 超时等待 | SOFT | 超时自动延长等待，不中断；仅报错重试 3 次 |
 | SPEC 法则 | SOFT | 4 条法则校验，违规警告 |
 
 ---

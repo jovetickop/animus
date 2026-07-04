@@ -102,7 +102,7 @@
 第 3 轮审查 → 仍有 high 问题 → ❌ 审查终止，报错
 ```
 
-**超时降级：** 严格模式——任何 agent 失败/超时 → 自动重试最多 **3 次** → 仍失败 → 审查终止报错。
+**超时等待：** agent 超时不等于失败，网络延迟或服务端繁忙时自动延长等待时间。仅在 agent 明确返回错误时重试（最多 **3 次**），仍失败则审查终止报错。
 
 **回退流程：**
 1. 审查发现有 high 级问题，生成审查报告
@@ -153,7 +153,7 @@
 | 新建 `agents/universal/edge-case-hunter.md` | 新 agent：边界审查 |
 | 新建 `agents/universal/acceptance-auditor.md` | 新 agent：验收审计 |
 | 新建 `agents/universal/ponytail-reviewer.md` | 新 agent：精简审查（参考 ponytail-review 内容） |
-| 修改 `commands/animus-review.md` | 并行调用 4 agent + 结果聚合 + 循环回退逻辑 + 超时降级 |
+| 修改 `commands/animus-review.md` | 并行调用 4 agent + 结果聚合 + 循环回退逻辑 + 超时等待 |
 | 修改 implementer agent | 追加 ponytail 开发原则 |
 | 修改 `scripts/validate-features.py` | 门控逻辑更新 + 循环回退计数 + 3 轮上限 |
 | `.claude/animus/config.toml` | 追加 `[review]`、`[ponytail]` 配置段 |
@@ -164,7 +164,7 @@
 |------|------|
 | 性能 | 最多 4 agent × 3 轮 = 12 次审查调用，耗时增加但仅在 high 问题时触发 |
 | 兼容性 | `/animus-review` 接口不变，输出格式向后兼容 |
-| 降级 | 超时/失败 → 自动重试 3 次 → 仍失败则终止报错；单 agent 失败不影响其他 agent 结果 |
+| 降级 | 超时自动延长等待，不中断；仅 agent 明确报错时重试 3 次仍失败才终止；单 agent 失败不影响其他 |
 
 ## 四、验证方法
 
