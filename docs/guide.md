@@ -209,15 +209,26 @@ max_findings = 20
 
 ### `/animus-archive` — 迭代归档
 
-**原理：** 将当前 features.json 打包到 `archive/iter-xxx-名称/` 目录下，清空 features.json 开始新的迭代。归档目录保留完整的任务历史、审查报告和日志，可随时回溯。
+**原理：** 将当前迭代的完整状态打包到 `archive/iter-xxx-名称/` 目录下，清空 features.json 开始新的迭代。归档目录保留完整的任务历史、memlog 事件和迭代总结，可随时回溯。
+
+**归档内容：**
+
+| 内容 | 去向 | 原位置 |
+|------|------|--------|
+| features.json（含全部任务历史） | 复制到 `archive/iter-xxx/` | 清空 tasks，保留 metadata |
+| memlog 所有事件 | 复制到 `archive/iter-xxx/memlog/` | 保留（append-only） |
+| iteration-summary.md（自动生成） | 创建到 `archive/iter-xxx/` | — |
+| config.toml | 不变 | 保留 |
+| deferred-work.md | 可手动移入 | 保留 |
 
 **执行流程：**
 1. 读取当前 features.json 的任务统计
 2. 创建 `archive/iter-{编号}-{名称}/` 目录
-3. 复制 features.json 到归档目录
-4. 生成 `iteration-summary.md`（含任务统计明细）
-5. 清空 features.json（仅保留 metadata）
-6. 向 memlog 写入归档事件
+3. 复制 memlog/ 到归档目录
+4. 复制 features.json 到归档目录
+5. 生成 `iteration-summary.md`（含任务统计明细）
+6. 清空 features.json（仅保留 metadata）
+7. 向 memlog 写入归档事件
 
 **命令选项：**
 ```

@@ -67,6 +67,15 @@ def run(name="", discard=False):
     iter_dir = os.path.join(archive_dir, "iter-{:03d}-{}".format(iteration, name))
     os.makedirs(iter_dir)
 
+    # 归档 memlog（复制到迭代目录，不删除原文件）
+    memlog_dir = os.path.join(animus_dir, "memlog")
+    if os.path.isdir(memlog_dir):
+        memlog_archive = os.path.join(iter_dir, "memlog")
+        shutil.copytree(memlog_dir, memlog_archive)
+        memlog_count = len([f for f in os.listdir(memlog_dir) if f.endswith(".md")])
+    else:
+        memlog_count = 0
+
     # 读取当前 features.json
     features_path = os.path.join(animus_dir, "features.json")
     if os.path.isfile(features_path):
