@@ -9,6 +9,20 @@ import json
 import os
 import sys
 
+# ---------- deferred-work ----------
+
+def _count_deferred(features_dir):
+    """统计 deferred-work.md 中的待办条目数"""
+    dw_path = os.path.join(features_dir, "deferred-work.md")
+    if not os.path.isfile(dw_path):
+        return 0
+    try:
+        with open(dw_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        return content.count("- [ ]")
+    except Exception:
+        return 0
+
 # ---------- 工作流依赖图 ----------
 
 WORKFLOW_GRAPH = {
@@ -163,9 +177,11 @@ def run():
         return "\n".join(result_lines)
 
     tasks = _extract_tasks(data)
+    features_dir = os.path.dirname(features_path)
+    deferred_count = _count_deferred(features_dir)
     if not tasks:
         append("INFO: features.json 中无任务数据")
-        return "\n".join(result_lines)
+        return "\\n".join(result_lines)
 
     # ---- 统计 ----
     total = len(tasks)

@@ -148,10 +148,30 @@ description: 统一开发入口（四路路由：debug/fast/light/full）
 
 ## deferred-work 机制
 
-review 中发现的存量问题标记为 `defer`，记入 `.claude/animus/deferred-work.md`：
-- 不混入当前修复流程，不阻塞主线
-- 下次 `/animus-dev` 启动时自动读取，作为参考但不强制
-- 格式：日期 + 来源任务 + 路径 + 描述
+review 中发现的存量问题标记为 `defer`，记入 `.claude/animus/deferred-work.md`。
+
+**生命周期：**
+
+```
+发现存量问题 → 标记 [defer] → 记入 deferred-work.md（不阻塞当前流程）
+                                       ↓
+                  下次 /animus-dev 启动时：显示待办条目数
+                                       ↓
+                  用户决定是否在当前迭代处理 → 是则创建新任务
+                                       ↓
+                  完成处理后 → 删除 deferred-work.md 中对应条目
+```
+
+**启动时自动读取：** `/animus-dev` 启动时输出：
+```
+⚠️ deferred-work.md 中有 3 条待办
+   1. src/legacy_parser.cpp:120 缺乏输入长度检查
+   2. src/database.cpp:45 连接池没有超时机制
+   （不强制，可继续当前开发）
+```
+
+**查看方式：** `/animus-status` 会显示推迟工作条目数。
+**清理方式：** 处理完毕后直接编辑 `deferred-work.md` 删除对应条目。
 
 ## 并行任务
 
