@@ -146,48 +146,6 @@ class TestTeamConfigOverride:
 # 3. test_user_config_override
 # ==============================================================
 
-class TestUserConfigOverride:
-    """user config.user.toml 覆盖 team 配置。"""
-
-    def test_user_overrides_team(self, animus_dir):
-        """user 配置优先级最高。"""
-        write_toml(
-            os.path.join(animus_dir, "config.toml"),
-            {"dev": {"default_path": "full", "autonomous": False}},
-        )
-        write_toml(
-            os.path.join(animus_dir, "config.user.toml"),
-            {"dev": {"autonomous": True}},
-        )
-        cfg = load_config(animus_dir)
-        # user 覆盖 autonomous
-        assert cfg["dev"]["autonomous"] is True
-        # team 的 default_path 不受影响
-        assert cfg["dev"]["default_path"] == "full"
-
-    def test_user_overrides_without_team(self, animus_dir):
-        """无 team 配置时，user 直接覆盖默认值。"""
-        write_toml(
-            os.path.join(animus_dir, "config.user.toml"),
-            {"review": {"strictness": "low"}},
-        )
-        cfg = load_config(animus_dir)
-        assert cfg["review"]["strictness"] == "low"
-
-    def test_user_adds_new_section(self, animus_dir):
-        """user 配置新增 section（默认中没有的）。"""
-        write_toml(
-            os.path.join(animus_dir, "config.user.toml"),
-            {"custom": {"theme": "dark"}},
-        )
-        cfg = load_config(animus_dir)
-        assert cfg["custom"]["theme"] == "dark"
-
-
-# ==============================================================
-# 4. test_fallback_default
-# ==============================================================
-
 class TestFallbackDefault:
     """配置缺失时回退默认值（merge 语义已在上面覆盖，这里侧重边界）。"""
 

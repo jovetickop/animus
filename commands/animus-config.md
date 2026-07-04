@@ -51,13 +51,10 @@ animus 配置（三层合并结果）
 
 ## 配置覆盖原则
 
-```
-defaults（硬编码） ← team（config.toml，git跟踪） ← user（config.user.toml，gitignored）
-   最低优先级                                   最高优先级
-```
+`defaults（硬编码） ← config.toml`
 
 ## 相关文件
 
 - `.claude/animus/config.toml` — 团队配置
-- `.claude/animus/config.user.toml` — 用户个人配置
+
 - `scripts/config_loader.py` — 加载逻辑

@@ -123,7 +123,7 @@ AI 自动选路后输出「将使用 XX 路径」让用户确认。`config.toml`
 
 ## 配置系统
 
-三层覆盖：`defaults（硬编码） ← team（config.toml） ← user（config.user.toml）`
+两层覆盖：`defaults（硬编码） ← config.toml`
 
 文件位置：`.claude/animus/`
 

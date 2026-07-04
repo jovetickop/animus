@@ -14,7 +14,6 @@ node_modules/
 .remember/
 
 # 用户个人配置（不跟踪）
-.claude/animus/config.user.toml
 # 运行时文件（不跟踪）
 .claude/animus/handoff.json
 .claude/animus/continue-report.md

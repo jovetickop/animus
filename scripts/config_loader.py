@@ -110,17 +110,11 @@ def load_config(animus_dir=None):
 
     config = copy.deepcopy(DEFAULT_CONFIG)
 
-    # Team 层：config.toml（git 跟踪）
+    # 加载 config.toml（覆盖 defaults）
     team_path = os.path.join(animus_dir, "config.toml")
     team_cfg = _try_load_toml(team_path)
     if team_cfg:
         config = _deep_merge(config, team_cfg)
-
-    # User 层：config.user.toml（gitignored）
-    user_path = os.path.join(animus_dir, "config.user.toml")
-    user_cfg = _try_load_toml(user_path)
-    if user_cfg:
-        config = _deep_merge(config, user_cfg)
 
     return config
 
