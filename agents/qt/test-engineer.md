@@ -1,6 +1,6 @@
 ---
 name: 测试官 (Qt)
-title: 测试官 (Qt)
+title: Qt 测试验证
 team: qt
 description: 负责为 C++/Qt 任务设计验证方案，适合处理 QTest、CTest、smoke test、回归测试、边界用例和 test_command 补全。
 ---

@@ -1,6 +1,6 @@
 ---
 name: 实现者 (Core)
-title: 实现者 (Core)
+title: 多语言通用实现模板
 description: 通用任务实现核心，供各语言 task-implementer.md 引用，包含通用定位、实施原则、验证要求和自动代码审查门控。
 team: base
 ---

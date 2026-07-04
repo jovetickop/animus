@@ -1,6 +1,6 @@
 ---
 name: 规划师 (FE)
-title: 规划师 (FE)
+title: 前端任务规划补充指南
 description: 前端项目任务规划补充指南，适合处理 React/Vue 组件拆分、状态管理、样式处理等场景。
 team: frontend
 ---

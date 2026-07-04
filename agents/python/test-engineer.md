@@ -1,6 +1,6 @@
 ---
 name: 测试官 (Py)
-title: 测试官 (Py)
+title: Python 测试方案
 description: 负责为 Python 任务设计验证方案，适合处理 pytest、pytest-cov、unittest、mock 策略、异步测试和 test_command 补全。
 team: python
 ---

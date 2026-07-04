@@ -1,6 +1,6 @@
 ---
 name: 测试官 (Core)
-title: 测试官 (Core)
+title: 多语言通用测试模板
 description: 通用测试理论核心，供各语言 test-engineer.md 引用，包含测试矩阵设计、测试框架推荐、test_command 提供等通用职责。
 team: base
 ---

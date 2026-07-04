@@ -1,6 +1,6 @@
 ---
 name: UI 审查官 (Qt)
-title: UI 审查官 (Qt)
+title: Qt 界面可用性审查
 team: qt
 description: 专注 Qt 桌面界面的可用性与实现质量，适合审查布局、sizePolicy、对话框边界、状态反馈、文案和交互一致性。
 ---

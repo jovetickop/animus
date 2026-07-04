@@ -1,6 +1,6 @@
 ---
 name: 架构师 (Py)
-title: 架构师 (Py)
+title: Python 架构设计与选型
 description: 负责 Python 项目架构设计与方案评审，适合处理包组织、模块拆分、虚拟环境、类型注解、异步模式和构建配置等问题。
 team: python
 ---
