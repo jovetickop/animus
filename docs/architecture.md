@@ -34,19 +34,17 @@
 
 | 语言 | 占比 | 用途 |
 |------|------|------|
-| PowerShell | ~45% | 核心状态机引擎、项目初始化编排、会话管理、回归测试运行器、hook 脚本 |
-| Python | ~30% | 状态显示、状态机替代实现、编码桥接（GBK/UTF-8）、多语言格式化分发、会话恢复、验证脚本 |
-| Markdown | ~20% | Agent 定义（22 个）、插件清单（plugin.json）、编码规范规则、命令文档 |
+| Python | ~70% | 状态显示、状态机实现、编码桥接（GBK/UTF-8）、多语言格式化分发、会话恢复、验证脚本 |
+| Markdown | ~15% | Agent 定义（22 个）、插件清单（plugin.json）、编码规范规则、命令文档 |
 | JSON | ~5% | 配置（hooks.json、settings.local.json、features.json） |
-| Shell (Bash) | ~3% | 跨平台 hook 降级脚本（clang-format、pre-tool-use、pre-compact、stop-check） |
+| Shell (Bash) | ~5% | 跨平台 hook 降级脚本（clang-format、pre-tool-use、pre-compact、stop-check） |
 | YAML / TOML | 无 | 不在本仓库中使用 |
 
 ## 运行时要求
 
 | 运行时 | 版本要求 | 用途 |
 |--------|----------|------|
-| PowerShell | 5.1+（Windows） | 主要运行时，所有 .ps1 脚本 |
-| Python | 2.7+ / 3.x 双兼容 | 所有 .py 脚本，含 Python 2/3 兼容层（`from __future__`） |
+| Python | 3.9+（含 2.7 兼容模式） | 核心运行时，所有 .py 脚本 |
 | Bash | 任意 POSIX shell | 跨平台 hook 降级（.sh 脚本） |
 | Node.js | 任意（通过 npx） | （可选）MCP 服务器运行时 |
 | Git | 任意 | 版本控制、提交工作流 |
@@ -62,7 +60,7 @@
 | `prettier` | JS/TS 格式化 | 首选，降级到 eslint --fix |
 | `eslint --fix` | JS/TS 格式化 | 降级选项 |
 | `cargo fmt` | Rust 格式化 | 唯一选项 |
-| `clang-format` | C/C++ 格式化 | 唯一选项（另有独立 .ps1/.sh hook 脚本） |
+| `clang-format` | C/C++ 格式化 | 唯一选项（另有独立 .py/.sh hook 脚本） |
 
 ### Python 运行时依赖
 
@@ -94,7 +92,7 @@
 
 - **PowerShell 脚本用 UTF-8 编码**（CLAUDE.md 明确指出使用 UTF-8 无 BOM 编码，已修复 BOM 问题）
 - **Python 脚本兼容 Python 2/3**：使用 `from __future__ import print_function, unicode_literals`，`subprocess.Popen` + `communicate()`
-- **跨平台降级**：所有 hook 脚本同时提供 `.sh` 和 `.ps1` 两种版本，互为 fallback
+- **跨平台降级**：所有 hook 脚本同时提供 `.sh` 和 `.py` 两种版本，互为 fallback
 - **GBK 编码支持**：通过 `encoding-bridge.py` 实现 GBK ↔ UTF-8 双向转换，仅作用于 C/C++ 源文件
 
 ## 架构分层/模块划分
@@ -187,7 +185,7 @@
 ### 4. 钩子自动化
 
 - 4 种钩子覆盖整个 Claude Code 会话生命周期
-- 双平台脚本 (bash + PowerShell) 互为降级
+- 双平台脚本 (bash + Python) 互为降级
 - 失败时 `exit 0` 保证不阻塞主流程
 
 ### 5. Oracle 验证门控
@@ -207,13 +205,13 @@
 | 决策 | 理由 | 体现位置 |
 |------|------|----------|
 | 所有插件资产放在仓库根目录下 | 插件源码仓库，通过 `/plugin install` 安装，路径由 `${CLAUDE_PLUGIN_ROOT}` 解析 | agents/, commands/, rules/ 等目录 |
-| 使用 PowerShell 作为主脚本语言 | Windows 优先的用户群体，PS 5.1 兼容 | `templates/animus/` |
-| 核心脚本从 PS 迁移到 Python | 跨平台 + Python 2/3 兼容 | `scripts/` 中的 `.py` 文件 |
+| 使用 Python 作为主脚本语言 | 跨平台需求，Python 2/3 双兼容 | `scripts/` 中的 `.py` 文件 |
+| 核心脚本全部使用 Python | 已完成迁移，跨平台 + Python 2/3 兼容 | `scripts/` 中的 `.py` 文件 |
 | HTML 注释引用替代原生 include | Markdown 缺乏 include 机制，HTML 注释是最便携方式 | `agents/base/*.md` |
 | 前置声明式 tasks.json | JSON 比 YAML 更宽泛的语言解析支持 | `templates/animus/features.json` |
 | 不修改目标项目的 CLAUDE.md | 目标项目保持独立，仅创建 .claude/animus/ 运行时目录 | `init_project.py` |
 | 状态分片 (active/archive) | 缩减 Token 消耗约 78%，长项目更友好 | `.claude/animus/` 目录 |
-| 双平台钩子脚本 | Windows/Linux 开发环境都需支持 | `hooks/scripts/*.ps1 + *.sh` |
+| 双平台钩子脚本 | Windows/Linux 开发环境都需支持 | `hooks/scripts/*.py + *.sh` |
 | 项目类型自动检测 | 零配置上手，按项目文件判定语言栈 | `init_project.py` 步骤 5 |
 | 空命令值保持空 | 不硬编码默认值，由用户首次运行时填写 | `config.toml [project]` 段 |
 

@@ -68,7 +68,7 @@ def write_event(event_type, content_dict):
     if context:
         safe_context = ""
         for ch in context:
-            if ch.isalnum() or ch in ('-', '_', '.', 'T', 'P', 'C', 'D'):
+            if ch.isalnum() or ch in ('-', '_', '.'):
                 safe_context += ch
             elif '\u4e00' <= ch <= '\u9fff' or '\u3000' <= ch <= '\u303f':
                 safe_context += ch

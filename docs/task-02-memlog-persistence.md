@@ -197,7 +197,7 @@ def update_task_status(task_id, to, evidence=None):
     rebuild_from_memlog()
 ```
 
-#### 2.5.4 修改 `hooks/scripts/pre-compact.ps1` 和 `.sh`
+#### 2.5.4 修改 `hooks/scripts/pre-compact.py` 和 `.sh`
 
 当前：同时写 features.json + JSONL + task_plan.md
 修改后：只追加 memlog 事件，删除多文件同步逻辑
@@ -229,7 +229,7 @@ handoff/continue 作为独立命令已移除，功能由 memlog + `/animus-dev` 
 新建 scripts/rebuild-from-memlog.py     # 核心重建引擎
 新建 scripts/migrate-to-memlog.py       # 迁移脚本
 修改 scripts/update-progress.py         # 写入改为 memlog + 重建
-修改 hooks/scripts/pre-compact.ps1      # 同步逻辑简化
+修改 hooks/scripts/pre-compact.py      # 同步逻辑简化
 修改 hooks/scripts/pre-compact.sh       # 同步逻辑简化
 删除 commands/animus-handoff.md          # 已移除，memlog 自动接管
 删除 commands/animus-continue.md        # 已移除，/animus-dev 自动恢复

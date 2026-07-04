@@ -50,6 +50,13 @@ class TestAnimusInitDetectProjectType(unittest.TestCase):
     # detect_project_type 测试
     # ------------------------------------------------------------------
 
+    def test_import_animus_init(self):
+        """模块可正常导入，主要函数可用"""
+        mod = self._import_module()
+        self.assertTrue(hasattr(mod, 'detect_project_type'))
+        self.assertTrue(hasattr(mod, 'animus_init'))
+        self.assertTrue(hasattr(mod, 'main'))
+
     def test_detect_project_type_cpp_qt(self):
         """创建 CMakeLists.txt（含 Qt）→ 返回 cpp-qt"""
         cmake_content = (

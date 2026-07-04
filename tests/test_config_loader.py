@@ -451,3 +451,37 @@ class TestGetCurrentSubProject:
             result = get_current_sub_project(cfg, deep)
             assert result is not None
             assert result[0] == "frontend"
+
+    def test_get_current_sub_project_exact_match(self):
+        """精确匹配：子项目目录名完整匹配时应返回正确结果"""
+        import tempfile
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            sub = os.path.join(tmp, "frontend")
+            os.makedirs(sub)
+            cfg = {"project": {"sub_projects": [
+                {"dir": "frontend", "type": "node"},
+                {"dir": "frontend-admin", "type": "react"},
+            ]}}
+            # 在 frontend 目录中,应匹配 frontend
+            result = get_current_sub_project(cfg, sub)
+            assert result is not None
+            assert result[0] == "frontend"
+            assert result[1] == "node"
+
+    def test_get_current_sub_project_partial_no_match(self):
+        """包含关系不误匹配：在 frontend-admin 中不应匹配 frontend"""
+        import tempfile
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            sub_admin = os.path.join(tmp, "frontend-admin")
+            os.makedirs(sub_admin)
+            cfg = {"project": {"sub_projects": [
+                {"dir": "frontend", "type": "node"},
+                {"dir": "frontend-admin", "type": "react"},
+            ]}}
+            # 在 frontend-admin 目录中,应匹配 frontend-admin,不是 frontend
+            result = get_current_sub_project(cfg, sub_admin)
+            assert result is not None
+            assert result[0] == "frontend-admin"
+            assert result[1] == "react"

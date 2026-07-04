@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function, unicode_literals
 """
 deferred-work 管理模块
 
@@ -7,6 +8,7 @@ deferred-work 管理模块
 """
 
 import os
+import sys
 from datetime import date
 
 
@@ -24,8 +26,12 @@ def read(animus_dir=None):
     path = get_path(animus_dir)
     if not os.path.exists(path):
         return ""
-    with open(path, "r", encoding="utf-8") as f:
-        return f.read()
+    if sys.version_info[0] >= 3:
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read()
+    else:
+        with open(path, "rb") as f:
+            return f.read().decode("utf-8")
 
 
 def append_entry(entry, animus_dir=None):
@@ -35,29 +41,41 @@ def append_entry(entry, animus_dir=None):
 
     lines = []
     if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
-            lines = f.readlines()
+        if sys.version_info[0] >= 3:
+            with open(path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+        else:
+            with open(path, "rb") as f:
+                lines = [l.decode("utf-8") for l in f.readlines()]
 
     # 检查是否已有今日标题
     has_today = any(today in l for l in lines)
     if not has_today:
-        lines.append(f"\n## {today}\n")
+        lines.append("\n## {}\n".format(today))
 
-    lines.append(f"- [ ] {entry}\n")
+    lines.append("- [ ] {}\n".format(entry))
 
-    with open(path, "w", encoding="utf-8") as f:
-        f.writelines(lines)
+    if sys.version_info[0] >= 3:
+        with open(path, "w", encoding="utf-8") as f:
+            f.writelines(lines)
+    else:
+        with open(path, "wb") as f:
+            f.writelines([l.encode("utf-8") for l in lines])
 
 
 def clear(animus_dir=None):
     """清空 deferred-work.md"""
     path = get_path(animus_dir)
-    with open(path, "w", encoding="utf-8") as f:
-        f.write("# 延迟工作记录\n\n")
+    if sys.version_info[0] >= 3:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("# 延迟工作记录\n\n")
+    else:
+        with open(path, "wb") as f:
+            f.write("# 延迟工作记录\n\n".encode("utf-8"))
 
 
 if __name__ == "__main__":
     # 简单测试
     test_dir = os.path.join(os.path.dirname(__file__), "..", ".claude", "animus")
-    print(f"Deferred work path: {get_path(test_dir)}")
-    print(f"Current content:\n{read(test_dir)}")
+    print("Deferred work path: {}".format(get_path(test_dir)))
+    print("Current content:\n{}".format(read(test_dir)))

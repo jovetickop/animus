@@ -874,5 +874,96 @@ class TestRunRegression(unittest.TestCase):
         self.assertEqual(test_cmd, "go test ./...")
 
 
+
+# ======================================================================
+# 5. 测试: scripts/memlog.py
+# ======================================================================
+
+class TestMemlog(unittest.TestCase):
+    """测试 scripts/memlog.py 的安全过滤和文件写入功能。"""
+
+    def setUp(self):
+        """每个测试前创建临时 .claude/animus 目录。"""
+        self.tmpdir, self._old_cwd = _make_temp_dir("memlog_test_")
+        self._loaded = {}
+        # 创建 .claude/animus 目录（write_event 依赖的目录结构）
+        self.animus_dir = os.path.join(self.tmpdir, ".claude", "animus")
+        os.makedirs(self.animus_dir)
+        # 切换到临时目录，使 get_animus_dir() 能找到它
+        os.chdir(self.tmpdir)
+
+    def tearDown(self):
+        """每个测试后清理。"""
+        _clean_temp_dir(self.tmpdir, self._old_cwd)
+
+    def _load(self):
+        """惰性加载 memlog 模块。"""
+        if "ml" not in self._loaded:
+            self._loaded["ml"] = _load_via_importlib(
+                "memlog",
+                os.path.join(_SCRIPTS_DIR, "memlog.py"),
+            )
+        return self._loaded["ml"]
+
+    # ------------------------------------------------------------------
+    # write_event — 文件名安全过滤验证
+    # ------------------------------------------------------------------
+
+    def test_safe_context_keeps_alnum_and_chinese(self):
+        """write_event 生成的文件名保留字母数字和中文字符"""
+        ml = self._load()
+        path = ml.write_event("状态变更", {
+            "task_id": "T001",
+            "title": "登录模块",
+        })
+        self.assertIsNotNone(path)
+        filename = os.path.basename(path)
+        self.assertIn("T001", filename)
+        self.assertIn("登录模块", filename)
+
+    def test_safe_context_replaces_special_chars(self):
+        """write_event 将非法字符替换为连字符"""
+        ml = self._load()
+        path = ml.write_event("状态变更", {
+            "task_id": "T001",
+            "title": "测试: 登录/模块",
+        })
+        self.assertIsNotNone(path)
+        filename = os.path.basename(path)
+        # 文件名中不应包含冒号和斜杠
+        self.assertNotIn(":", filename)
+        self.assertNotIn("/", filename)
+
+    def test_filename_no_illegal_chars(self):
+        """write_event 生成的文件名不含非法字符（仅字母数字._-）"""
+        ml = self._load()
+        path = ml.write_event("决策", {
+            "task_id": "T023",
+            "title": "清理: 冗余/过滤代码",
+        })
+        self.assertIsNotNone(path)
+        filename = os.path.basename(path)
+        name_no_ext = filename[:-3] if filename.endswith(".md") else filename
+        for ch in name_no_ext:
+            self.assertTrue(
+                ch.isalnum() or ch in ('-', '_', '.'),
+                msg="不允许的字符 '%s' 出现在文件名 %s 中" % (ch, filename)
+            )
+
+    def test_write_event_no_task_id(self):
+        """无 task_id 时 write_event 不报错且生成文件名"""
+        ml = self._load()
+        path = ml.write_event("note", {"note": "一条记录"})
+        self.assertIsNotNone(path)
+        self.assertTrue(os.path.exists(path))
+
+    def test_list_events(self):
+        """写入事件后 list_events 能列出"""
+        ml = self._load()
+        ml.write_event("决策", {"task_id": "T001", "title": "测试"})
+        events = ml.list_events()
+        self.assertGreaterEqual(len(events), 1)
+
+
 if __name__ == "__main__":
     unittest.main()

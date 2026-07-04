@@ -27,7 +27,7 @@
 
 ---
 
-### Sprint 0.1：三层定制与团队配置（⑨）
+### Sprint 0.1：三层定制与团队配置（⑨） [✅ 已完成 2026-07-04]
 
 **任务清单：**
 
@@ -50,7 +50,7 @@
 
 ---
 
-### Sprint 0.2：引擎脚本化（⑥）
+### Sprint 0.2：引擎脚本化（⑥） [✅ 已完成 2026-07-04]
 
 **任务清单：**
 
@@ -91,11 +91,11 @@
 
 **工期：** 第 3-4 周
 **前置依赖：** Phase 0 通过 G0.FINAL
-**产出：** 命名 Agent + memlog + 命令别名 + Quick Dev 五路路由
+**产出：** 命名 Agent + memlog + 命令别名 + Quick Dev 四路路由
 
 ---
 
-### Sprint 1.1：命名 Agent 角色系统（①）
+### Sprint 1.1：命名 Agent 角色系统（①） [✅ 已完成 2026-07-04]
 
 **任务清单：**
 
@@ -116,7 +116,7 @@
 
 ---
 
-### Sprint 1.2：Memlog 持久化（②）
+### Sprint 1.2：Memlog 持久化（②） [✅ 已完成 2026-07-04]
 
 **任务清单：**
 
@@ -126,7 +126,7 @@
 | 1.2.2 | 实现 `cmd_rebuild.py`（从 memlog 重建） | `engine/cmd_rebuild.py` | 可以重建 features.json |
 | 1.2.3 | 新建 `migrate-to-memlog.py` | `scripts/migrate-to-memlog.py`（新建） | 一次性转换现有 features.json |
 | 1.2.4 | 修改 `update-progress.py` 写入改为 memlog | `scripts/update-progress.py` | 状态变更 → memlog 事件 |
-| 1.2.5 | 修改 hooks/pre-compact | `pre-compact.ps1/.sh` | 只追加 memlog，删除多文件同步 |
+| 1.2.5 | 修改 hooks/pre-compact | `pre-compact.py/.sh` | 只追加 memlog，删除多文件同步 |
 | 1.2.6 | 删除 handoff/continue 命令 | 删除 2 个 md + 修改 plugin.json | 命令不可用 |
 
 **验证门控：**
@@ -142,7 +142,7 @@
 
 ---
 
-### Sprint 1.3：命令别名（③）
+### Sprint 1.3：命令别名（③） [✅ 已完成 2026-07-04]
 
 **任务清单：**
 
@@ -161,7 +161,7 @@
 
 ---
 
-### Sprint 1.4：Quick Dev 五路路由（⑤）
+### Sprint 1.4：Quick Dev 四路路由（⑤） [✅ 已完成 2026-07-04]
 
 **任务清单：**
 
@@ -170,7 +170,7 @@
 | 1.4.1 | 新建 `commands/animus-dev.md`（四路路由） | `animus-dev.md`（新建） | 4 条路由（debug/fast/light/full） |
 | 1.4.2 | 实现路径确认提示 | 同上 | AI 选路后问用户确认 |
 | 1.4.3 | 删除 `animus-plan.md` 和 `animus-debug.md` | 删除 2 个文件 | 命令不可用 |
-| 1.4.4 | 实现 write-gate hook | `write-gate.sh/.ps1`（新建） | 无任务时拦截 Write/Edit |
+| 1.4.4 | 实现 write-gate hook | `write-gate.sh/.py`（新建） | 无任务时拦截 Write/Edit |
 | 1.4.5 | 更新 plugin.json | `plugin.json` | 注册 animus-dev |
 | 1.4.6 | 实现 autonomous 模式 | 引用 config.toml | autonomous=true 时跳过确认 |
 
@@ -178,7 +178,7 @@
 
 | 门控 | 级别 | 验证方法 | 通过标准 |
 |------|------|---------|---------|
-| G1.4.1 | ◎ | 场景矩阵测试（每路由至少 2 个场景） | 五路路由全部走通 |
+| G1.4.1 | ◎ | 场景矩阵测试（每路由至少 2 个场景） | 四路路由全部走通 |
 | **场景矩阵：** |
 | | debug | "PDF 导出崩溃" + "按钮点不动" | 走 debug-path，3 问调试专用 Grilling | 2/2 |
 | | fast | "改按钮间距" + "加个 tooltip" | 1 问确认 | 2/2 |
@@ -212,7 +212,7 @@
 
 ---
 
-### Sprint 2.1：工作流地图（④）
+### Sprint 2.1：工作流地图（④） [✅ 已完成 2026-07-04]
 
 **任务清单：**
 
@@ -231,7 +231,7 @@
 
 ---
 
-### Sprint 2.2：对抗性审查（⑦）
+### Sprint 2.2：对抗性审查（⑦） [✅ 已完成 2026-07-04]
 
 **任务清单：**
 
@@ -257,7 +257,7 @@
 
 ---
 
-### Sprint 2.3：Party Mode（独立 Skill）
+### Sprint 2.3：Party Mode（独立 Skill） [✅ 已完成 2026-07-04]
 
 **任务清单：**
 
@@ -283,7 +283,7 @@
 
 ---
 
-### Sprint 2.4：头脑风暴（⑧）
+### Sprint 2.4：头脑风暴（⑧） [◐ 部分完成]
 
 **任务清单：**
 
@@ -373,7 +373,6 @@
 
 | 风险 | 影响 | 缓解措施 |
 |------|------|---------|
-| PowerShell 状态机翻译遗漏分支 | Phase 0 延迟 | G0.2.8：PS/Python 输出对比，逐条覆盖 |
 | memlog 文件数膨胀（1000+ 事件） | 性能下降 | G1.2.5：性能测试门控；后续考虑按季度归档 |
 | 4 agent 审查 token 消耗过大 | Phase 2 成本超预期 | Party Mode 默认 session 模式降级；`config.toml` 可选 subagent |
 | Party Mode 子 agent 互相冲突 | 输出不可用 | debate 最大轮数限制 3 轮 |

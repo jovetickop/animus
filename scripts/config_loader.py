@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-三层配置加载器：defaults → team config.toml → user config.user.toml
+两层配置加载器：defaults → config.toml
 兼容 Python 3.11+（使用标准库 tomllib）和 Python 3.9-3.10（使用 tomli 或回退）。
 """
 
@@ -94,9 +94,9 @@ def _deep_merge(base, override):
 
 def load_config(animus_dir=None):
     """
-    加载三层配置，返回合并后的 dict。
-    
-    优先级：defaults < team config.toml < user config.user.toml
+    加载两层配置，返回合并后的 dict。
+
+    优先级：defaults < config.toml
     
     参数：
         animus_dir: .claude/animus/ 目录路径。默认从当前目录查找。
@@ -168,11 +168,13 @@ def get_current_sub_project(config, cwd=None):
         if not sub_dir or not sub_type:
             continue
         
-        # 检查 cwd 是否以 sub_dir 开头或是其子目录
-        # 相对于项目根（config.toml 所在目录的父目录的父目录）
-        # 简化：直接匹配路径中是否包含 sub_dir
-        if sub_dir in cwd.split(os.sep):
-            return (sub_dir, sub_type)
+        # 精确匹配：检查 sub_dir 是否为 cwd 路径中的完整目录段
+        # 避免包含关系的目录名误匹配（如 "frontend" vs "frontend-admin"）
+        for i, part in enumerate(cwd.split(os.sep)):
+            if part == sub_dir:
+                matched_path = os.sep.join(cwd.split(os.sep)[:i+1])
+                if os.path.isdir(matched_path):
+                    return (sub_dir, sub_type)
 
     return None
 

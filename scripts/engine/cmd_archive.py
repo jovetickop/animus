@@ -32,15 +32,16 @@ def _read_json(path):
 
 
 def _write_json(path, data):
-    with open(path, "wb") as f:
-        content = json.dumps(data, ensure_ascii=False, indent=2)
-        if isinstance(content, str):
-            f.write(content.encode("utf-8"))
-        else:
-            f.write(content)
+    text = json.dumps(data, ensure_ascii=False, indent=2)
+    if sys.version_info[0] >= 3:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(text)
+    else:
+        with open(path, "wb") as f:
+            f.write(text.encode("utf-8"))
 
 
-def run(name="", discard=False):
+def run(name=""):
     """执行归档"""
     animus_dir = _find_animus_dir()
     if not animus_dir:
@@ -88,9 +89,15 @@ def run(name="", discard=False):
         shutil.copy2(features_path, os.path.join(iter_dir, "features.json"))
 
         # 生成迭代总结
-        tasks = features.get("tasks", features.get("initial_tasks", []))
-        if isinstance(tasks, dict):
-            tasks = [{"id": tid, **t} for tid, t in tasks.items()]
+        task_dict = features.get("tasks", features.get("initial_tasks", {}))
+        if isinstance(task_dict, dict):
+            tasks = []
+            for tid, t in task_dict.items():
+                item = {"id": tid}
+                item.update(t)
+                tasks.append(item)
+        else:
+            tasks = task_dict  # already a list
 
         total = len(tasks)
         passed = sum(1 for t in tasks if t.get("status") == "passed")
@@ -123,11 +130,12 @@ def run(name="", discard=False):
                 title=t.get("title", t.get("name", "?")))
 
         summary_path = os.path.join(iter_dir, "iteration-summary.md")
-        with open(summary_path, "wb") as f:
-            if isinstance(summary, str):
-                f.write(summary.encode("utf-8"))
-            else:
+        if sys.version_info[0] >= 3:
+            with open(summary_path, "w", encoding="utf-8") as f:
                 f.write(summary)
+        else:
+            with open(summary_path, "wb") as f:
+                f.write(summary.encode("utf-8"))
 
         # 清空 features.json
         empty = {"metadata": features.get("metadata", {}), "tasks": {}}
@@ -146,4 +154,4 @@ if __name__ == "__main__":
     p.add_argument("--name", default="")
     p.add_argument("--discard", action="store_true")
     args = p.parse_args()
-    run(args.name, args.discard)
+    run(args.name)

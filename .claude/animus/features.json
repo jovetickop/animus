@@ -1,79 +1,127 @@
 {
   "metadata": {
-    "rebuilt_from": "memlog",
-    "rebuilt_at": "2026-07-04T16:12:01.063799",
-    "event_count": 14
+    "iteration": "iter-003-审查修复-迭代1",
+    "created_at": "2026-07-04",
+    "prev_iteration_archived": "T001-T007 (animus-status 命令开发)",
+    "source": "审查报告 doc-sparkling-torvalds.md (19 issues, P0/P1/P2)",
+    "description": "PS1→Python 迁移后文档同步与代码兼容性修复"
   },
   "tasks": {
-    "T001": {
-      "id": "T001",
-      "title": "创建 /animus-status 命令定义文件",
-      "name": "创建 /animus-status 命令定义文件",
-      "status": "pending",
+    "T008": {
+      "id": "T008",
+      "name": "同步 marketplace.json 版本号为 1.4.0",
+      "status": "passed",
       "depends_on": [],
-      "priority": 99,
-      "last_error": "",
-      "updated_at": "2026-07-04-1611-"
+      "priority": 10
     },
-    "T002": {
-      "id": "T002",
-      "title": "改造 show-status.py 增加依赖树引擎 + ASCII 渲染",
-      "name": "改造 show-status.py 增加依赖树引擎 + ASCII 渲染",
-      "status": "pending",
+    "T009": {
+      "id": "T009",
+      "name": "更新 architecture.md 语言分布表与 PS1 引用",
+      "status": "passed",
       "depends_on": [],
-      "priority": 99,
-      "last_error": "",
-      "updated_at": "2026-07-04-1611-"
+      "priority": 10
     },
-    "T003": {
-      "id": "T003",
-      "title": "创建 animus-status.ps1 执行脚本",
-      "name": "创建 animus-status.ps1 执行脚本",
-      "status": "pending",
+    "T010": {
+      "id": "T010",
+      "name": "清理其余文档中的 .ps1 残留引用",
+      "status": "passed",
       "depends_on": [],
-      "priority": 99,
-      "last_error": "",
-      "updated_at": "2026-07-04-1611-"
+      "priority": 10
     },
-    "T004": {
-      "id": "T004",
-      "title": "更新 plugin.json 注册 /animus-status",
-      "name": "更新 plugin.json 注册 /animus-status",
-      "status": "pending",
+    "T011": {
+      "id": "T011",
+      "name": "修复 cmd_archive.py Python 2 写入 bug 并清理死代码",
+      "status": "passed",
       "depends_on": [],
-      "priority": 99,
-      "last_error": "",
-      "updated_at": "2026-07-04-1611-"
+      "priority": 10
     },
-    "T005": {
-      "id": "T005",
-      "title": "Mock 数据 + 边界条件测试验证",
-      "name": "Mock 数据 + 边界条件测试验证",
-      "status": "pending",
+    "T012": {
+      "id": "T012",
+      "name": "补充 agent-index.md 遗漏的 5 个 Agent",
+      "status": "passed",
       "depends_on": [],
-      "priority": 99,
-      "last_error": "",
-      "updated_at": "2026-07-04-1611-"
+      "priority": 10
     },
-    "T006": {
-      "id": "T006",
-      "title": "全语言回归验证（C++/Rust/Python）",
-      "name": "全语言回归验证（C++/Rust/Python）",
-      "status": "pending",
+    "T013": {
+      "id": "T013",
+      "name": "修复 animus-dev.md 步骤编号和 animus-review.md 表格格式",
+      "status": "passed",
       "depends_on": [],
-      "priority": 99,
-      "last_error": "",
-      "updated_at": "2026-07-04-1611-"
+      "priority": 20
     },
-    "T007": {
-      "id": "T007",
-      "title": "状态变更后自动输出迭代看板（update-progress.ps1 集成）",
-      "name": "状态变更后自动输出迭代看板（update-progress.ps1 集成）",
-      "status": "pending",
+    "T014": {
+      "id": "T014",
+      "name": "修正 config_loader.py 文档注释为两层描述",
+      "status": "passed",
       "depends_on": [],
-      "priority": 99,
-      "last_error": "",
-      "updated_at": "2026-07-04-1611-"
+      "priority": 20
+    },
+    "T015": {
+      "id": "T015",
+      "name": "修复 deferred_work.py Python 2 兼容性",
+      "status": "passed",
+      "depends_on": [],
+      "priority": 20
+    },
+    "T016": {
+      "id": "T016",
+      "name": "清理 animus_init.py _join 死代码",
+      "status": "passed",
+      "depends_on": [],
+      "priority": 20
+    },
+    "T017": {
+      "id": "T017",
+      "name": "精确化 config_loader.py 路径匹配逻辑",
+      "status": "passed",
+      "depends_on": [
+        "T014"
+      ],
+      "priority": 20
+    },
+    "T018": {
+      "id": "T018",
+      "name": "修复 hooks.json PreCompact matcher 通配符",
+      "status": "passed",
+      "depends_on": [],
+      "priority": 20
+    },
+    "T019": {
+      "id": "T019",
+      "name": "更新路线图/开发计划状态并清理五路路由残留",
+      "status": "passed",
+      "depends_on": [
+        "T010"
+      ],
+      "priority": 30
+    },
+    "T020": {
+      "id": "T020",
+      "name": "补充 CLAUDE.md 三层/七层架构说明",
+      "status": "passed",
+      "depends_on": [],
+      "priority": 30
+    },
+    "T021": {
+      "id": "T021",
+      "name": "更新 animus-init.md 引用旧文件名",
+      "status": "passed",
+      "depends_on": [],
+      "priority": 30
+    },
+    "T022": {
+      "id": "T022",
+      "name": "更新 templates/existing_project/CLAUDE.md 引用",
+      "status": "passed",
+      "depends_on": [],
+      "priority": 30
+    },
+    "T023": {
+      "id": "T023",
+      "name": "清理 memlog.py 字符过滤冗余",
+      "status": "passed",
+      "depends_on": [],
+      "priority": 30
     }
   }
 }

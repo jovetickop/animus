@@ -14,6 +14,7 @@ import pytest
 
 from scripts.engine import cmd_transition
 from scripts.engine import cmd_validate
+from scripts.engine import cmd_archive
 
 
 # ============================================================
@@ -860,3 +861,52 @@ class TestConfigLoaderEncoding:
             assert cfg["dev"]["default_path"] == "auto"
         finally:
             self._cleanup(tmpdir)
+
+
+# ============================================================
+# cmd_archive 归档引擎测试
+# ============================================================
+
+class TestCmdArchive:
+    """cmd_archive 单元测试。"""
+
+    # ----------------------------------------------------------
+    # test_write_json_py2_compat
+    # ----------------------------------------------------------
+
+    def test_write_json_py2_compat(self):
+        """_write_json 在 Python 2/3 兼容路径下能正确写入。"""
+        import json
+        import tempfile
+
+        data = {"name": "测试", "status": "passed"}
+
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
+            tmp_path = f.name
+
+        try:
+            # 执行写入
+            cmd_archive._write_json(tmp_path, data)
+
+            # 验证可以正确读回
+            with open(tmp_path, "rb") as f:
+                content = f.read()
+            decoded = json.loads(content.decode("utf-8"))
+            assert decoded == data, "写入的数据与读取的不一致"
+            assert decoded["name"] == "测试", "Unicode 数据写入后丢失"
+        finally:
+            import os
+            os.unlink(tmp_path)
+
+    # ----------------------------------------------------------
+    # test_archive_run_no_animus_dir
+    # ----------------------------------------------------------
+
+    def test_archive_run_no_animus_dir(self):
+        """run() 在找不到 .claude/animus/ 目录时正常退出。"""
+        from unittest.mock import patch
+
+        with patch.object(cmd_archive, "_find_animus_dir", return_value=None):
+            # 不应抛出异常
+            result = cmd_archive.run()
+            assert result is None, "无 animus 目录时应返回 None"

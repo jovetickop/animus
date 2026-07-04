@@ -17,7 +17,7 @@
 每次编码会话开始前，执行：
 
 ```powershell
-& "${CLAUDE_PLUGIN_ROOT}\templates\animus\coding-session.ps1"
+python "${CLAUDE_PLUGIN_ROOT}/templates/animus/coding_session.py"
 python "${CLAUDE_PLUGIN_ROOT}/templates/animus/show-status.py" .claude/animus
 python "${CLAUDE_PLUGIN_ROOT}/scripts/format-log.py" --project-dir . --recent 20
 ```

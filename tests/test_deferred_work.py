@@ -114,3 +114,30 @@ class TestDeferredWork:
         """指定目录后路径正确"""
         path = dw.get_path("/my/project/.claude/animus")
         assert "deferred-work.md" in path
+
+    def test_append_entry(self):
+        """追加一条 deferred entry 能正确写入文件"""
+        with tempfile.TemporaryDirectory() as tmp:
+            d = os.path.join(tmp, ".claude", "animus")
+            os.makedirs(d)
+            dw.append_entry("src/main.cpp:42 内存泄漏", d)
+            content = dw.read(d)
+            assert "src/main.cpp:42 内存泄漏" in content
+            assert "- [ ]" in content
+            # 验证日期标题存在
+            today = __import__("datetime").date.today().isoformat()
+            assert today in content
+
+    def test_read_entries(self):
+        """读取功能正常：空文件和含内容文件"""
+        with tempfile.TemporaryDirectory() as tmp:
+            d = os.path.join(tmp, ".claude", "animus")
+            os.makedirs(d)
+            # 空文件读取
+            content_empty = dw.read(d)
+            assert content_empty == ""
+            # 写入内容后读取
+            dw.append_entry("test_entry", d)
+            content = dw.read(d)
+            assert "test_entry" in content
+            assert len(content) > 0

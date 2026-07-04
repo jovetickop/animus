@@ -4,6 +4,8 @@
 
 | 目录 | Agent | 显示名 | 副标题 | team | 职责 |
 |------|-------|--------|--------|------|------|
+| `agents/base/` | `task-implementer-core` | 实现者 (Core) | 多语言通用实现模板 | base | 通用任务实现核心 |
+| | `test-engineer-core` | 测试官 (Core) | 多语言通用测试模板 | base | 通用测试理论核心 |
 | `agents/universal/` | `feature-planner` | 规划师 (Plan) | 任务拆解与进度编排 | universal | PRD → features.json |
 | | `task-implementer` | 实现者 (Impl) | 增量编码与构建修复 | universal | 单任务最小闭环实现 |
 | | `test-engineer` | 测试官 (Test) | 测试方案设计与验证 | universal | 通用测试设计 |
@@ -22,8 +24,11 @@
 | `agents/node/` | `architect` | 架构师 (Node) | Node/Web 架构设计与选型 | node | Web 架构 |
 | | `test-engineer` | 测试官 (Node) | Node 测试方案 | node | Node 测试 |
 | | `ui-reviewer` | UI 审查官 (Web) | 前端界面可用性审查 | node | 前端 UI 审查 |
+| `agents/go/` | `architect` | 架构师 (Go) | Go 架构设计与选型 | go | Go 架构 |
+| | `test-engineer` | 测试官 (Go) | Go 测试方案 | go | Go 测试 |
 | `agents/rust/` | `architect` | 架构师 (Rust) | Rust 架构设计与选型 | rust | Rust 架构 |
 | | `test-engineer` | 测试官 (Rust) | Rust 测试方案 | rust | Rust 测试 |
+| `agents/frontend/` | `feature-planner-frontend` | 规划师 (FE) | 前端任务规划补充指南 | frontend | 前端任务规划 |
 
 ## 新增 Agent 规范
 
