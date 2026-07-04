@@ -75,7 +75,7 @@ animus/
 
 ## 状态机核心规则
 
-状态由 `templates/animus/update-progress.ps1` 强制执行：
+状态由 `scripts/engine/cmd_transition.py` 强制执行：
 
 - 状态流：`pending → in_progress → passed/failed`；`failed → in_progress` 重试；`pending` 只能从 `failed/in_progress/pending` 改回。
 - 同时只能有一个 `in_progress` 任务。
@@ -113,8 +113,6 @@ animus/
 ## 本仓库常用命令
 
 ```bash
-# PowerShell 语法检查
-powershell -NoProfile -Command "`$null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw 'templates/animus/update-progress.ps1'), [ref]`$null); 'ok'"
 # Python 语法检查
 python -m py_compile templates/animus/show-status.py
 # JSON 校验

@@ -118,8 +118,8 @@
 | ~~`/animus-handoff`~~ | ~~已移除，memlog 自动接管~~ | — |
 | ~~`/animus-continue`~~ | ~~已移除，/animus-dev 自动恢复~~ | — |
 | `/animus-archive` | 归档当前迭代，清空并开始新迭代 | `commands/animus-archive.md` |
-| 验证辅助 | features.json 结构校验 | `commands/validate-features.ps1` |
-| 一致性检查 | 检查状态文件一致性 | `commands/check-consistency.ps1` |
+| 验证辅助 | features.json 结构校验 | `scripts/animus-engine.py validate` |
+| 一致性检查 | 检查状态文件一致性 | `scripts/animus-engine.py validate` |
 
 ### 3. 执行层 (Agents)
 
@@ -143,15 +143,15 @@
 
 ### 6. 运行时引擎 (animus)
 
-- `update-progress.ps1` — 核心状态机引擎（逐步迁移到 `engine/cmd_transition.py`）
+- `animus-engine.py transition` — 核心状态机引擎（逐步迁移到 `engine/cmd_transition.py`）
 - `animus-engine.py` — 统一 CLI 入口，调度所有 engine 子命令
 - `engine/` — 子命令模块目录：cmd_status.py、cmd_transition.py、cmd_validate.py、cmd_archive.py、cmd_rebuild.py
 - `show-status.py` — 状态概览显示
-- `run-regression.ps1` — 一键构建+测试
+- `scripts/run-regression.py` — 一键构建+测试
 - `init.ps1` — 首次初始化引导
 - `coding-session.ps1` — 会话入口
 - `config.toml` 中 `[project]` 段 — 项目类型与构建命令配置（由 `/animus-init` 自动填入）
-- `validate-features.ps1` — 结构校验 + 循环依赖检测 (Kahn 算法)
+- `animus-engine.py validate` — 结构校验 + 循环依赖检测 (Kahn 算法)
 
 ### 7. 持久化层 (State)
 
