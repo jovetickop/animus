@@ -64,7 +64,7 @@ animus/
 
 1. **插件清单** (`.claude-plugin/plugin.json`)：声明元信息、命令入口和自动发现组件。
 2. **编排命令** (`commands/`)：7 个斜杠命令驱动工作流
-   - `animus-setup`：检测项目类型 + 创建 `.claude/animus/` 运行时目录
+   - `animus-init`：检测项目类型 + 创建 `.claude/animus/` 运行时目录
    - `animus-plan`：PRD + 方案 → `features.json` 任务列表
    - `animus-debug`：系统化调试（根因→分析→修复→审查）
    - `animus-review`：通用 + 语言专项验收

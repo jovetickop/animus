@@ -5,12 +5,12 @@
 > **路径约定**：`${CLAUDE_PLUGIN_ROOT}` = 技能安装根目录（Claude Code 自动设置）。
 > 目标项目运行时状态文件在 `.claude/animus/` 目录中。
 
-## 自动识别命令（/animus-setup 回填）
+## 自动识别命令（/animus-init 回填）
 
-- 项目类型：`{project-type}` — 由 /animus-setup 初始化时填入
-- 构建命令：`{构建命令}` — 由 /animus-setup 初始化时填入
-- 测试命令：`{测试命令}` — 由 /animus-setup 初始化时填入
-- 运行命令：`{运行命令}` — 由 /animus-setup 初始化时填入
+- 项目类型：`{project-type}` — 由 /animus-init 初始化时填入
+- 构建命令：`{构建命令}` — 由 /animus-init 初始化时填入
+- 测试命令：`{测试命令}` — 由 /animus-init 初始化时填入
+- 运行命令：`{运行命令}` — 由 /animus-init 初始化时填入
 
 ## 会话初始化（MUST）
 
@@ -41,7 +41,7 @@ python "${CLAUDE_PLUGIN_ROOT}/scripts/format-log.py" --project-dir . --recent 20
 
 ## 项目专项说明
 
-{cpp-qt-specific} — 由 /animus-setup 在项目类型为 cpp-qt 时自动填入 Qt 专项验收要求
+{cpp-qt-specific} — 由 /animus-init 在项目类型为 cpp-qt 时自动填入 Qt 专项验收要求
 
 ## Git 提交
 

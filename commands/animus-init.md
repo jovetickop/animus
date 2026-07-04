@@ -2,12 +2,12 @@
 description: 检测项目类型并为目标项目创建 .claude/animus/ 运行时目录
 ---
 
-# /animus-setup
+# /animus-init
 
 在目标项目根目录执行以下命令来安装 animus 基础设施：
 
 ```powershell
-& "${CLAUDE_PLUGIN_ROOT}\commands\animus-setup.ps1" -ProjectDir (Get-Location) -PluginRoot "${CLAUDE_PLUGIN_ROOT}"
+& "${CLAUDE_PLUGIN_ROOT}\commands\animus-init.ps1" -ProjectDir (Get-Location) -PluginRoot "${CLAUDE_PLUGIN_ROOT}"
 ```
 
 脚本会自动检测项目类型、创建 `.claude/animus/` 运行时目录、生成 `project-config.json` 项目配置、初始化空的状态文件。

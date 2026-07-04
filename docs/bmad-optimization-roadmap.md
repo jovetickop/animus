@@ -171,7 +171,7 @@ Phase 0 (基础设施)       Phase 1 (核心体验)       Phase 2 (能力增强)
 
 ```yaml
 commands:
-  animus-setup:
+  animus-init:
     pre: []
     post: [".claude/animus/features.json 存在"]
     next: [animus-dev]

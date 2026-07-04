@@ -184,7 +184,7 @@ max_findings = 20
 
 | 当前状态 | 推荐命令 |
 |---------|---------|
-| 无 features.json | `/animus-setup` |
+| 无 features.json | `/animus-init` |
 | features.json 无任务 | `/animus-dev` |
 | 有进行中任务 | `/animus-dev` 继续 |
 | 有完成未审查 | `/animus-review` |
@@ -192,7 +192,7 @@ max_findings = 20
 
 ---
 
-### `/animus-setup` — 项目初始化
+### `/animus-init` — 项目初始化
 
 **原理：** 检测目标项目的技术栈类型（CMakeList.txt → cpp-qt/cpp-cmake、Cargo.toml → rust、go.mod → go、package.json → node、pyproject.toml → python），创建 `.claude/animus/` 运行时目录，写入默认配置。
 

@@ -29,7 +29,7 @@
 
 ```python
 WORKFLOW_GRAPH = {
-    "animus-setup": {
+    "animus-init": {
         "pre": [],
         "post": [".claude/animus/features.json 存在"],
         "next": ["animus-dev"]
@@ -73,7 +73,7 @@ WORKFLOW_GRAPH = {
 
 | # | 条件 | 推荐命令 | 理由 |
 |---|------|---------|------|
-| 1 | 无 features.json | `/animus-setup` | 项目还没初始化 |
+| 1 | 无 features.json | `/animus-init` | 项目还没初始化 |
 | 2 | features.json 无任务 | `/animus-dev` | 还没拆需求 |
 | 3 | 有 pending 任务 | `/animus-dev` | 有任务等实施 |
 | 4 | 有 in_progress 任务 | `/animus-dev` | 继续当前任务 |
@@ -115,7 +115,7 @@ WORKFLOW_GRAPH = {
 
 ## 四、验证方法
 
-1. 未初始化项目 → 推荐 `/animus-setup`
+1. 未初始化项目 → 推荐 `/animus-init`
 2. features.json 无任务 → 推荐 `/animus-dev`
 3. 有 in_progress 任务 → 推荐 `/animus-dev` 继续
 4. 有 passed 任务未审查 → 推荐 `/animus-review`

@@ -12,7 +12,7 @@ $featuresPath = Join-Path $StateDir "features.json"
 # === 2. 检查 features.json 是否存在 ===
 if (-not (Test-Path $featuresPath)) {
     Write-Host "[animus] 错误: 未找到 .claude/animus/features.json"
-    Write-Host "[animus] 请先在目标项目中运行 /animus-setup 初始化工作目录"
+    Write-Host "[animus] 请先在目标项目中运行 /animus-init 初始化工作目录"
     exit 1
 }
 

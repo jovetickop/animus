@@ -12,7 +12,7 @@ import sys
 # ---------- 工作流依赖图 ----------
 
 WORKFLOW_GRAPH = {
-    "animus-setup": {
+    "animus-init": {
         "pre": [],
         "post": [".claude/animus/features.json 存在"],
         "next": ["animus-dev"],
@@ -53,7 +53,7 @@ WORKFLOW_GRAPH = {
 def _recommend_next(features):
     """根据 features.json 当前状态推荐下一步。返回 (命令, 理由)。"""
     if not features:
-        return ("/animus-setup", "项目还没初始化，先运行 setup")
+        return ("/animus-init", "项目还没初始化，先运行 init")
 
     # 获取任务列表
     tasks_data = features.get("tasks", features.get("initial_tasks", []))

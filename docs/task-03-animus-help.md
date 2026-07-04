@@ -60,7 +60,7 @@
   │     /animus-handoff — 保存状态      │
   │     /animus-continue — 恢复状态     │
   │     /animus-archive — 迭代归档      │
-  │     /animus-setup  — 项目初始化     │
+  │     /animus-init  — 项目初始化     │
   └─────────────────────────────────┘
 ```
 
@@ -70,7 +70,7 @@
 
 | 当前状态 | 推荐命令 | 理由 |
 |---------|---------|------|
-| 无 features.json | `/animus-setup` | 项目还没初始化 |
+| 无 features.json | `/animus-init` | 项目还没初始化 |
 | features.json 无任务 | `/animus-dev` | 还没拆需求，建议规划 |
 | 有待办任务 (pending) | `/animus-dev` | 有任务等实施 |
 | 有进行中任务 (in_progress) | `/animus-dev` | 继续当前任务 |
@@ -115,7 +115,7 @@ description: 显示 animus 帮助和推荐下一步操作
 
 ## 四、验证方法
 
-1. 在未初始化的项目执行 `/animus-help` → 推荐 `/animus-setup`
+1. 在未初始化的项目执行 `/animus-help` → 推荐 `/animus-init`
 2. 在有 features.json 但无任务的项目执行 → 推荐 `/animus-dev`
 3. 在有 in_progress 任务的项目执行 → 推荐 `/animus-dev` 继续
 4. 确认全部命令别名在 plugin.json 中注册正确

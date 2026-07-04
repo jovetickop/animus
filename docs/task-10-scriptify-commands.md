@@ -139,7 +139,7 @@ def find_current_task(features):
 def serialize():
     animus_dir = ANIMUS_DIR
     if not os.path.isdir(animus_dir):
-        print("未找到 .claude/animus 目录，需要先执行 /animus-setup")
+        print("未找到 .claude/animus 目录，需要先执行 /animus-init")
         return False
 
     # 读状态文件

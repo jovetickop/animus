@@ -9,7 +9,7 @@
   "homepage": "https://github.com/jovetickop/animus",
   "min_claude_version": "1.0.0",
   "commands": [
-    "./commands/animus-setup.md",
+    "./commands/animus-init.md",
     "./commands/animus-dev.md",
     "./commands/animus-review.md",
     "./commands/animus-archive.md",

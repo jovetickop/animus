@@ -106,13 +106,13 @@
 | 模块 | 职责 | 文件 |
 |------|------|------|
 | 插件清单 | 声明插件元信息、斜杠命令和自动发现组件 | `.claude-plugin/plugin.json` |
-| 项目状态判定 | 目标项目状态判定由 `commands/animus-setup.md` 处理 | `commands/animus-setup.md` |
+| 项目状态判定 | 目标项目状态判定由 `commands/animus-init.md` 处理 | `commands/animus-init.md` |
 
 ### 2. 编排层 (Commands)
 
 | 命令 | 职责 | 文件 |
 |------|------|------|
-| `/animus-setup` | 项目初始化 + 类型检测 + 创建 `.claude/animus/` 运行时目录 | `commands/animus-setup.md` |
+| `/animus-init` | 项目初始化 + 类型检测 + 创建 `.claude/animus/` 运行时目录 | `commands/animus-init.md` |
 | `/animus-dev` | 统一开发入口（四路路由：debug/fast/light/full） | `commands/animus-dev.md` |
 | ~~`/animus-plan`~~ | ~~已移除，改用 `/animus-dev --full`~~ | — |
 | `/animus-review` | 通用验收 + 语言专项验收 | `commands/animus-review.md` |

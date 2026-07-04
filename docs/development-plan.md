@@ -157,7 +157,7 @@
 | 门控 | 级别 | 验证方法 | 通过标准 |
 |------|------|---------|---------|
 | G1.3.1 | ◎ | `/dev` `/status` `/review` | 3 个别名可用 |
-| G1.3.2 | ◎ | `/animus-help` 在无 features.json 时 | 推荐 `/animus-setup` |
+| G1.3.2 | ◎ | `/animus-help` 在无 features.json 时 | 推荐 `/animus-init` |
 
 ---
 
