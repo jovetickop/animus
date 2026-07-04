@@ -1,13 +1,13 @@
 ---
-command: /harness-code-archive
+command: /animus-archive
 description: 归档当前迭代，打包所有状态文件到 archive/iteration-N-<name>/，清空并开始新迭代
 ---
 
-# /harness-code-archive 归档迭代
+# /animus-archive 归档迭代
 
 ## 功能
 
-将当前 `.claude/harness-cc/` 中的运行时状态打包归档，清空当前状态，开始新迭代。
+将当前 `.claude/animus/` 中的运行时状态打包归档，清空当前状态，开始新迭代。
 
 ## 流程
 

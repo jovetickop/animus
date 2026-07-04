@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Python 2.7+ / 3.x 兼容
-# harness-cc 回归测试运行器 —— 读取项目配置执行构建和测试
+# animus 回归测试运行器 —— 读取项目配置执行构建和测试
 
 from __future__ import print_function, unicode_literals
 import argparse
@@ -57,10 +57,10 @@ def main():
 
     project_root = os.path.abspath(args.project_root)
     claude_root = os.path.join(project_root, ".claude")
-    harness_root = os.path.join(claude_root, "harness-cc")
-    state_root = os.path.join(claude_root, "harness-cc")
+    animus_root = os.path.join(claude_root, "animus")
+    state_root = os.path.join(claude_root, "animus")
 
-    config_path = os.path.join(harness_root, "project-config.json")
+    config_path = os.path.join(animus_root, "project-config.json")
     features_path = os.path.join(state_root, "features.json")
 
     build_command = ""

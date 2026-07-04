@@ -10,20 +10,20 @@ $projectRoot = if ($env:CLAUDE_PROJECT_ROOT) {
     (Resolve-Path "$PSScriptRoot/../../..").Path
 }
 
-# 统一路径查找：features.json 固定在 .claude/harness-cc/
-$featuresPath = Join-Path $projectRoot ".claude" "harness-cc" "features.json"
+# 统一路径查找：features.json 固定在 .claude/animus/
+$featuresPath = Join-Path $projectRoot ".claude" "animus" "features.json"
 
 # 旧路径 deprecated 警告（同时检查 .claude/state/ 和 .claude/harness/）
 $oldStatePath = Join-Path $projectRoot ".claude" "state" "features.json"
 $oldHarnessPath = Join-Path $projectRoot ".claude" "harness" "features.json"
 if (Test-Path -LiteralPath $oldStatePath) {
-    Write-Host "[harness-cc] WARNING: features.json 在旧路径 .claude/state/ (deprecated). 请迁移到 .claude/harness-cc/" -ForegroundColor Yellow
+    Write-Host "[animus] WARNING: features.json 在旧路径 .claude/state/ (deprecated). 请迁移到 .claude/animus/" -ForegroundColor Yellow
 }
 if (Test-Path -LiteralPath $oldHarnessPath) {
-    Write-Host "[harness-cc] WARNING: features.json 在旧路径 .claude/harness/ (deprecated). 请迁移到 .claude/harness-cc/" -ForegroundColor Yellow
+    Write-Host "[animus] WARNING: features.json 在旧路径 .claude/harness/ (deprecated). 请迁移到 .claude/animus/" -ForegroundColor Yellow
 }
 
-$historyPath = Join-Path $projectRoot ".claude" "harness-cc" "harness-history.jsonl"
+$historyPath = Join-Path $projectRoot ".claude" "animus" "animus-history.jsonl"
 
 # 1) 如果 features.json 存在，统计任务完成情况并输出摘要
 if (Test-Path -LiteralPath $featuresPath) {
@@ -43,7 +43,7 @@ if (Test-Path -LiteralPath $featuresPath) {
         if ($totalCount -gt 0) {
             # 统计状态为 passed 或 completed 的已完成任务数
             $doneCount = ($tasks | Where-Object { $_.status -in @("passed", "completed") }).Count
-            Write-Host "[harness-cc] PreCompact: $doneCount/$totalCount 任务完成"
+            Write-Host "[animus] PreCompact: $doneCount/$totalCount 任务完成"
 
             # 3) 写入 JSONL compact 事件
             if (Test-Path -LiteralPath $historyPath) {
@@ -60,7 +60,7 @@ if (Test-Path -LiteralPath $featuresPath) {
             }
 
             # 4) 自动同步 features.json → task_plan.md
-            $taskPlanPath = Join-Path $projectRoot ".claude" "harness-cc" "task_plan.md"
+            $taskPlanPath = Join-Path $projectRoot ".claude" "animus" "task_plan.md"
             if (Test-Path -LiteralPath $taskPlanPath) {
                 try {
                     $planContent = Get-Content -LiteralPath $taskPlanPath -Encoding UTF8
@@ -114,8 +114,8 @@ if (Test-Path -LiteralPath $featuresPath) {
                 if (-not $currentIds.ContainsKey($hId)) { $missingIds += $hId }
             }
             if ($missingIds.Count -gt 0) {
-                Write-Host "[harness-cc] WARNING: Append-only 违规！以下任务已从 features.json 中删除: $($missingIds -join ', ')" -ForegroundColor Red
-                Write-Host "[harness-cc] 建议从备份 features.json.bak.* 中恢复" -ForegroundColor Yellow
+                Write-Host "[animus] WARNING: Append-only 违规！以下任务已从 features.json 中删除: $($missingIds -join ', ')" -ForegroundColor Red
+                Write-Host "[animus] 建议从备份 features.json.bak.* 中恢复" -ForegroundColor Yellow
             }
         } catch { }
     }

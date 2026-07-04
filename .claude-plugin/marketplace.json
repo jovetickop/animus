@@ -1,6 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "harness-cc",
+  "name": "animus",
   "description": "状态机驱动的编码工作流引擎，支持 C++/Qt、Python、Node.js、Rust、Go 等多语言项目",
   "owner": {
     "name": "JiangJie",
@@ -8,7 +8,7 @@
   },
   "plugins": [
     {
-      "name": "harness-cc",
+      "name": "animus",
       "source": "./",
       "version": "1.0.0",
       "description": "状态机驱动的编码工作流引擎，支持 C++/Qt、Python、Node.js、Rust、Go",

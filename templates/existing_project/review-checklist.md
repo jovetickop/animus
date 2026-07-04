@@ -1,6 +1,6 @@
 # 已有工程验收清单
 
-> 完整验收流程请执行 `/harness-code-review`，本文件为人工快速参考。
+> 完整验收流程请执行 `/animus-review`，本文件为人工快速参考。
 
 ## 通用检查
 
@@ -9,7 +9,7 @@
 - [ ] 代码是否符合项目编码规范？
 - [ ] 是否有未处理的错误路径？
 - [ ] 是否有调试代码或临时日志残留？
-- [ ] harness 状态是否已更新？（features.json + harness-history.jsonl + feature-detail.md + task_plan.md + findings.md）
+- [ ] animus 状态是否已更新？（features.json + animus-history.jsonl + feature-detail.md + task_plan.md + findings.md）
 
 ## 语言专项（按项目类型选做）
 

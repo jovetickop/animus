@@ -1,9 +1,9 @@
-param(
+﻿param(
     [string]$ProjectRoot = "."
 )
 
 $ClaudeRoot = Join-Path $ProjectRoot ".claude"
-$StateRoot = Join-Path $ClaudeRoot "harness-cc"
+$StateRoot = Join-Path $ClaudeRoot "animus"
 $BuildDir = Join-Path $ProjectRoot "build"
 
 New-Item -ItemType Directory -Force -Path $StateRoot | Out-Null
@@ -17,4 +17,4 @@ if (-not (Test-Path $BuildDir)) {
     New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
 }
 
-Write-Host "已初始化 harness-cc：$StateRoot"
+Write-Host "已初始化 animus：$StateRoot"

@@ -21,14 +21,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 仓库性质
 
-本仓库是 **harness-cc 插件的源码发布仓库**，不是使用该插件的目标工程。用户通过 `/plugin marketplace add` + `/plugin install` 或手动克隆后 `/plugin install <path>` 安装，插件目录通过 `${CLAUDE_PLUGIN_ROOT}` 环境变量解析。仓库根目录包含插件所有源代码（agents/, commands/, rules/, hooks/, templates/, scripts/, skills/, docs/），没有 `CMakeLists.txt` / `Cargo.toml` / `package.json` 等业务工程文件。
+本仓库是 **animus 插件的源码发布仓库**，不是使用该插件的目标工程。用户通过 `/plugin marketplace add` + `/plugin install` 或手动克隆后 `/plugin install <path>` 安装，插件目录通过 `${CLAUDE_PLUGIN_ROOT}` 环境变量解析。仓库根目录包含插件所有源代码（agents/, commands/, rules/, hooks/, templates/, scripts/, skills/, docs/），没有 `CMakeLists.txt` / `Cargo.toml` / `package.json` 等业务工程文件。
 
-`.claude-plugin/plugin.json` 是插件入口，7 个斜杠命令（`/harness-code-setup`、`/harness-code-plan`、`/harness-code-review`、`/harness-code-handoff`、`/harness-code-continue`、`/harness-code-archive`、`/harness-code-debug`）是主要工作流入口。`templates/init-project.ps1` 是手动安装入口（用户执行后为目标项目创建 `.claude/harness-cc/` 运行时目录）。
+`.claude-plugin/plugin.json` 是插件入口，7 个斜杠命令（`/animus-setup`、`/animus-plan`、`/animus-review`、`/animus-handoff`、`/animus-continue`、`/animus-archive`、`/animus-debug`）是主要工作流入口。`templates/init-project.ps1` 是手动安装入口（用户执行后为目标项目创建 `.claude/animus/` 运行时目录）。
 
 ## 仓库根结构
 
 ```
-harness-cc/                             仓库根（插件发布源）
+animus/                             仓库根（插件发布源）
 ├── .claude-plugin/plugin.json          插件清单（插件入口）
 ├── README.md                          中文使用文档
 ├── .gitignore                         排除 CLAUDE.md、本地 settings、worktrees、运行时状态
@@ -41,11 +41,11 @@ harness-cc/                             仓库根（插件发布源）
 ├── commands/                          7 个斜杠命令 + 验证脚本
 ├── docs/                              开发文档（编码策略、Hook 调试、模板说明）
 ├── hooks/                             PostToolUse 自动 clang-format 等运行时钩子
-├── rules/                             8 个编码规范文件（按语言分组）
+├── rules/                            13 个编码规范文件（按语言分组）
 ├── scripts/                           Python 脚本（session-catchup 5问重启、format-log JSONL渲染、状态显示等）
 ├── skills/tdd-workflow/               子技能（/tdd-workflow）
 └── templates/                         安装时使用的模板
-    ├── harness/                       状态机脚本 + 状态文件（含 task_plan.md 子步骤追踪、findings.md 知识积累、plan-context.md 规划上下文等 10 个文件）
+    ├── animus/                       状态机脚本 + 状态文件（含 task_plan.md 子步骤追踪、findings.md 知识积累、plan-context.md 规划上下文等 10 个文件）
     ├── existing_project/              CLAUDE.md / review-checklist / cmake-adapter 模板
     ├── .clang-format                  C++ 格式化配置
     └── init-project.ps1               项目初始化主脚本
@@ -55,15 +55,15 @@ harness-cc/                             仓库根（插件发布源）
 
 插件按"插件清单 → 编排命令 → 执行 Agent + 规则"组织：
 
-1. **插件清单** (`.claude-plugin/plugin.json`)：声明插件元信息、3 个斜杠命令入口和自动发现组件。
+1. **插件清单** (`.claude-plugin/plugin.json`)：声明插件元信息、7 个斜杠命令入口和自动发现组件。
 2. **编排命令** (`commands/`)：7 个斜杠命令驱动工作流
-   - `harness-code-setup`：检测项目类型（CMake/Qt/Cargo/npm/pip）+ 创建 `.claude/harness-cc/` 运行时目录
-   - `harness-code-plan`：PRD+方案 → `features.json` 任务列表
-   - `harness-code-debug`：系统化调试——根因调查→模式分析→假设验证→修复规划→自动审查
-   - `harness-code-review`：通用 + 语言专项验收
-   - `harness-code-handoff`：保存 session 上下文快照到 handoff.json
-   - `harness-code-continue`：从 handoff.json 恢复 session 上下文
-   - `harness-code-archive`：归档当前迭代，清空并开始新迭代
+   - `animus-setup`：检测项目类型（CMake/Qt/Cargo/npm/pip）+ 创建 `.claude/animus/` 运行时目录
+   - `animus-plan`：PRD+方案 → `features.json` 任务列表
+   - `animus-debug`：系统化调试——根因调查→模式分析→假设验证→修复规划→自动审查
+   - `animus-review`：通用 + 语言专项验收
+   - `animus-handoff`：保存 session 上下文快照到 handoff.json
+   - `animus-continue`：从 handoff.json 恢复 session 上下文
+   - `animus-archive`：归档当前迭代，清空并开始新迭代
 3. **执行层** (`agents/` + `rules/`)：agents/commands/rules 不再复制到目标项目，直接从插件安装目录（通过 `${CLAUDE_PLUGIN_ROOT}` 环境变量解析）加载。universal 5 个通用 + 各语言专项 Agent；rules 约束编码规范。
 
 ## Agent 索引（按职责）
@@ -85,13 +85,13 @@ harness-cc/                             仓库根（插件发布源）
 
 ## 状态机核心规则（修改时必须遵守）
 
-`templates/harness/` 是状态机的实现，逻辑由 `update-progress.ps1` 强制执行：
+`templates/animus/` 是状态机的实现，逻辑由 `update-progress.ps1` 强制执行：
 
 - 状态机：`pending → in_progress → passed/failed`；`failed → in_progress` 重试；`pending` 只能从 `failed/in_progress/pending` 改回。
 - 同时只能有一个 `in_progress` 任务（脚本会拒绝第二个）。
 - `in_progress → passed` 必须有构建/测试证据，否则违反工作流硬规则。
 - `depends_on` 必须是直接前置任务 ID；前置任务未 `passed` 时不能进入 `in_progress`。
-- 每次状态流转自动追加 `.claude/harness-cc/harness-history.jsonl` 一行 + 生成 `.claude/harness-cc/docs/<TaskId>-<name>.md` 报告。
+- 每次状态流转自动追加 `.claude/animus/animus-history.jsonl` 一行 + 生成 `.claude/animus/docs/<TaskId>-<name>.md` 报告。
 - `updated_at` / `last_error` 由脚本维护，不要手工批量改写。
 - 状态非法流转脚本会 `exit 1` 并打印原因——这是契约，不应放宽。
 
@@ -103,8 +103,8 @@ harness-cc/                             仓库根（插件发布源）
 
 ## 模板与目标工程约定
 
-- `templates/init-project.ps1` 为目标项目创建 `.claude/harness-cc/` 运行时目录，不再修改目标项目的 `CLAUDE.md`。
-- `templates/harness/features.json` 里的字段顺序（id/name/status/depends_on/priority/test_command/last_error/updated_at/acceptance_criteria）是契约，新字段必须保证向后兼容。
+- `templates/init-project.ps1` 为目标项目创建 `.claude/animus/` 运行时目录，不再修改目标项目的 `CLAUDE.md`。
+- `templates/animus/features.json` 里的字段顺序（id/name/status/depends_on/priority/test_command/last_error/updated_at/acceptance_criteria）是契约，新字段必须保证向后兼容。
 
 ## 修改本仓库时的常用命令
 
@@ -112,16 +112,16 @@ harness-cc/                             仓库根（插件发布源）
 
 # 语法快速检查（PowerShell 脚本）
 
-powershell -NoProfile -Command "$null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw 'templates/harness/update-progress.ps1'), [ref]$null); 'ok'"
+powershell -NoProfile -Command "$null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw 'templates/animus/update-progress.ps1'), [ref]$null); 'ok'"
 
 # Python 脚本快速检查（兼容 Py2/3）
 
-python -m py_compile templates/harness/show-status.py
+python -m py_compile templates/animus/show-status.py
 
 # JSON 校验
 
-python -m json.tool templates/harness/features.json > /dev/null
-python -m json.tool templates/harness/project-config.json > /dev/null
+python -m json.tool templates/animus/features.json > /dev/null
+python -m json.tool templates/animus/project-config.json > /dev/null
 ```
 
 本仓库没有构建步骤；CI 通常在多语言目标工程上跑（参考 `rules/universal/testing.md`）。
@@ -129,7 +129,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 ## 开发/提交约定
 
 - 用户全局规则要求 **不在本仓库自动 push 远程**，只本地提交，由用户自行推送。
-- 修改 harness 技能后需走"全语言回归"：至少 3 种语言（C++/Qt、Rust、Python）跑 `Setup → Plan → Implement → Review → Verify → commit` 完整链路，最后用 `plugin-validator` 验证。
+- 修改 animus 技能后需走"全语言回归"：至少 3 种语言（C++/Qt、Rust、Python）跑 `Setup → Plan → Implement → Review → Verify → commit` 完整链路，最后用 `plugin-validator` 验证。
 - commit 信息遵循 `rules/universal/git-workflow.md` 的 Conventional Commits 风格。
 - 新增 Agent 描述要写明触发场景，否则 Claude Code 不会自动委派。
 
@@ -142,11 +142,11 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 ## Project
 
-**harness-cc**
+**animus**
 
-`harness-cc` 是一个 Claude Code 技能插件式的编码工作流引擎。采用微内核 + 插件风格架构，核心层提供状态机引擎和运行时钩子，语言专属插件通过 Agent 定义和编码规则扩展支持 6 种语言生态（C++/Qt、C++/CMake、Python、Node.js、Rust、Go）。该仓库是插件本身的开发仓库，而非使用该插件的目标工程。
+`animus` 是一个 Claude Code 技能插件式的编码工作流引擎。采用微内核 + 插件风格架构，核心层提供状态机引擎和运行时钩子，语言专属插件通过 Agent 定义和编码规则扩展支持 6 种语言生态（C++/Qt、C++/CMake、Python、Node.js、Rust、Go）。该仓库是插件本身的开发仓库，而非使用该插件的目标工程。
 
-**Core Value:** 对于使用 Claude Code 进行多语言开发的团队，harness-cc 提供了一套结构化的代码审查和测试编排框架，核心价值是**"让 AI 辅助的编码工作可跟踪、可验证、可重复"**。
+**Core Value:** 对于使用 Claude Code 进行多语言开发的团队，animus 提供了一套结构化的代码审查和测试编排框架，核心价值是**"让 AI 辅助的编码工作可跟踪、可验证、可重复"**。
 
 ### Constraints
 
@@ -200,7 +200,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 |------|------|
 | `.claude/settings.local.json` | Claude Code 本地权限白名单（此仓库也保留在 `.claude/` 下）（Bash/Read/MCP/skill 调用） |
 | `hooks/hooks.json` | 注册 PostToolUse/PreToolUse/PreCompact/Stop 四个钩子 |
-| `templates/harness/project-config.json` | 目标项目类型配置（frontend/backend/verify 字段） |
+| `templates/animus/project-config.json` | 目标项目类型配置（frontend/backend/verify 字段） |
 | `templates/.clang-format` | C++ 格式化规则模板 |
 | `.claude-plugin/plugin.json` | 插件清单，声明元信息、斜杠命令和自动发现组件 |
 | `.gitignore` | 排除 CLAUDE.md、settings.local.json、worktrees、.codegraph/ |
@@ -284,7 +284,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 ### GBK 编码支持 (`rules/cpp-cmake/encoding.md`)
 
-- 在 `.claude/harness-cc/project-config.json` 中设置 `"encoding": "gbk"` 启用。
+- 在 `.claude/animus/project-config.json` 中设置 `"encoding": "gbk"` 启用。
 - PreToolUse 钩子自动 GBK → UTF-8 转换，PostToolUse 自动 UTF-8 → GBK 回转。
 - Agent 不需手动编码转换，hooks 自动完成。
 
@@ -392,7 +392,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 ### 本仓库特殊约定 (CLAUDE.md)
 
 - **不在本仓库自动 push 远程**，只本地提交，由用户自行推送。
-- 修改 harness 技能后需走 **全语言回归**：至少 3 种语言（C++/Qt、Rust、Python）跑完整工作流。
+- 修改 animus 技能后需走 **全语言回归**：至少 3 种语言（C++/Qt、Rust、Python）跑完整工作流。
 - 用户全局规则：跨 Git 目录时执行 `codegraph sync`。
 
 ### 提交前检查
@@ -404,24 +404,24 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 ## 代码审查标准
 
-### 审查流程 (`commands/harness-code-review.md` / `agents/universal/code-reviewer.md`)
+### 审查流程 (`commands/animus-review.md` / `agents/universal/code-reviewer.md`)
 
 ### 严重级别输出
 
 - **critical/high**：必须修复后才能继续。
 - **medium/low**：记录待办后可继续。
 
-### 验收审查 (`harness-code-review` 命令)
+### 验收审查 (`animus-review` 命令)
 
 - `commands\validate-features.ps1` — 验证 `features.json` 结构。
-- `commands\check-consistency.ps1` — 检查 `.claude/harness-cc/features.json` 与 `.claude/harness-cc/harness-history.jsonl` 一致性（含 append-only 校验）
+- `commands\check-consistency.ps1` — 检查 `.claude/animus/features.json` 与 `.claude/animus/animus-history.jsonl` 一致性（含 append-only 校验）
 
 ### 状态机验收硬规则 (CLAUDE.md)
 
 - `in_progress → passed` 必须有构建/测试证据。
 - 不得标记任务为 `passed` 之前跳过验证。
 - 必须执行 `verify_command` 并确认 `exit 0`。
-- 验证输出追加到 `.claude/harness-cc/harness-history.jsonl`（至少最后 3 条）。
+- 验证输出追加到 `.claude/animus/animus-history.jsonl`（至少最后 3 条）。
 - 不得修改 `verify_config` 中的 `verify_command`。
 
 ### 已有工程验收清单 (`templates/existing_project/review-checklist.md`)
@@ -431,7 +431,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 - [ ] 代码是否符合项目编码规范？
 - [ ] 是否有未处理的错误路径？
 - [ ] 是否有调试代码或临时日志残留？
-- [ ] harness 状态是否已更新？
+- [ ] animus 状态是否已更新？
 
 ### 核心设计约束 (`universal/coding-style.md`)
 
@@ -452,19 +452,19 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 | 模块 | 职责 | 文件 |
 |------|------|------|
 | 插件清单 | 声明插件元信息、斜杠命令和自动发现组件 | `.claude-plugin/plugin.json` |
-| 项目状态判定 | 目标项目状态判定由 `commands/harness-code-setup.md` 处理 | `commands/harness-code-setup.md` |
+| 项目状态判定 | 目标项目状态判定由 `commands/animus-setup.md` 处理 | `commands/animus-setup.md` |
 
 ### 2. 编排层 (Commands)
 
 | 命令 | 职责 | 文件 |
 |------|------|------|
-| `/harness-code-setup` | 项目初始化 + 类型检测 + 创建 `.claude/harness-cc/` 运行时目录 | `commands/harness-code-setup.md` |
-| `/harness-code-plan` | PRD/方案文档 -> features.json 任务列表 | `commands/harness-code-plan.md` |
-| `/harness-code-review` | 通用验收 + 语言专项验收 | `commands/harness-code-review.md` |
-| `/harness-code-debug` | 系统化调试——根因调查→模式分析→假设验证→实施修复 | `commands/harness-code-debug.md` |
-| `/harness-code-handoff` | 保存 session 上下文快照到 handoff.json | `commands/harness-code-handoff.md` |
-| `/harness-code-continue` | 从 handoff.json 恢复 session 上下文 | `commands/harness-code-continue.md` |
-| `/harness-code-archive` | 归档当前迭代，清空并开始新迭代 | `commands/harness-code-archive.md` |
+| `/animus-setup` | 项目初始化 + 类型检测 + 创建 `.claude/animus/` 运行时目录 | `commands/animus-setup.md` |
+| `/animus-plan` | PRD/方案文档 -> features.json 任务列表 | `commands/animus-plan.md` |
+| `/animus-review` | 通用验收 + 语言专项验收 | `commands/animus-review.md` |
+| `/animus-debug` | 系统化调试——根因调查→模式分析→假设验证→实施修复 | `commands/animus-debug.md` |
+| `/animus-handoff` | 保存 session 上下文快照到 handoff.json | `commands/animus-handoff.md` |
+| `/animus-continue` | 从 handoff.json 恢复 session 上下文 | `commands/animus-continue.md` |
+| `/animus-archive` | 归档当前迭代，清空并开始新迭代 | `commands/animus-archive.md` |
 | 验证辅助 | features.json 结构校验 | `commands/validate-features.ps1` |
 | 一致性检查 | 检查状态文件一致性 | `commands/check-consistency.ps1` |
 
@@ -488,7 +488,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 | PreCompact | 上下文压缩前 | 刷进度（JSONL compact 事件 + features→task_plan 同步） |
 | Stop | 会话结束时 | 检查未完成任务，输出恢复提示 |
 
-### 6. 运行时引擎 (Harness)
+### 6. 运行时引擎 (animus)
 
 - `update-progress.ps1` — 核心状态机引擎，执行状态流转校验、Oracle 验证门控
 - `show-status.py` — 状态概览显示
@@ -502,7 +502,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 
 - `features.active.json` — 当前活动任务 (Token 优化分片)
 - `features.archive.json` — 已完成/失败归档
-- `harness-history.jsonl` — 统一结构化日志
+- `animus-history.jsonl` — 统一结构化日志
 - `task_plan.md` — 子步骤追踪
 - `findings.md` — 知识积累
 
@@ -527,7 +527,7 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 ### 3. 模板 + 安装脚本的部署模式
 
 - 所有技能资产集中存储在仓库根目录下
-- `init-project.ps1` 是安装脚本，为目标项目创建 `.claude/harness-cc/` 运行时目录
+- `init-project.ps1` 是安装脚本，为目标项目创建 `.claude/animus/` 运行时目录
 - 不再修改目标项目的 CLAUDE.md
 
 ### 4. 钩子自动化
@@ -553,12 +553,12 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 | 决策 | 理由 | 体现位置 |
 |------|------|----------|
 | 所有插件资产放在仓库根目录下 | 插件源码仓库，通过 `/plugin install` 安装，路径由 `${CLAUDE_PLUGIN_ROOT}` 解析 | agents/, commands/, rules/ 等目录 |
-| 使用 PowerShell 作为主脚本语言 | Windows 优先的用户群体，PS 5.1 兼容 | `templates/harness/` |
+| 使用 PowerShell 作为主脚本语言 | Windows 优先的用户群体，PS 5.1 兼容 | `templates/animus/` |
 | 核心脚本从 PS 迁移到 Python | 跨平台 + Python 2/3 兼容 | `scripts/` 中的 `.py` 文件 |
 | HTML 注释引用替代原生 include | Markdown 缺乏 include 机制，HTML 注释是最便携方式 | `agents/base/*.md` |
-| 前置声明式 tasks.json | JSON 比 YAML 更宽泛的语言解析支持 | `templates/state/features.json` |
-| 不修改目标项目的 CLAUDE.md | 目标项目保持独立，仅创建 .claude/harness-cc/ 运行时目录 | `init-project.ps1` |
-| 状态分片 (active/archive) | 缩减 Token 消耗约 78%，长项目更友好 | `.claude/harness-cc/` 目录 |
+| 前置声明式 tasks.json | JSON 比 YAML 更宽泛的语言解析支持 | `templates/animus/features.json` |
+| 不修改目标项目的 CLAUDE.md | 目标项目保持独立，仅创建 .claude/animus/ 运行时目录 | `init-project.ps1` |
+| 状态分片 (active/archive) | 缩减 Token 消耗约 78%，长项目更友好 | `.claude/animus/` 目录 |
 | 双平台钩子脚本 | Windows/Linux 开发环境都需支持 | `hooks/scripts/*.ps1 + *.sh` |
 | 项目类型自动检测 | 零配置上手，按项目文件判定语言栈 | `init-project.ps1` 步骤 5 |
 | 空命令值保持空 | 不硬编码默认值，由用户首次运行时填写 | `project-config.json` |
@@ -588,12 +588,12 @@ python -m json.tool templates/harness/project-config.json > /dev/null
 - Oracle 门控防止任务被过早标记完成
 - 状态机校验防止非法流转
 - hooks 双平台互为降级，单点失败不阻塞
-- 每次状态流转生成 `.claude/harness-cc/docs/` 报告 + 追加 JSONL 日志
+- 每次状态流转生成 `.claude/animus/docs/` 报告 + 追加 JSONL 日志
 
 ### 跨会话持久性
 
 - `features.active.json` + `features.archive.json` 持久化任务状态
-- `harness-history.jsonl` 记录所有状态转换历史（JSONL 格式，追加写入）
+- `animus-history.jsonl` 记录所有状态转换历史（JSONL 格式，追加写入）
 - `session-catchup.py` 在会话中断后自动恢复（5 问重启检查）
 - `findings.md` 记录决策和错误经验（非易失性知识）
 

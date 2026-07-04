@@ -4,7 +4,7 @@
 
 # ===== 路径定义 =====
 $ClaudeRoot = Join-Path $ProjectRoot ".claude"
-$StateRoot = Join-Path $ClaudeRoot "harness-cc"
+$StateRoot = Join-Path $ClaudeRoot "animus"
 $FeaturesFile = Join-Path $StateRoot "features.json"
 # show-status.py 位于插件源码目录，使用环境变量定位
 $PluginRoot = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { Split-Path $PSScriptRoot -Parent }

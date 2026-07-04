@@ -7,7 +7,7 @@
 # 用法:
 #   python scripts/session-catchup.py [--project-dir DIR]
 #
-# 不再依赖 Claude Code session JSONL 文件，直接读取 .claude/harness-cc/ 状态文件。
+# 不再依赖 Claude Code session JSONL 文件，直接读取 .claude/animus/ 状态文件。
 # 输出 5 问恢复检查报告。
 
 from __future__ import print_function, unicode_literals
@@ -86,7 +86,7 @@ def read_features(path):
 
 
 def read_jsonl(path):
-    """读取 harness-history.jsonl → 返回 events 列表。
+    """读取 animus-history.jsonl → 返回 events 列表。
 
     每行一个 JSON 对象。如果文件不存在或解析失败，返回 None。
     """
@@ -336,23 +336,23 @@ def main():
     args = parser.parse_args()
     project_dir = args.project_dir
 
-    # 拼装 .claude/harness-cc/ 路径
-    harness_dir = os.path.join(project_dir, ".claude", "harness-cc")
+    # 拼装 .claude/animus/ 路径
+    animus_dir = os.path.join(project_dir, ".claude", "animus")
 
-    # 边界情况：harness 目录不存在
-    if not os.path.isdir(harness_dir):
+    # 边界情况：animus 目录不存在
+    if not os.path.isdir(animus_dir):
         print_header()
         print()
-        print(u"  项目尚未初始化（.claude/harness-cc/ 目录不存在）。")
+        print(u"  项目尚未初始化（.claude/animus/ 目录不存在）。")
         print()
         print_footer()
         return 0
 
     # 定义各文件路径
-    features_path = os.path.join(harness_dir, "features.json")
-    jsonl_path = os.path.join(harness_dir, "harness-history.jsonl")
-    task_plan_path = os.path.join(harness_dir, "task_plan.md")
-    findings_path = os.path.join(harness_dir, "findings.md")
+    features_path = os.path.join(animus_dir, "features.json")
+    jsonl_path = os.path.join(animus_dir, "animus-history.jsonl")
+    task_plan_path = os.path.join(animus_dir, "task_plan.md")
+    findings_path = os.path.join(animus_dir, "findings.md")
 
     # 读取各文件
     tasks = read_features(features_path)
@@ -377,13 +377,13 @@ def main():
     print_q3(events, findings_content)
     print_q4([
         ("features.json", features_path),
-        ("harness-history.jsonl", jsonl_path),
+        ("animus-history.jsonl", jsonl_path),
         ("task_plan.md", task_plan_path),
         ("findings.md", findings_path),
     ])
     print_q5(tasks)
 
-    handoff_path = os.path.join(harness_dir, "handoff.json")
+    handoff_path = os.path.join(animus_dir, "handoff.json")
     print_q6(handoff_path)
 
     print_footer()

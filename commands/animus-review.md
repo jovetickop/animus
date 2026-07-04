@@ -2,7 +2,7 @@
 description: 执行通用检查 + 按项目类型的专项验收检查
 ---
 
-# /harness-code-review
+# /animus-review
 
 请使用 code-reviewer agent 对当前变更进行全面审查。
 

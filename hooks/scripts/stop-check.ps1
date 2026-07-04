@@ -10,7 +10,7 @@ $projectRoot = if ($env:CLAUDE_PROJECT_ROOT) {
     Resolve-Path "$PSScriptRoot/../../.."
 }
 
-$featuresPath = Join-Path $projectRoot ".claude" "harness-cc" "features.json"
+$featuresPath = Join-Path $projectRoot ".claude" "animus" "features.json"
 
 # 检查 features.json 是否存在
 if (-not (Test-Path -LiteralPath $featuresPath)) {

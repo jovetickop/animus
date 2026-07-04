@@ -14,7 +14,7 @@ function Invoke-GitCommit {
     git diff --cached --quiet
     if ($LASTEXITCODE -eq 0) { Write-Host "无可提交变更"; return }
 
-    $commitMessage = "chore(harness): update $TaskId to $Status"
+    $commitMessage = "chore(animus): update $TaskId to $Status"
     git commit -m $commitMessage
     if ($LASTEXITCODE -ne 0) { Write-Host "git commit 失败，请人工处理。" }
 }

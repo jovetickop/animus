@@ -9,7 +9,7 @@
 
 ## 通用定位
 
-你是当前单个 harness 任务的实现代理，目标是在不越界的前提下，把一个任务从"待做"推进到"可验收"。
+你是当前单个 animus 任务的实现代理，目标是在不越界的前提下，把一个任务从"待做"推进到"可验收"。
 
 ## 通用工作方式
 
@@ -44,9 +44,9 @@
 
 - 不得标记任务为 passed 之前跳过验证
 - 必须执行 verify_command 并确认 exit 0
-- 将验证输出追加到 harness-history.jsonl（至少最后3条）
+- 将验证输出追加到 animus-history.jsonl（至少最后3条）
 - 不得修改 project-config.json 中的 verify_config
-- 每次开始实现前，先读取该任务在 harness-history.jsonl 中的失败历史
+- 每次开始实现前，先读取该任务在 animus-history.jsonl 中的失败历史
 
 ## 自动代码审查（passed 前置门控）
 
@@ -71,28 +71,28 @@
 
 ## 通用知识积累要求
 
-- 每次遇到非显而易见的修复（如奇怪编译错误、特殊 API 行为、非预期约束），记录到 `.claude/harness-cc/findings.md`
-- findings.md 格式参考 `${CLAUDE_PLUGIN_ROOT}/templates/harness/findings.md`
+- 每次遇到非显而易见的修复（如奇怪编译错误、特殊 API 行为、非预期约束），记录到 `.claude/animus/findings.md`
+- findings.md 格式参考 `${CLAUDE_PLUGIN_ROOT}/templates/animus/findings.md`
 - 记录内容：决策记录（架构选型）/ 错误经验（踩坑修复）/ 待办（延期项）
 - 每次记录附带来源任务 ID
 
 ### 术语表维护
 
-遇到业务领域术语时，追加到 `.claude/harness-cc/domain-lexicon.md`（如不存在则参考模板创建）。
+遇到业务领域术语时，追加到 `.claude/animus/domain-lexicon.md`（如不存在则参考模板创建）。
 每行记录：术语、英文名、定义、别名、来源（I{N}-T{NNN}）。
 
 ### ADR 记录
 
 遇到架构级决策（技术选型、架构变更、关键约束）时：
-1. 在 `.claude/harness-cc/adr/` 目录创建 ADR 文件
+1. 在 `.claude/animus/adr/` 目录创建 ADR 文件
 2. 编号递增，标题用中文描述决策主题
 3. 记录上下文、决策、备选方案和后果
 
 ## 通用子步骤追踪要求
 
-- **步骤 0**：开始实现前，先读取`.claude/harness-cc/features.json` 中当前任务的信息
-- 创建 `.claude/harness-cc/task_plan.md`，按模板 `${CLAUDE_PLUGIN_ROOT}/templates/harness/task_plan.md` 格式编写
+- **步骤 0**：开始实现前，先读取`.claude/animus/features.json` 中当前任务的信息
+- 创建 `.claude/animus/task_plan.md`，按模板 `${CLAUDE_PLUGIN_ROOT}/templates/animus/task_plan.md` 格式编写
 - 将任务的 `acceptance_criteria` 作为验收依据写入 task_plan.md
 - 每完成一步就更新 `[ ]` → `[x]` 和进度数字
 - 遇到阻塞时更新"风险/阻塞"部分
-- task_plan.md 中的进度变化也应记录到 `harness-history.jsonl`（subtask_update 类型）
+- task_plan.md 中的进度变化也应记录到 `animus-history.jsonl`（subtask_update 类型）

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Python 2.7+ / 3.x 兼容
-# harness-cc 状态显示工具 —— 增强版（含持续时间、预测、失败趋势）
+# animus 状态显示工具 —— 增强版（含持续时间、预测、失败趋势）
 
 from __future__ import print_function, unicode_literals
 import datetime
@@ -170,18 +170,18 @@ def main():
         state_root = args[0]
     else:
         # 自动检测 state 目录
-        default_root = os.path.join(".claude", "harness-cc")
+        default_root = os.path.join(".claude", "animus")
         if os.path.exists(default_root):
             state_root = default_root
         else:
             script_dir = os.path.dirname(os.path.abspath(__file__))
-            state_root = os.path.join(script_dir, "..", ".claude", "harness-cc")
+            state_root = os.path.join(script_dir, "..", ".claude", "animus")
 
     # P1-5: 优先使用 features.active.json，向后兼容 features.json
     active_path = os.path.join(state_root, "features.active.json")
     legacy_path = os.path.join(state_root, "features.json")
     archive_path = os.path.join(state_root, "features.archive.json")
-    history_path = os.path.join(state_root, "harness-history.jsonl")
+    history_path = os.path.join(state_root, "animus-history.jsonl")
 
     if show_archive:
         # 显示已归档任务
@@ -325,7 +325,7 @@ def main():
                 print(u"    - {0} {1}".format(ft.get("id", "??"), ft.get("name", "")))
 
     # ============================================================
-    # P2-5: 读取 harness-history.jsonl 显示失败趋势
+    # P2-5: 读取 animus-history.jsonl 显示失败趋势
     # ============================================================
     history_records = read_jsonl_lines(history_path)
     if history_records:

@@ -6,18 +6,18 @@
 # 确定项目根目录（从脚本路径 .claude/hooks/scripts/ 向上三级）
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 project_root="$(cd "$script_dir/../../.." && pwd)"
-# 统一路径查找：features.json 固定在 .claude/harness-cc/
-features_path="$project_root/.claude/harness-cc/features.json"
+# 统一路径查找：features.json 固定在 .claude/animus/
+features_path="$project_root/.claude/animus/features.json"
 
 # 旧路径 deprecated 警告（同时检查 .claude/state/ 和 .claude/harness/）
 if [ -f "$project_root/.claude/state/features.json" ]; then
-    echo "[harness-cc] WARNING: features.json 在旧路径 .claude/state/ (deprecated). 请迁移到 .claude/harness-cc/"
+    echo "[animus] WARNING: features.json 在旧路径 .claude/state/ (deprecated). 请迁移到 .claude/animus/"
 fi
 if [ -f "$project_root/.claude/harness/features.json" ]; then
-    echo "[harness-cc] WARNING: features.json 在旧路径 .claude/harness/ (deprecated). 请迁移到 .claude/harness-cc/"
+    echo "[animus] WARNING: features.json 在旧路径 .claude/harness/ (deprecated). 请迁移到 .claude/animus/"
 fi
 
-history_path="$project_root/.claude/harness-cc/harness-history.jsonl"
+history_path="$project_root/.claude/animus/animus-history.jsonl"
 
 # 1) 如果 features.json 存在，统计任务完成情况并输出摘要
 if [ -f "$features_path" ] && command -v jq >/dev/null 2>&1; then
@@ -35,7 +35,7 @@ if [ -f "$features_path" ] && command -v jq >/dev/null 2>&1; then
     ' "$features_path" 2>/dev/null)
 
     if [ -n "$stats" ]; then
-        echo "[harness-cc] PreCompact: $stats 任务完成"
+        echo "[animus] PreCompact: $stats 任务完成"
         # 3) 写入 JSONL compact 事件
         if [ -f "$history_path" ]; then
             timestamp=$(date "+%Y-%m-%dT%H:%M:%S")
@@ -46,7 +46,7 @@ if [ -f "$features_path" ] && command -v jq >/dev/null 2>&1; then
 fi
 
 # 4) 自动同步 features.json → task_plan.md
-task_plan_path="$project_root/.claude/harness-cc/task_plan.md"
+task_plan_path="$project_root/.claude/animus/task_plan.md"
 if [ -f "$task_plan_path" ]; then
     modified=false
     # 通过 python 解析 JSON 获取已完成任务 id（兼容 initial_tasks/tasks）

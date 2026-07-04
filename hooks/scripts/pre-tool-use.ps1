@@ -26,11 +26,11 @@ $filePath = $filePath -replace '\\\\', '\'
 $encDir = Split-Path $filePath -Parent
 $projectConfig = $null
 while ($encDir -and (Test-Path $encDir)) {
-    # 优先在用户项目的 .claude/harness-cc/ 下查找
-    $candidate = Join-Path $encDir ".claude\harness-cc\project-config.json"
-    # 回退到源仓库根目录的 templates/harness/（用于在 harness-cc 源仓库内开发）
+    # 优先在用户项目的 .claude/animus/ 下查找
+    $candidate = Join-Path $encDir ".claude\animus\project-config.json"
+    # 回退到源仓库根目录的 templates/animus/（用于在 animus 源仓库内开发）
     if (-not (Test-Path $candidate)) {
-        $candidate = Join-Path $encDir "templates\harness\project-config.json"
+        $candidate = Join-Path $encDir "templates\animus\project-config.json"
     }
     if (Test-Path $candidate) {
         $projectConfig = $candidate
@@ -54,12 +54,12 @@ if ($projectConfig) {
     }
 }
 
-# 从目标文件向上遍历目录，查找 .claude/harness-cc/features.json
+# 从目标文件向上遍历目录，查找 .claude/animus/features.json
 $dir = Split-Path $filePath -Parent
 $featuresPath = $null
 
 while ($dir -and (Test-Path $dir)) {
-    $candidate = Join-Path $dir ".claude\harness-cc\features.json"
+    $candidate = Join-Path $dir ".claude\animus\features.json"
     if (Test-Path $candidate) {
         $featuresPath = $candidate
         break

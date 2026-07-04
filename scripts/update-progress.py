@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Python 2.7+ / 3.x 兼容
-# harness-cc 任务进度更新脚本 —— 完整状态机 + 失败历史记录
+# animus 任务进度更新脚本 —— 完整状态机 + 失败历史记录
 
 from __future__ import print_function, unicode_literals
 import argparse
@@ -100,7 +100,7 @@ def get_tasks(data):
 
 def get_verify_config(data, project_dir):
     """获取验证配置。优先从 project-config.json 读取（T032），降级到 features.json。"""
-    config_path = os.path.join(project_dir, ".claude", "harness-cc", "project-config.json")
+    config_path = os.path.join(project_dir, ".claude", "animus", "project-config.json")
     if os.path.isfile(config_path):
         try:
             with open(config_path, "rb") as f:
@@ -220,8 +220,8 @@ def validate_transition(task_id, current_status, new_status, all_tasks, task_by_
 
 
 def append_history(features_root, task_id, from_status, to_status, message):
-    """追加状态转换历史到 harness-history.jsonl"""
-    history_path = os.path.join(features_root, "harness-history.jsonl")
+    """追加状态转换历史到 animus-history.jsonl"""
+    history_path = os.path.join(features_root, "animus-history.jsonl")
     record = {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "task_id": task_id,
@@ -348,14 +348,14 @@ def main():
     # 路径定义
     # ============================================================
     claude_root = os.path.join(project_root, ".claude")
-    features_root = os.path.join(claude_root, "harness-cc")
+    features_root = os.path.join(claude_root, "animus")
     # P1-5: 优先使用 features.active.json，向后兼容 features.json
     active_path = os.path.join(features_root, "features.active.json")
     legacy_path = os.path.join(features_root, "features.json")
     features_path = active_path if os.path.exists(active_path) else legacy_path
     archive_path = os.path.join(features_root, "features.archive.json")
-    history_path = os.path.join(features_root, "harness-history.jsonl")
-    reports_dir = os.path.join(claude_root, "harness-cc", "docs")
+    history_path = os.path.join(features_root, "animus-history.jsonl")
+    reports_dir = os.path.join(claude_root, "animus", "docs")
 
     # ============================================================
     # 检查状态文件是否存在
@@ -528,7 +528,7 @@ def main():
             print(u"警告: 归档任务 {0} 失败: {1}".format(task_id, e))
 
     # ============================================================
-    # P1-1: 追加状态转换历史到 harness-history.jsonl
+    # P1-1: 追加状态转换历史到 animus-history.jsonl
     # ============================================================
     append_history(features_root, task_id, current_status, new_status, log_message)
 

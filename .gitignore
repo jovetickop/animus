@@ -9,7 +9,7 @@ __pycache__/
 temp_utf8.ps1
 
 node_modules/
-.claude/harness-cc/
+.claude/animus/
 
 # Claude Code 会话记忆
 .remember/

@@ -8,7 +8,7 @@
 #   python scripts/format-log.py [--project-dir DIR] [--recent N]
 #                                [--task Txxx] [--type TYPE] [--markdown]
 #
-# 从 .claude/harness-cc/harness-history.jsonl 读取事件记录，
+# 从 .claude/animus/animus-history.jsonl 读取事件记录，
 # 支持按任务 ID、事件类型过滤和两种输出格式。
 
 from __future__ import print_function, unicode_literals
@@ -184,7 +184,7 @@ def format_markdown(events):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="从 harness-history.jsonl 渲染人类可读的格式输出"
+        description="从 animus-history.jsonl 渲染人类可读的格式输出"
     )
     parser.add_argument(
         "--project-dir",
@@ -219,12 +219,12 @@ def main():
 
     # 构造 JSONL 文件路径
     jsonl_path = os.path.join(
-        args.project_dir, ".claude", "harness-cc", "harness-history.jsonl"
+        args.project_dir, ".claude", "animus", "animus-history.jsonl"
     )
 
     # JSONL 文件不存在时输出友好提示
     if not os.path.isfile(jsonl_path):
-        print("harness-history.jsonl not found at {}".format(
+        print("animus-history.jsonl not found at {}".format(
             os.path.normpath(jsonl_path)
         ))
         return 0

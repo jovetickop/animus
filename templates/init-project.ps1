@@ -1,10 +1,10 @@
-param(
+﻿param(
     [string]$ProjectRoot = "."
 )
 
 # ============================================================
-# harness-cc 项目初始化脚本（精简版）
-# 功能：创建 .claude\harness-cc\ 目录和配置文件，不再复制文件
+# animus 项目初始化脚本（精简版）
+# 功能：创建 .claude\animus\ 目录和配置文件，不再复制文件
 # ============================================================
 
 # 中文输出函数
@@ -37,11 +37,11 @@ if (-not [System.IO.Path]::IsPathRooted($ProjectRoot)) {
 # 斜杠统一为反斜杠
 $ProjectRoot = $ProjectRoot -replace '/', '\'
 
-$StateDir  = Join-Path $ProjectRoot ".claude\harness-cc"
+$StateDir  = Join-Path $ProjectRoot ".claude\animus"
 $ReportsDir = Join-Path $StateDir "docs"
 
 Write-Host "========================================" -ForegroundColor Magenta
-Write-Host "  harness-cc 项目初始化（精简模式）" -ForegroundColor Magenta
+Write-Host "  animus 项目初始化（精简模式）" -ForegroundColor Magenta
 Write-Host "========================================" -ForegroundColor Magenta
 Write-Host "目标目录: $ProjectRoot"
 Write-Host ""
@@ -49,19 +49,19 @@ Write-Host ""
 # ============================================================
 # 步骤 2: 确定技能根目录
 # ============================================================
-Write-Step "确定 harness-cc 技能目录..."
+Write-Step "确定 animus 技能目录..."
 
 # 脚本在 templates/ 下，技能根是父目录
 $SkillRoot = Split-Path $PSScriptRoot -Parent
 
 if (-not (Test-Path (Join-Path $SkillRoot ".claude-plugin\plugin.json"))) {
-    $SkillRoot = Join-Path $env:USERPROFILE ".claude\plugins\harness-cc"
+    $SkillRoot = Join-Path $env:USERPROFILE ".claude\plugins\animus"
 }
 
 if (-not (Test-Path (Join-Path $SkillRoot ".claude-plugin\plugin.json"))) {
-    Write-Host "[错误] 无法找到 harness-cc 技能目录" -ForegroundColor Red
-    Write-Host "请确保已安装 harness-cc 技能：" -ForegroundColor Red
-    Write-Host "git clone https://github.com/jovetickop/Harness-CC.git `"$env:USERPROFILE\.claude\plugins\harness-cc`"" -ForegroundColor Yellow
+    Write-Host "[错误] 无法找到 animus 技能目录" -ForegroundColor Red
+    Write-Host "请确保已安装 animus 技能：" -ForegroundColor Red
+    Write-Host "git clone https://github.com/jovetickop/Animus.git `"$env:USERPROFILE\.claude\plugins\animus`"" -ForegroundColor Yellow
     exit 1
 }
 
@@ -70,7 +70,7 @@ Write-Success "技能目录: $SkillRoot"
 # ============================================================
 # 步骤 3: 创建目录
 # ============================================================
-Write-Step "创建 .claude\harness-cc 目录结构..."
+Write-Step "创建 .claude\animus 目录结构..."
 
 New-Item -ItemType Directory -Force -Path $StateDir  | Out-Null
 New-Item -ItemType Directory -Force -Path $ReportsDir | Out-Null
@@ -121,20 +121,20 @@ Write-Step "写入 README.md..."
 $ReadmeFile = Join-Path $StateDir "README.md"
 
 $ReadmeContent = @"
-# harness-cc
+# animus
 
 ## 目录位置
 
 - **技能安装目录**: $SkillRoot
-- **项目状态目录**: .claude\harness-cc\（本目录）
+- **项目状态目录**: .claude\animus\（本目录）
 
 ## 目录结构
 
 ```
-.claude\harness-cc\
+.claude\animus\
 ├── README.md                # 本文件
 ├── features.json            # 任务状态列表
-├── harness-history.jsonl    # 结构化日志
+├── animus-history.jsonl    # 结构化日志
 ├── project-config.json      # 项目配置
 └── docs\                    # 任务报告
 ```
@@ -148,12 +148,12 @@ python "$SkillRoot/scripts/show-status.py"
 
 ### 更新任务状态
 ```
-powershell -File "$SkillRoot/templates/harness/update-progress.ps1" <TaskId> <status> "描述"
+powershell -File "$SkillRoot/templates/animus/update-progress.ps1" <TaskId> <status> "描述"
 ```
 
 ### 运行回归测试
 ```
-powershell -File "$SkillRoot/templates/harness/run-regression.ps1"
+powershell -File "$SkillRoot/templates/animus/run-regression.ps1"
 ```
 
 ### 状态说明
@@ -228,17 +228,17 @@ if (-not (Test-Path $FeaturesFile)) {
 }
 
 # ============================================================
-# 步骤 8: 写入 harness-history.jsonl
+# 步骤 8: 写入 animus-history.jsonl
 # ============================================================
-Write-Step "写入 harness-history.jsonl..."
+Write-Step "写入 animus-history.jsonl..."
 
-$HistoryFile = Join-Path $StateDir "harness-history.jsonl"
+$HistoryFile = Join-Path $StateDir "animus-history.jsonl"
 
 if (-not (Test-Path $HistoryFile)) {
     Set-Content -Path $HistoryFile -Value "" -Encoding UTF8
-    Write-Info "  harness-history.jsonl 已创建"
+    Write-Info "  animus-history.jsonl 已创建"
 } else {
-    Write-Info "  harness-history.jsonl 已存在，跳过"
+    Write-Info "  animus-history.jsonl 已存在，跳过"
 }
 
 # ============================================================
@@ -252,7 +252,7 @@ Write-Host ""
 Write-Host "已创建:" -ForegroundColor Green
 Write-Host "  - $StateDir\README.md"
 Write-Host "  - $StateDir\features.json"
-Write-Host "  - $StateDir\harness-history.jsonl"
+Write-Host "  - $StateDir\animus-history.jsonl"
 Write-Host "  - $StateDir\project-config.json"
 Write-Host "  - $StateDir\docs\"
 Write-Host ""
@@ -264,6 +264,6 @@ Write-Host "      直接从技能目录读取，不再复制到项目。 " -Fore
 Write-Host ""
 Write-Host "下一步:" -ForegroundColor Yellow
 Write-Host "  1. 确认构建/测试命令（编辑 project-config.json）"
-Write-Host "  2. 使用 /harness-code-plan 拆解任务"
-Write-Host "  3. 使用 /harness-cc 开始工作流"
+Write-Host "  2. 使用 /animus-plan 拆解任务"
+Write-Host "  3. 使用 /animus 开始工作流"
 Write-Host ""

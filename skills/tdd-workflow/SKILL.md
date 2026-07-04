@@ -1,6 +1,6 @@
 ---
 name: tdd-workflow
-description: 面向 C++/Qt 开发的 TDD 工作流指南。功能实现、缺陷修复、重构时自动激活——先写失败测试、再写实现、重构并保持绿色。与 harness-cc task-implementer 配合使用。
+description: 面向 C++/Qt 开发的 TDD 工作流指南。功能实现、缺陷修复、重构时自动激活——先写失败测试、再写实现、重构并保持绿色。与 animus task-implementer 配合使用。
 ---
 # C++/Qt 测试驱动开发 (TDD) 工作流
 
@@ -446,10 +446,10 @@ ctest --test-dir build --output-on-failure
 ctest --test-dir build -R "ConfigLoader|SettingsDialog" --output-on-failure
 ```
 
-如果仓库启用了 harness，还应同步：
+如果仓库启用了 animus，还应同步：
 
-- 把验证命令写入 `.claude/harness-cc/features.json`
-- 把最新结果追加到 `.claude/harness-cc/harness-history.jsonl`
+- 把验证命令写入 `.claude/animus/features.json`
+- 把最新结果追加到 `.claude/animus/animus-history.jsonl`
 
 ## 完成标准
 

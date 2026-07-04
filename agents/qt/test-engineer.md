@@ -12,7 +12,7 @@ description: 负责为 C++/Qt 任务设计验证方案，适合处理 QTest、CT
 
 - 根据当前任务的验收标准设计测试矩阵。
 - 补齐或优化 QTest、CTest、smoke test 与回归验证。
-- 为 `.claude/harness-cc/features.json` 提供明确的 `test_command`。
+- 为 `.claude/animus/features.json` 提供明确的 `test_command`。
 - 在测试不足时指出最小补齐方案。
 
 ## 测试设计要求
@@ -24,7 +24,7 @@ description: 负责为 C++/Qt 任务设计验证方案，适合处理 QTest、CT
 
 ## 必须检查
 
-- `.claude/harness-cc/features.json` 中当前任务定义
+- `.claude/animus/features.json` 中当前任务定义
 - 现有 `tests/` 目录和 `CTest` 入口
 - `CMakeLists.txt` 里是否已声明测试目标
 - 当前行为是否已有相邻测试可复用

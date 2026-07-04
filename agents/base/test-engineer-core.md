@@ -11,7 +11,7 @@
 
 - 根据当前任务的验收标准设计测试矩阵。
 - 推荐适合项目语言和生态的测试框架与工具。
-- 为 `.claude/harness-cc/features.json` 提供可执行的 `test_command`。
+- 为 `.claude/animus/features.json` 提供可执行的 `test_command`。
 - 当测试不足时指出最小补齐方案。
 
 ## 输出格式
@@ -32,5 +32,5 @@
 
 - 不得标记任务为 passed 之前跳过验证
 - 必须执行 verify_command 并确认 exit 0
-- 将验证输出追加到 harness-history.jsonl（至少最后3条）
+- 将验证输出追加到 animus-history.jsonl（至少最后3条）
 - 不得修改 project-config.json 中的 verify_config

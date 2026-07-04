@@ -6,7 +6,7 @@
 # 确定项目根目录（从脚本路径 .claude/hooks/scripts/ 向上三级）
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 project_root="$(cd "$script_dir/../../.." && pwd)"
-features_path="$project_root/.claude/harness-cc/features.json"
+features_path="$project_root/.claude/animus/features.json"
 
 # 检查 features.json 是否存在
 [ -f "$features_path" ] || exit 0

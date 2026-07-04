@@ -1,7 +1,7 @@
 # 规划上下文
 
 - 创建时间: {{timestamp}}
-- 来源: /harness-code-plan
+- 来源: /animus-plan
 
 ## 追问记录
 

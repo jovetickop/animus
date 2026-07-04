@@ -4,16 +4,16 @@
 
 ```
 templates/
-├── harness/             # 状态机脚本 + 配置模板（安装到目标工程的 .claude/harness-cc/）
+├── animus/             # 状态机脚本 + 配置模板（安装到目标工程的 .claude/animus/）
 ├── existing_project/    # 已有工程模板（review-checklist / cmake-adapter）
 ├── .clang-format        # C++ 格式化规则模板
 └── init-project.ps1     # 项目初始化脚本（入口）
 ```
 
-**说明：** 旧版 `state/` 目录已合并到 `harness/`，不再单独存放状态模板。
-安装目标路径统一为 `.claude/harness-cc/`（不再使用 `.claude/harness/` 和 `.claude/state/`）。
+**说明：** 旧版 `state/` 目录已合并到 `animus/`，不再单独存放状态模板。
+安装目标路径统一为 `.claude/animus/`（不再使用 `.claude/harness/` 和 `.claude/state/`）。
 
-## harness/ 脚本文件
+## animus/ 脚本文件
 
 | 文件 | 用途 |
 |------|------|
@@ -34,7 +34,7 @@ templates/
 
 `init-project.ps1` 按以下顺序处理：
 1. 检测项目类型（CMake/Cargo/npm/pip/go）
-2. 创建 `.claude/harness-cc/` 运行时目录
-3. 从 `templates/harness/` 复制状态机脚本和初始模板
+2. 创建 `.claude/animus/` 运行时目录
+3. 从 `templates/animus/` 复制状态机脚本和初始模板
 4. 回填检测到的构建/测试命令到 `project-config.json`
 5. **不再修改目标项目的 CLAUDE.md**（Agent 通过 `${CLAUDE_PLUGIN_ROOT}` 从技能安装目录加载）

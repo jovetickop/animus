@@ -2,8 +2,8 @@
     [string]$ProjectRoot = "."
 )
 
-$ConfigPath = Join-Path $ProjectRoot ".claude\harness-cc\project-config.json"
-$FeaturesPath = Join-Path $ProjectRoot ".claude\harness-cc\features.json"
+$ConfigPath = Join-Path $ProjectRoot ".claude\animus\project-config.json"
+$FeaturesPath = Join-Path $ProjectRoot ".claude\animus\features.json"
 
 # 优先从 project-config.json 读取构建/测试命令
 if (Test-Path $ConfigPath) {

@@ -4,7 +4,7 @@
 
 - 只要变更不是纯文档，就必须至少完成构建和相关测试。
 - 新行为应补充测试；如果不能补测试，必须说明原因。
-- 验证命令要写入 `.claude/harness-cc/features.json`。
+- 验证命令要写入 `.claude/animus/features.json`。
 
 ## 覆盖建议
 
@@ -32,6 +32,6 @@
 
 - 构建成功
 - 相关测试通过
-- 结果已经追加到 `.claude/harness-cc/harness-history.jsonl`
+- 结果已经追加到 `.claude/animus/animus-history.jsonl`
 
 如果构建或测试失败，先把失败摘要写入 JSONL 日志，再把任务标记为 `failed`。

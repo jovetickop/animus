@@ -66,7 +66,7 @@ $input | Out-String  # 检查原始 JSON 格式
 ### clang-format 未生效
 ```bash
 # 确认项目配置
-cat .claude/harness-cc/project-config.json  # encoding 字段
+cat .claude/animus/project-config.json  # encoding 字段
 # 手动格式化
 clang-format -i file.cpp
 ```

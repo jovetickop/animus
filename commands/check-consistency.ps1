@@ -1,12 +1,12 @@
 ﻿param(
-    [string]$StateDir = ".claude/harness-cc"
+    [string]$StateDir = ".claude/animus"
 )
 
 $ErrorActionPreference = "Stop"
 $warnings = @()
 
 $featuresPath = Join-Path $StateDir "features.json"
-$historyPath = Join-Path $StateDir "harness-history.jsonl"
+$historyPath = Join-Path $StateDir "animus-history.jsonl"
 
 if (-not (Test-Path $featuresPath)) {
     Write-Host "FAILED: features.json not found: $featuresPath"
@@ -59,7 +59,7 @@ if (Test-Path $historyPath) {
 # Append-only 检查：JSONL 中出现过的 task_id 必须在 features.json 中存在
 foreach ($knownId in $knownTaskIds.Keys) {
     if (-not $taskStatus.ContainsKey($knownId)) {
-        $warnings += "[WARN] ${knownId}: 在 harness-history.jsonl 中存在但 features.json 中已被删除（append-only 违规）"
+        $warnings += "[WARN] ${knownId}: 在 animus-history.jsonl 中存在但 features.json 中已被删除（append-only 违规）"
     }
 }
 

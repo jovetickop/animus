@@ -1,9 +1,9 @@
-# oracle-runner.ps1 — Oracle 验证模块
+﻿# oracle-runner.ps1 — Oracle 验证模块
 # 执行构建/测试命令，验证状态机状态转换是否被批准
 
 function Get-ProjectVerifyConfig {
     param([string]$ProjectRoot = '.')
-    $configPath = Join-Path $ProjectRoot '.claude' 'harness-cc' 'project-config.json'
+    $configPath = Join-Path $ProjectRoot '.claude' 'animus' 'project-config.json'
     if (Test-Path $configPath) {
         try {
             $config = Get-Content -Raw $configPath -Encoding UTF8 | ConvertFrom-Json
@@ -32,8 +32,8 @@ function Invoke-OracleVerify {
     Write-Host "[Oracle 验证] 验证命令已配置，开始执行验证..."
     Write-Host "命令: $verifyCommand"
 
-    $verifyTempOut = Join-Path $env:TEMP "harness-verify-$([System.IO.Path]::GetRandomFileName()).txt"
-    $verifyTempErr = Join-Path $env:TEMP "harness-verify-err-$([System.IO.Path]::GetRandomFileName()).txt"
+    $verifyTempOut = Join-Path $env:TEMP "animus-verify-$([System.IO.Path]::GetRandomFileName()).txt"
+    $verifyTempErr = Join-Path $env:TEMP "animus-verify-err-$([System.IO.Path]::GetRandomFileName()).txt"
     $verifyExitCode = -1; $verifyOutput = ""; $verifyError = ""
 
     try {
@@ -49,7 +49,7 @@ function Invoke-OracleVerify {
     $verifyLog = @("", "--- Oracle 验证门 ---", "时间: $verifyTimestamp", "任务: $TaskId -> passed", "验证命令: $verifyCommand", "退出码: $verifyExitCode")
     if (-not [string]::IsNullOrWhiteSpace($verifyOutput)) { $verifyLog += "标准输出:"; $verifyLog += $verifyOutput.Trim() }
     if (-not [string]::IsNullOrWhiteSpace($verifyError)) { $verifyLog += "错误输出:"; $verifyLog += $verifyError.Trim() }
-    # 验证日志打印到控制台，持久化由 update-progress.ps1 通过 harness-history.jsonl 完成
+    # 验证日志打印到控制台，持久化由 update-progress.ps1 通过 animus-history.jsonl 完成
 
     if ($verifyExitCode -ne 0) {
         Write-Host "[Oracle 验证] 未通过 (exit code: $verifyExitCode)，状态将被设为 failed"

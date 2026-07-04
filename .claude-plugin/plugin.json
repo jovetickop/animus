@@ -1,20 +1,20 @@
 {
-  "name": "harness-cc",
+  "name": "animus",
   "description": "状态机驱动的编码工作流引擎。任务拆解编排、进度持久化、JSONL 日志追踪、跨会话上下文恢复、自动代码审查门控。面向需要多轮会话的复杂开发场景。",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "author": {
     "name": "JiangJie",
     "url": "https://github.com/jovetickop"
   },
-  "homepage": "https://github.com/jovetickop/Harness-CC",
+  "homepage": "https://github.com/jovetickop/animus",
   "min_claude_version": "1.0.0",
   "commands": [
-    "./commands/harness-code-setup.md",
-    "./commands/harness-code-plan.md",
-    "./commands/harness-code-review.md",
-    "./commands/harness-code-handoff.md",
-    "./commands/harness-code-continue.md",
-    "./commands/harness-code-archive.md",
-    "./commands/harness-code-debug.md"
+    "./commands/animus-setup.md",
+    "./commands/animus-plan.md",
+    "./commands/animus-review.md",
+    "./commands/animus-handoff.md",
+    "./commands/animus-continue.md",
+    "./commands/animus-archive.md",
+    "./commands/animus-debug.md"
   ]
 }

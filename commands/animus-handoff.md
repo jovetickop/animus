@@ -1,13 +1,13 @@
 ---
-command: /harness-code-handoff
+command: /animus-handoff
 description: 保存当前 session 上下文快照到 handoff.json，供后续 session 恢复
 ---
 
-# /harness-code-handoff
+# /animus-handoff
 
 ## 功能
 
-收集当前会话上下文并保存到 `.claude/harness-cc/handoff.json`，供后续 `/harness-code-continue` 恢复。
+收集当前会话上下文并保存到 `.claude/animus/handoff.json`，供后续 `/animus-continue` 恢复。
 
 当需要中断当前工作、关机或切换上下文时执行此命令，确保下次回来时能无缝恢复思路。
 
@@ -15,7 +15,7 @@ description: 保存当前 session 上下文快照到 handoff.json，供后续 se
 
 ### 1. 加载当前状态
 
-读取 `.claude/harness-cc/` 下的状态文件：
+读取 `.claude/animus/` 下的状态文件：
 
 - `features.json` — 当前活动任务列表（含状态和验收标准）
 - `task_plan.md` — 当前任务的子步骤计划
@@ -36,7 +36,7 @@ description: 保存当前 session 上下文快照到 handoff.json，供后续 se
 
 ### 3. 写入 handoff.json
 
-将收集的信息写入 `.claude/harness-cc/handoff.json`，格式如下：
+将收集的信息写入 `.claude/animus/handoff.json`，格式如下：
 
 ```json
 {
@@ -81,9 +81,9 @@ description: 保存当前 session 上下文快照到 handoff.json，供后续 se
 
 完成输出：
 ```
-Handoff 已保存: .claude/harness-cc/handoff.json
+Handoff 已保存: .claude/animus/handoff.json
 会话 ID: <session_id>
 当前任务: <current_task_id> - <task_name>
 状态: saved
-下次使用 /harness-code-continue 恢复上下文
+下次使用 /animus-continue 恢复上下文
 ```

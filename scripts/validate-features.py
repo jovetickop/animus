@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Python 2.7+ / 3.x 兼容
-# harness-cc features.json 结构验证器 —— 含循环依赖检测
+# animus features.json 结构验证器 —— 含循环依赖检测
 
 from __future__ import print_function, unicode_literals
 import argparse
@@ -141,7 +141,7 @@ def main():
         features_path = os.path.abspath(args.path)
     else:
         project_root = os.path.abspath(args.project_root)
-        features_path = os.path.join(project_root, ".claude", "harness-cc", "features.json")
+        features_path = os.path.join(project_root, ".claude", "animus", "features.json")
 
     errors = []
     warnings = []

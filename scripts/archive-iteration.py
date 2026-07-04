@@ -58,11 +58,11 @@ def main():
     args = parser.parse_args()
 
     project_dir = args.project_dir
-    harness_dir = os.path.join(project_dir, ".claude", "harness-cc")
-    archive_dir = os.path.join(harness_dir, "archive")
+    animus_dir = os.path.join(project_dir, ".claude", "animus")
+    archive_dir = os.path.join(animus_dir, "archive")
 
-    if not os.path.isdir(harness_dir):
-        print("错误: .claude/harness-cc 目录不存在")
+    if not os.path.isdir(animus_dir):
+        print("错误: .claude/animus 目录不存在")
         return 1
 
     iter_num = args.iter_num if args.iter_num > 0 else get_next_iteration_number(archive_dir)
@@ -77,17 +77,17 @@ def main():
     os.makedirs(iter_dir)
 
     # 复制运行时文件
-    files_to_archive = ["features.json", "harness-history.jsonl",
+    files_to_archive = ["features.json", "animus-history.jsonl",
                         "feature-detail.md", "domain-lexicon.md",
                         "task_plan.md", "findings.md"]
     for fname in files_to_archive:
-        src = os.path.join(harness_dir, fname)
+        src = os.path.join(animus_dir, fname)
         if os.path.isfile(src):
             shutil.copy2(src, os.path.join(iter_dir, fname))
             print(u"  归档: {}".format(fname))
 
     # 复制 docs 目录（报告等）
-    docs_src = os.path.join(harness_dir, "docs")
+    docs_src = os.path.join(animus_dir, "docs")
     docs_dst = os.path.join(iter_dir, "docs")
     if os.path.isdir(docs_src):
         shutil.copytree(docs_src, docs_dst, dirs_exist_ok=True)
@@ -102,7 +102,7 @@ def main():
 
 ## 归档内容
 - features.json
-- harness-history.jsonl
+- animus-history.jsonl
 - task_plan.md
 - findings.md
 - docs/
@@ -121,14 +121,14 @@ def main():
 
     # 清理运行时残留（以下文件归档后删除运行时副本）
     for fname in ["plan-context.md", "domain-lexicon.md", "feature-detail.md"]:
-        fpath = os.path.join(harness_dir, fname)
+        fpath = os.path.join(animus_dir, fname)
         if os.path.isfile(fpath):
             os.remove(fpath)
             print(u"  清理: {}".format(fname))
 
     # 清空当前状态
     for fname in files_to_archive:
-        fpath = os.path.join(harness_dir, fname)
+        fpath = os.path.join(animus_dir, fname)
         if os.path.isfile(fpath):
             if fname == "features.json":
                 # 清空 tasks
@@ -140,7 +140,7 @@ def main():
                     data = []
                 with io.open(fpath, "w", encoding="utf-8") as f:
                     json.dump(data, f, ensure_ascii=False, indent=2)
-            elif fname == "harness-history.jsonl":
+            elif fname == "animus-history.jsonl":
                 with io.open(fpath, "w", encoding="utf-8") as f:
                     f.write("")
             elif fname == "task_plan.md":

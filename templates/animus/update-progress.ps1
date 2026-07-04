@@ -22,8 +22,8 @@ $modulesDir = Join-Path $PSScriptRoot 'modules'
 . (Join-Path $modulesDir 'git-helper.ps1')
 
 $ClaudeRoot = Join-Path $ProjectRoot '.claude'
-$FeaturesPath = Join-Path $ClaudeRoot 'harness-cc\features.json'
-$HistoryPath = Join-Path $ClaudeRoot 'harness-cc\harness-history.jsonl'
+$FeaturesPath = Join-Path $ClaudeRoot 'animus\features.json'
+$HistoryPath = Join-Path $ClaudeRoot 'animus\animus-history.jsonl'
 
 $features = Read-FeaturesJson -FeaturesPath $FeaturesPath
 if (-not $features) { exit 1 }

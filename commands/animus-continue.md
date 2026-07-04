@@ -1,21 +1,21 @@
 ---
-command: /harness-code-continue
+command: /animus-continue
 description: 从 handoff.json 恢复上次 session 的上下文
 ---
 
-# /harness-code-continue
+# /animus-continue
 
 ## 功能
 
-读取 `.claude/harness-cc/handoff.json`，恢复上次 `/harness-code-handoff` 保存的会话上下文。
+读取 `.claude/animus/handoff.json`，恢复上次 `/animus-handoff` 保存的会话上下文。
 
-与 `/harness-code-handoff` 互为逆向操作。
+与 `/animus-handoff` 互为逆向操作。
 
 ## 执行步骤
 
 ### 1. 读取 handoff.json
 
-读取 `.claude/harness-cc/handoff.json`。如果文件不存在，提示"未找到 handoff.json，请先执行 /harness-code-handoff"并结束。
+读取 `.claude/animus/handoff.json`。如果文件不存在，提示"未找到 handoff.json，请先执行 /animus-handoff"并结束。
 
 ### 2. 检查状态
 
@@ -27,14 +27,14 @@ description: 从 handoff.json 恢复上次 session 的上下文
 
 ### 3. 加载相关状态文件
 
-同时加载 `/harness-code-continue` 补充读取以下文件：
+同时加载 `/animus-continue` 补充读取以下文件：
 
 ```
-.claude/harness-cc/features.json          — 任务列表和状态
-.claude/harness-cc/harness-history.jsonl   — 状态转换历史
-.claude/harness-cc/task_plan.md            — 子步骤进度计划
-.claude/harness-cc/findings.md             — 决策和错误经验
-.claude/harness-cc/feature-detail.md       — 当前任务实现细节
+.claude/animus/features.json          — 任务列表和状态
+.claude/animus/animus-history.jsonl   — 状态转换历史
+.claude/animus/task_plan.md            — 子步骤进度计划
+.claude/animus/findings.md             — 决策和错误经验
+.claude/animus/feature-detail.md       — 当前任务实现细节
 ```
 
 ### 4. 输出恢复报告

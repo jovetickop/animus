@@ -27,12 +27,12 @@ fi
 # 将 Windows 反斜杠路径转换为 Unix 正斜杠
 file_path="${file_path//\\//}"
 
-# 从目标文件向上遍历目录，查找 .claude/harness-cc/features.json
+# 从目标文件向上遍历目录，查找 .claude/animus/features.json
 dir=$(dirname "$file_path")
 features_path=""
 
 while [ -n "$dir" ] && [ -d "$dir" ]; do
-    candidate="$dir/.claude/harness-cc/features.json"
+    candidate="$dir/.claude/animus/features.json"
     if [ -f "$candidate" ]; then
         features_path="$candidate"
         break

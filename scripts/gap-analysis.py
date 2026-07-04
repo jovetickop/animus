@@ -76,7 +76,7 @@ def print_gap_table(features, requirements):
 
 def main():
     parser = argparse.ArgumentParser(description="功能差距分析工具")
-    parser.add_argument("--features", default=".claude/harness-cc/features.json",
+    parser.add_argument("--features", default=".claude/animus/features.json",
                         help="features.json 路径")
     parser.add_argument("--requirements", default=None,
                         help="需求清单文件路径（每行一个功能）")

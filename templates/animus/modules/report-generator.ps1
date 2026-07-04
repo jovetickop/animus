@@ -1,5 +1,5 @@
 ﻿# report-generator.ps1 — 报告生成模块
-# 生成 Markdown 格式的任务报告，存储到 .claude/harness-cc/docs/ 目录
+# 生成 Markdown 格式的任务报告，存储到 .claude/animus/docs/ 目录
 
 function Convert-ToSafeFileName {
     param([Parameter(Mandatory = $true)][string]$Name)
@@ -18,7 +18,7 @@ function Write-TaskReport {
         [Parameter(Mandatory = $true)][string]$NewStatus,
         [Parameter(Mandatory = $true)][string]$LogMessage
     )
-    $reportsDir = Join-Path $ProjectRoot ".claude\harness-cc\docs"
+    $reportsDir = Join-Path $ProjectRoot ".claude\animus\docs"
     New-Item -ItemType Directory -Force -Path $reportsDir | Out-Null
 
     $taskId = [string]$Task.id

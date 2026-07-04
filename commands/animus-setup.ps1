@@ -8,7 +8,7 @@
 $ErrorActionPreference = "Stop"
 $startTime = Get-Date
 
-Write-Progress -Activity "harness-cc Setup" -Status "Detecting project type" -PercentComplete 5
+Write-Progress -Activity "animus Setup" -Status "Detecting project type" -PercentComplete 5
 
 # === 1. 检测项目类型 ===
 $projectType = "generic"
@@ -37,31 +37,31 @@ if (Test-Path $cmakeFile) {
     $projectType = "python"
 }
 
-Write-Host "[harness] Detected project type: $projectType"
+Write-Host "[animus] Detected project type: $projectType"
 
 # === 2. 计算路径 ===
-$StateDir = Join-Path $ProjectDir ".claude\harness-cc"
+$StateDir = Join-Path $ProjectDir ".claude\animus"
 $ReportsDir = Join-Path $StateDir "docs"
 
-Write-Progress -Activity "harness-cc Setup" -Status "Creating directories" -PercentComplete 15
+Write-Progress -Activity "animus Setup" -Status "Creating directories" -PercentComplete 15
 
 # === 3. 创建目录 ===
 New-Item -ItemType Directory -Force -Path $StateDir | Out-Null
 New-Item -ItemType Directory -Force -Path $ReportsDir | Out-Null
-Write-Host "[harness]   Created state directory: $StateDir"
+Write-Host "[animus]   Created state directory: $StateDir"
 
 # === 4. 清理旧 README.md（已废弃，不再生成） ===
-Write-Progress -Activity "harness-cc Setup" -Status "Preparing state" -PercentComplete 30
+Write-Progress -Activity "animus Setup" -Status "Preparing state" -PercentComplete 30
 
 # 如果存在旧 README.md，清理掉
 $readmePath = Join-Path $StateDir "README.md"
 if (Test-Path $readmePath) {
     Remove-Item $readmePath -Force
-    Write-Host "[harness]   Removed obsolete README.md"
+    Write-Host "[animus]   Removed obsolete README.md"
 }
 
 # === 5. 写入 project-config.json ===
-Write-Progress -Activity "harness-cc Setup" -Status "Writing project config" -PercentComplete 50
+Write-Progress -Activity "animus Setup" -Status "Writing project config" -PercentComplete 50
 
 $configPath = Join-Path $StateDir "project-config.json"
 $config = @{
@@ -85,31 +85,31 @@ if (Test-Path $configPath) {
         if ($existingConfig.'build-command') { $config.'build-command' = $existingConfig.'build-command' }
         if ($existingConfig.'test-command')  { $config.'test-command'  = $existingConfig.'test-command' }
         if ($existingConfig.'run-command')   { $config.'run-command'   = $existingConfig.'run-command' }
-        Write-Host "[harness]   Preserved existing project-config.json commands"
+        Write-Host "[animus]   Preserved existing project-config.json commands"
     } catch {
-        Write-Host "[harness]   Could not read existing project-config.json, using defaults"
+        Write-Host "[animus]   Could not read existing project-config.json, using defaults"
     }
 }
 
 $configJson = $config | ConvertTo-Json -Depth 3
 [System.IO.File]::WriteAllText($configPath, $configJson)
-Write-Host "[harness]   Generated project-config.json: $projectType"
+Write-Host "[animus]   Generated project-config.json: $projectType"
 
 # === 6. 初始化 features.json（如果不存在） ===
-Write-Progress -Activity "harness-cc Setup" -Status "Initializing features" -PercentComplete 70
+Write-Progress -Activity "animus Setup" -Status "Initializing features" -PercentComplete 70
 
 $featuresPath = Join-Path $StateDir "features.json"
 if (-not (Test-Path $featuresPath)) {
     $features = @()
     $featuresJson = $features | ConvertTo-Json
     [System.IO.File]::WriteAllText($featuresPath, $featuresJson)
-    Write-Host "[harness]   Initialized features.json"
+    Write-Host "[animus]   Initialized features.json"
 } else {
-    Write-Host "[harness]   features.json already exists, skipped"
+    Write-Host "[animus]   features.json already exists, skipped"
 }
 
 # === 7. 初始化 domain-lexicon.md（如果不存在） ===
-Write-Progress -Activity "harness-cc Setup" -Status "Initializing domain lexicon" -PercentComplete 80
+Write-Progress -Activity "animus Setup" -Status "Initializing domain lexicon" -PercentComplete 80
 
 $lexiconPath = Join-Path $StateDir "domain-lexicon.md"
 if (-not (Test-Path $lexiconPath)) {
@@ -121,13 +121,13 @@ if (-not (Test-Path $lexiconPath)) {
 
 "@
     [System.IO.File]::WriteAllText($lexiconPath, $lexiconHeader)
-    Write-Host "[harness]   Initialized domain-lexicon.md"
+    Write-Host "[animus]   Initialized domain-lexicon.md"
 } else {
-    Write-Host "[harness]   domain-lexicon.md already exists, skipped"
+    Write-Host "[animus]   domain-lexicon.md already exists, skipped"
 }
 
 # === 8. 旧状态文件迁移 ===
-Write-Progress -Activity "harness-cc Setup" -Status "Migrating old state files" -PercentComplete 90
+Write-Progress -Activity "animus Setup" -Status "Migrating old state files" -PercentComplete 90
 
 $oldPaths = @(
     @{Src = Join-Path $ProjectDir ".claude\harness\features.json"}
@@ -141,25 +141,25 @@ foreach ($item in $oldPaths) {
     $dst = Join-Path $StateDir $fileName
     if ((Test-Path $src) -and -not (Test-Path $dst)) {
         Move-Item -Path $src -Destination $dst -Force
-        Write-Host "[harness]   Migrated: $src -> $dst"
+        Write-Host "[animus]   Migrated: $src -> $dst"
         $migrationDone = $true
     }
 }
 
 if ($migrationDone) {
-    Write-Host "[harness]   Old state files migrated to $StateDir"
+    Write-Host "[animus]   Old state files migrated to $StateDir"
 }
 
 # === 9. 不复制任何文件到项目，不修改项目 CLAUDE.md ===
-# 本脚本只创建 .claude\harness-cc\ 目录和配置文件
+# 本脚本只创建 .claude\animus\ 目录和配置文件
 
 # === 10. 完成 ===
-Write-Progress -Activity "harness-cc Setup" -Status "Done" -PercentComplete 100
+Write-Progress -Activity "animus Setup" -Status "Done" -PercentComplete 100
 
 $elapsed = [DateTime](Get-Date) - [DateTime]$startTime
 Write-Host ""
 Write-Host "============================================"
-Write-Host "  harness-cc Setup Complete"
+Write-Host "  animus Setup Complete"
 Write-Host "  Project type: $projectType"
 Write-Host "  State dir: $StateDir"
 Write-Host "  Elapsed: $($elapsed.TotalSeconds.ToString('0.0'))s"

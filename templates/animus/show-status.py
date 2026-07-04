@@ -64,7 +64,7 @@ def main():
     if len(sys.argv) > 1:
         state_root = sys.argv[1]
     else:
-        default_root = os.path.join(".claude", "harness-cc")
+        default_root = os.path.join(".claude", "animus")
         if os.path.exists(default_root):
             state_root = default_root
         else:

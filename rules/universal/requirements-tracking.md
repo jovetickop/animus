@@ -6,7 +6,7 @@
 
 ## 触发时机
 
-- 每次调用 `/harness-code-plan` 时自动执行
+- 每次调用 `/animus-plan` 时自动执行
 - 手动运行 `scripts/gap-analysis.py` 按需检查
 
 ## 差距分析输出格式
