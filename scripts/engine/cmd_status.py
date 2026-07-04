@@ -51,11 +51,6 @@ WORKFLOW_GRAPH = {
         "post": [],
         "next": [],
     },
-    "animus-config": {
-        "pre": [],
-        "post": [],
-        "next": [],
-    },
     "animus-help": {
         "pre": [],
         "post": [],

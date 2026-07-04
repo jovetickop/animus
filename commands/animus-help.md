@@ -19,7 +19,6 @@ description: 列出所有 animus 命令及推荐下一步
 | `/animus-status` | 状态看板 |
 | `/animus-archive` | 迭代归档 |
 | `/animus-init` | 项目初始化 |
-| `/animus-config` | 配置管理 |
 
 ## 推荐逻辑
 

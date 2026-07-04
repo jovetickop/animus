@@ -237,34 +237,6 @@ max_findings = 20
 
 ---
 
-### `/animus-config` — 配置管理
-
-**原理：** 读取 `.claude/animus/config.toml`，与硬编码默认值合并，输出当前生效的完整配置。也可校验配置文件合法性。
-
-**命令选项：**
-```
-/animus-config              # 显示当前配置
-/animus-config --validate   # 校验配置合法性
-```
-
-**输出示例：**
-```
-animus 配置（两层覆盖结果）
-==============================
-[dev]
-  default_path = auto
-  autonomous = false
-
-[review]
-  strictness = normal
-  max_findings = 20
-
-[gates]
-  require_task_before_write = true
-...
-```
-
----
 
 ## 四路开发路由
 

@@ -14,7 +14,6 @@
     "./commands/animus-review.md",
     "./commands/animus-archive.md",
     "./commands/animus-status.md",
-    "./commands/animus-config.md",
     "./commands/animus-help.md"
   ]
 }
