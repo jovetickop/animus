@@ -41,7 +41,7 @@
 
 ## 命令详解
 
-### `/dev` — 统一开发入口
+### `/animus-dev` — 统一开发入口
 
 处理所有开发场景。五路路由自动分流：
 
@@ -57,7 +57,7 @@ AI 自动选路后输出「将使用 XX 路径」让用户确认。`config.toml`
 
 启动时自动检测 memlog→若有历史事件则自动恢复 features.json。
 
-### `/review` — 代码审查
+### `/animus-review` — 代码审查
 
 4 agent 并行审查：
 
@@ -70,11 +70,11 @@ AI 自动选路后输出「将使用 XX 路径」让用户确认。`config.toml`
 
 审查分级：HIGH 阻塞 / MEDIUM 人工确认 / LOW 自动通过。不合格可退回 implementer 修复后重审（最多 3 轮）。
 
-### `/status` — 状态看板
+### `/animus-status` — 状态看板
 
 显示任务统计 + 每个任务明细 + 推荐下一步。
 
-### `/help` — 帮助与导航
+### `/animus-help` — 帮助与导航
 
 根据当前项目状态动态推荐命令。
 
