@@ -213,22 +213,21 @@ max_findings = 20
 
 **归档内容：**
 
-| 内容 | 去向 | 原位置 |
-|------|------|--------|
+| 内容 | 去向 | 原位置处理 |
+|------|------|-----------|
 | features.json（含全部任务历史） | 复制到 `archive/iter-xxx/` | 清空 tasks，保留 metadata |
-| memlog 所有事件 | 复制到 `archive/iter-xxx/memlog/` | 保留（append-only） |
+| memlog 所有事件 | 复制到 `archive/iter-xxx/memlog/` | 清空（新迭代从零开始） |
 | iteration-summary.md（自动生成） | 创建到 `archive/iter-xxx/` | — |
 | config.toml | 不变 | 保留 |
-| deferred-work.md | 可手动移入 | 保留 |
+| deferred-work.md | 不归档 | 可手动移入 |
 
 **执行流程：**
 1. 读取当前 features.json 的任务统计
 2. 创建 `archive/iter-{编号}-{名称}/` 目录
-3. 复制 memlog/ 到归档目录
+3. 复制 memlog/ 到归档目录，清空原目录
 4. 复制 features.json 到归档目录
 5. 生成 `iteration-summary.md`（含任务统计明细）
 6. 清空 features.json（仅保留 metadata）
-7. 向 memlog 写入归档事件
 
 **命令选项：**
 ```

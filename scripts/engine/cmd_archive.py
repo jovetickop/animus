@@ -67,14 +67,18 @@ def run(name="", discard=False):
     iter_dir = os.path.join(archive_dir, "iter-{:03d}-{}".format(iteration, name))
     os.makedirs(iter_dir)
 
-    # 归档 memlog（复制到迭代目录，不删除原文件）
+    # 归档 memlog（移动到迭代目录，原位置清空）
     memlog_dir = os.path.join(animus_dir, "memlog")
+    memlog_count = 0
     if os.path.isdir(memlog_dir):
         memlog_archive = os.path.join(iter_dir, "memlog")
         shutil.copytree(memlog_dir, memlog_archive)
         memlog_count = len([f for f in os.listdir(memlog_dir) if f.endswith(".md")])
-    else:
-        memlog_count = 0
+        # 清空原 memlog
+        for f in os.listdir(memlog_dir):
+            fp = os.path.join(memlog_dir, f)
+            if os.path.isfile(fp):
+                os.remove(fp)
 
     # 读取当前 features.json
     features_path = os.path.join(animus_dir, "features.json")
@@ -131,7 +135,7 @@ def run(name="", discard=False):
 
         print("归档完成：{iter_dir}".format(iter_dir=iter_dir))
         print("迭代编号：{iteration}".format(iteration=iteration))
-        print("已归档 {total} 个任务".format(total=total))
+        print("已归档 {total} 个任务，{mlog} 个事件".format(total=total, mlog=memlog_count))
     else:
         print("features.json 不存在，跳过归档")
 
