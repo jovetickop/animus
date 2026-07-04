@@ -9,8 +9,7 @@
 ### Constraints
 
 - **向后兼容**：`features.json` 字段顺序不可变。
-- **PowerShell 5.1 兼容**：核心脚本不依赖 PS7+ 特性。
-- **Python 双兼容**：所有 `.py` 兼容 2.7+ 和 3.x。
+- **Python 2/3 双兼容**：所有 `.py` 兼容 2.7+ 和 3.x。
 - **跨平台不阻塞**：Hooks 失败时 `exit 0`。
 - **本地提交**：不做自动远程推送。
 - **子任务优先**：3 个以上文件或 50 行以上改动**必须拆分**给 subagent。
@@ -42,18 +41,17 @@
 ```
 animus/
 ├── .claude-plugin/plugin.json      插件清单
-├── agents/                         22 个 Agent（按语言分组，详见 docs/agent-index.md）
+├── agents/                         25 个 Agent（按语言分组，详见 docs/agent-index.md）
 ├── commands/                       7 个斜杠命令 + 验证脚本
 ├── docs/                           参考文档（架构、Agent 索引等）
 ├── hooks/                          运行时钩子
 ├── rules/                          13 个编码规范文件
 ├── scripts/                        Python 工具脚本
-├── skills/tdd-workflow/            子技能
+├── skills/                          子技能（brainstorming/party-mode/systematic-debugging/tdd-workflow）
 └── templates/                      安装模板
     ├── animus/                     状态机脚本 + 状态文件（10+ 文件）
     ├── existing_project/           已有工程模板
-    ├── .clang-format               C++ 格式化配置
-    └── init-project.ps1            项目初始化入口
+    └── init_project.py             项目初始化入口
 ```
 
 ## 三层架构
@@ -65,11 +63,11 @@ animus/
 1. **插件清单** (`.claude-plugin/plugin.json`)：声明元信息、命令入口和自动发现组件。
 2. **编排命令** (`commands/`)：7 个斜杠命令驱动工作流
    - `animus-init`：检测项目类型 + 创建 `.claude/animus/` 运行时目录
-   - `animus-plan`：PRD + 方案 → `features.json` 任务列表
-   - `animus-debug`：系统化调试（根因→分析→修复→审查）
-   - `animus-review`：通用 + 语言专项验收
-   - `animus-handoff`：保存 session 上下文快照
-   - `animus-continue`：从 handoff.json 恢复
+   - `animus-dev`：统一开发入口（debug/fast/light/full 四路路由）
+   - `animus-review`：4 agent 并行代码审查
+   - `animus-party`：辩论模式（架构评审/代码审查）
+   - `animus-status`：状态看板，显示任务进度
+   - `animus-help`：帮助导航
    - `animus-archive`：归档当前迭代，开始新迭代
 3. **执行层** (`agents/` + `rules/`)：通过 `${CLAUDE_PLUGIN_ROOT}` 从插件目录加载。
 
@@ -91,16 +89,16 @@ animus/
 
 | 钩子 | 触发时机 | 作用 |
 |------|---------|------|
-| PreToolUse | Write/Edit 前 | 备份 features.json；GBK→UTF-8 转码 |
+| PreToolUse | Write/Edit 前 | write-gate 门控检查 + pre-tool-use 备份 features.json |
 | PostToolUse | Write/Edit 后 | clang-format + format-all 多语言格式化；UTF-8→GBK 回转 |
 | PreCompact | 上下文压缩前 | JSONL compact 事件 + task_plan.md 自动同步 |
 | Stop | 会话结束时 | 检查未完成任务，输出恢复提示 |
 
-每条钩子两条平台分支（bash + PowerShell）互为降级，失败 `exit 0` 不阻塞。修改时注意 `timeout: 10`。
+每条钩子 bash + Python 双分支互为降级，失败 `exit 0` 不阻塞。timeout 各钩子不同（5s-15s）。
 
 ## 模板与目标工程约定
 
-- `init-project.ps1` 为目标项目创建 `.claude/animus/` 运行时目录，不修改目标项目 CLAUDE.md。
+- `init_project.py` 为目标项目创建 `.claude/animus/` 运行时目录，不修改目标项目 CLAUDE.md。
 - `features.json` 字段顺序（id/name/status/depends_on/priority/test_command/last_error/updated_at/acceptance_criteria）是契约，新字段必须向后兼容。
 
 ## 开发/提交约定
@@ -117,7 +115,6 @@ animus/
 python -m py_compile templates/animus/show-status.py
 # JSON 校验
 python -m json.tool templates/animus/features.json > /dev/null
-python -m json.tool templates/animus/project-config.json > /dev/null
 ```
 
 本仓库无构建步骤；CI 在多语言目标工程上跑。
@@ -126,13 +123,13 @@ python -m json.tool templates/animus/project-config.json > /dev/null
 
 | 内容 | 位置 |
 |------|------|
-| Agent 索引（22 个 Agent 职责） | `docs/agent-index.md` |
+| Agent 索引（25 个 Agent 职责） | `docs/agent-index.md` |
 | 架构分层、设计模式、运行时要求 | `docs/architecture.md` |
 | 编码规范（通用 + 所有语言） | `rules/` |
 | Git 工作流 | `rules/universal/git-workflow.md` |
 | 代码审查标准 | `commands/animus-review.md` |
 | 状态机验收硬规则 | `commands/animus-review.md` |
-| Project Skills | `skills/tdd-workflow/SKILL.md` |
+| Project Skills | `skills/`（brainstorming/party-mode/systematic-debugging/tdd-workflow） |
 
 
 
