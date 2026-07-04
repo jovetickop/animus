@@ -1,0 +1,79 @@
+{
+  "metadata": {
+    "rebuilt_from": "memlog",
+    "rebuilt_at": "2026-07-04T16:12:01.063799",
+    "event_count": 14
+  },
+  "tasks": {
+    "T001": {
+      "id": "T001",
+      "title": "创建 /animus-status 命令定义文件",
+      "name": "创建 /animus-status 命令定义文件",
+      "status": "pending",
+      "depends_on": [],
+      "priority": 99,
+      "last_error": "",
+      "updated_at": "2026-07-04-1611-"
+    },
+    "T002": {
+      "id": "T002",
+      "title": "改造 show-status.py 增加依赖树引擎 + ASCII 渲染",
+      "name": "改造 show-status.py 增加依赖树引擎 + ASCII 渲染",
+      "status": "pending",
+      "depends_on": [],
+      "priority": 99,
+      "last_error": "",
+      "updated_at": "2026-07-04-1611-"
+    },
+    "T003": {
+      "id": "T003",
+      "title": "创建 animus-status.ps1 执行脚本",
+      "name": "创建 animus-status.ps1 执行脚本",
+      "status": "pending",
+      "depends_on": [],
+      "priority": 99,
+      "last_error": "",
+      "updated_at": "2026-07-04-1611-"
+    },
+    "T004": {
+      "id": "T004",
+      "title": "更新 plugin.json 注册 /animus-status",
+      "name": "更新 plugin.json 注册 /animus-status",
+      "status": "pending",
+      "depends_on": [],
+      "priority": 99,
+      "last_error": "",
+      "updated_at": "2026-07-04-1611-"
+    },
+    "T005": {
+      "id": "T005",
+      "title": "Mock 数据 + 边界条件测试验证",
+      "name": "Mock 数据 + 边界条件测试验证",
+      "status": "pending",
+      "depends_on": [],
+      "priority": 99,
+      "last_error": "",
+      "updated_at": "2026-07-04-1611-"
+    },
+    "T006": {
+      "id": "T006",
+      "title": "全语言回归验证（C++/Rust/Python）",
+      "name": "全语言回归验证（C++/Rust/Python）",
+      "status": "pending",
+      "depends_on": [],
+      "priority": 99,
+      "last_error": "",
+      "updated_at": "2026-07-04-1611-"
+    },
+    "T007": {
+      "id": "T007",
+      "title": "状态变更后自动输出迭代看板（update-progress.ps1 集成）",
+      "name": "状态变更后自动输出迭代看板（update-progress.ps1 集成）",
+      "status": "pending",
+      "depends_on": [],
+      "priority": 99,
+      "last_error": "",
+      "updated_at": "2026-07-04-1611-"
+    }
+  }
+}
