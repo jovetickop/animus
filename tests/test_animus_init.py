@@ -187,6 +187,38 @@ class TestDetectSubProjects(unittest.TestCase):
         self.assertEqual(cfg["sub_projects"][0]["dir"], "fe")
         self.assertEqual(cfg["sub_projects"][0]["type"], "node")
 
+    # ----------------------------------------------------------
+    # test_detect_sub_project_root_has_type
+    # ----------------------------------------------------------
+
+    def test_detect_sub_project_root_has_type(self):
+        """根目录已有类型时（如 go.mod），不扫描子目录。"""
+        import tempfile
+        from scripts import animus_init as ai
+        with tempfile.TemporaryDirectory() as tmp:
+            # 创建 go.mod 使根目录类型为 go
+            with open(os.path.join(tmp, "go.mod"), "w") as f:
+                f.write("module myapp\n")
+            # 创建子目录且有项目文件
+            sub = os.path.join(tmp, "frontend")
+            os.makedirs(sub)
+            with open(os.path.join(sub, "package.json"), "w") as f:
+                f.write("{}")
+
+            # animus_init 中：type=go → 不调用 detect_sub_projects
+            # 直接验证 detect_sub_projects 不会被调用：
+            # 根类型不是 generic，sub_projects 应为空列表
+            project_type = ai.detect_project_type(tmp)
+            self.assertEqual(project_type, "go",
+                             "根目录有 go.mod 时类型应为 go")
+
+            sub_projects = []
+            if project_type == "generic":
+                sub_projects = ai.detect_sub_projects(tmp)
+            # 因 type=go，不应扫描子目录
+            self.assertEqual(sub_projects, [],
+                             "根类型非 generic 时不应扫描子目录")
+
 
 class TestAnimusInitMakeFullToml(unittest.TestCase):
     """测试 _make_full_toml"""

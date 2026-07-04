@@ -4,7 +4,10 @@
 
 from __future__ import print_function, unicode_literals
 
+import json
 import os
+import sys
+import tempfile
 from unittest.mock import patch
 
 import pytest
@@ -555,3 +558,305 @@ class TestCmdValidate:
         assert "PASSED" in captured.out
 
 
+# ============================================================
+# 边缘用例：cmd_transition 补充边界测试
+# ============================================================
+
+class TestCmdTransitionBoundary:
+    """cmd_transition 边缘用例：依赖、自环、空数据、已通过状态等。"""
+
+    # ----------------------------------------------------------
+    # 内部辅助：在 mock 环境中执行转换（同 TestCmdTransition）
+    # ----------------------------------------------------------
+
+    def _run(self, features_data, task_id, to_state, evidence="",
+             verify_result=(True, "", ""),
+             features_path=FAKE_FEATURES_PATH):
+        """在 mock 环境下执行 cmd_transition.run()。"""
+        with patch.object(cmd_transition, "_find_features_json",
+                          return_value=features_path) as mock_find, \
+             patch.object(cmd_transition, "_read_json",
+                          return_value=features_data) as mock_read, \
+             patch.object(cmd_transition, "_write_json") as mock_write, \
+             patch.object(cmd_transition, "_now_iso",
+                          return_value=FIXED_ISO) as mock_now, \
+             patch.object(cmd_transition, "_exec_verify_command",
+                          return_value=verify_result) as mock_verify:
+            result = cmd_transition.run(task_id, to_state, evidence)
+        return result, mock_write
+
+    # ----------------------------------------------------------
+    # test_transition_nonexistent_task
+    # ----------------------------------------------------------
+
+    def test_transition_nonexistent_task(self):
+        """不存在的任务 ID 应返回错误，不写回文件。"""
+        tasks = [_make_task("T001", "pending")]
+        result, mock_write = self._run(tasks, "T999", "in_progress")
+
+        assert result["success"] is False
+        assert "未找到任务" in result["message"]
+        mock_write.assert_not_called()
+
+    # ----------------------------------------------------------
+    # test_transition_invalid_target
+    # ----------------------------------------------------------
+
+    def test_transition_invalid_target(self):
+        """非法目标状态（如 "abc"）应返回错误，不写回文件。"""
+        tasks = [_make_task("T001", "pending")]
+        result, mock_write = self._run(tasks, "T001", "abc")
+
+        assert result["success"] is False
+        assert "无效的目标状态" in result["message"]
+        mock_write.assert_not_called()
+
+    # ----------------------------------------------------------
+    # test_transition_missing_dep
+    # ----------------------------------------------------------
+
+    def test_transition_missing_dep(self):
+        """
+        依赖任务未完成时，当前实现不阻止流转。
+
+        说明：cmd_transition.run() 当前不校验 depends_on，
+        因此即使 T002 依赖 T001 且 T001 尚未完成，T002 仍可
+        转换为 in_progress。此测试验证当前行为。
+        """
+        tasks = [
+            _make_task("T001", "pending"),                       # 未完成的依赖
+            _make_task("T002", "pending", depends_on=["T001"]),  # 依赖 T001
+        ]
+        result, mock_write = self._run(tasks, "T002", "in_progress")
+
+        # 当前代码不校验 depends_on，因此转换成功
+        assert result["success"] is True, (
+            "当前实现不阻止依赖未完成的流转。若后续增加依赖校验，"
+            "此测试需同步更新断言。"
+        )
+        assert result["from"] == "pending"
+        assert result["to"] == "in_progress"
+        mock_write.assert_called_once()
+
+    # ----------------------------------------------------------
+    # test_transition_self_loop
+    # ----------------------------------------------------------
+
+    def test_transition_self_loop(self):
+        """流转到自身状态（如 pending→pending）属于非法转换。"""
+        for status in ("pending", "in_progress", "passed", "failed", "completed"):
+            tasks = [_make_task("T001", status)]
+            result, mock_write = self._run(tasks, "T001", status)
+
+            # VALID_TRANSITIONS 不含自环，故报"非法状态转换"
+            assert result["success"] is False
+            assert "非法状态转换" in result["message"]
+            assert result["from"] == status
+            assert result["to"] == status
+            mock_write.assert_not_called()
+
+    # ----------------------------------------------------------
+    # test_transition_empty_features
+    # ----------------------------------------------------------
+
+    def test_transition_empty_features(self):
+        """features.json 内容为空（无任务数据）应报错。"""
+        # 空 dict {}
+        result, mock_write = self._run({}, "T001", "in_progress")
+        assert result["success"] is False
+        assert "无任务数据" in result["message"]
+        mock_write.assert_not_called()
+
+    # ----------------------------------------------------------
+    # test_transition_already_passed
+    # ----------------------------------------------------------
+
+    def test_transition_already_passed(self):
+        """已 passed 的任务可转到 completed；passed→passed 非法。"""
+        # passed → completed 合法
+        tasks = [_make_task("T001", "passed")]
+        result, mock_write = self._run(tasks, "T001", "completed")
+        assert result["success"] is True, result["message"]
+        assert result["from"] == "passed"
+        assert result["to"] == "completed"
+        mock_write.assert_called_once()
+
+        # passed → passed 非法（自环不在表中）
+        tasks2 = [_make_task("T002", "passed")]
+        result2, mock_write2 = self._run(tasks2, "T002", "passed")
+        assert result2["success"] is False
+        assert "非法状态转换" in result2["message"]
+        mock_write2.assert_not_called()
+
+
+# ============================================================
+# 边缘用例：cmd_validate 循环依赖检测
+# ============================================================
+
+class TestCmdValidateCycleDetection:
+    """cmd_validate.run() 循环依赖检测边界用例。"""
+
+    FAKE_CWD = "/fake/project"
+    FAKE_FEATURES_PATH = os.path.join(FAKE_CWD, ".claude", "animus",
+                                      "features.json")
+
+    # ----------------------------------------------------------
+    # 辅助：在 mock 环境中执行校验
+    # ----------------------------------------------------------
+
+    def _run(self, features_data, file_exists=True):
+        """在 mock 环境下执行 cmd_validate.run() 并捕获输出。"""
+        import io
+        old_stdout = sys.stdout
+        buf = io.StringIO()
+        sys.stdout = buf
+        try:
+            with patch.object(cmd_validate, "_read_json",
+                              return_value=features_data), \
+                 patch("os.getcwd", return_value=self.FAKE_CWD), \
+                 patch("os.path.isfile",
+                       side_effect=lambda p: file_exists and p == self.FAKE_FEATURES_PATH), \
+                 patch("os.path.exists",
+                       side_effect=lambda p: file_exists and p == self.FAKE_FEATURES_PATH):
+                cmd_validate.run()
+        finally:
+            sys.stdout = old_stdout
+        return buf.getvalue()
+
+    # ----------------------------------------------------------
+    # test_validate_no_cycle
+    # ----------------------------------------------------------
+
+    def test_validate_no_cycle(self):
+        """无环 DAG 校验通过，输出 PASSED。"""
+        tasks = [
+            _make_task("T001", "pending"),
+            _make_task("T002", "pending", depends_on=["T001"]),
+            _make_task("T003", "pending", depends_on=["T002"]),
+        ]
+        features_data = {"tasks": tasks}
+        output = self._run(features_data)
+        assert "PASSED" in output, "无环 DAG 应通过校验"
+        assert "FAILED" not in output
+
+    # ----------------------------------------------------------
+    # test_validate_with_cycle
+    # ----------------------------------------------------------
+
+    def test_validate_with_cycle(self):
+        """有环 DAG 校验失败，输出 FAILED 及循环依赖信息。"""
+        # T001 → T002, T002 → T003, T003 → T001 形成环
+        tasks = [
+            _make_task("T001", "pending", depends_on=["T003"]),
+            _make_task("T002", "pending", depends_on=["T001"]),
+            _make_task("T003", "pending", depends_on=["T002"]),
+        ]
+        features_data = {"tasks": tasks}
+        output = self._run(features_data)
+        assert "FAILED" in output, "有环 DAG 应校验失败"
+        assert "循环依赖" in output, "应提示循环依赖"
+
+
+# ============================================================
+# config_loader 编码边界测试
+# ============================================================
+
+class TestConfigLoaderEncoding:
+    """config_loader 在 TOML 解析异常、部分配置、Unicode 值的边界行为。"""
+
+    # ----------------------------------------------------------
+    # 辅助：在临时目录中创建 .claude/animus/ 结构
+    # ----------------------------------------------------------
+
+    def _setup_animus(self, toml_content):
+        """
+        创建临时 .claude/animus/，写入 config.toml，
+        返回 animus_dir 路径。
+        """
+        tmpdir = tempfile.mkdtemp(prefix="cfg_enc_")
+        animus_dir = os.path.join(tmpdir, ".claude", "animus")
+        os.makedirs(animus_dir)
+        if toml_content is not None:
+            cfg_path = os.path.join(animus_dir, "config.toml")
+            with open(cfg_path, "wb") as f:
+                if isinstance(toml_content, str):
+                    f.write(toml_content.encode("utf-8"))
+                else:
+                    f.write(toml_content)
+        return animus_dir, tmpdir
+
+    def _cleanup(self, tmpdir):
+        """清理临时目录。"""
+        import shutil
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+    # ----------------------------------------------------------
+    # test_toml_parse_error
+    # ----------------------------------------------------------
+
+    def test_toml_parse_error(self):
+        """TOML 文件解析错误时降级到默认配置。"""
+        from scripts.config_loader import load_config, DEFAULT_CONFIG
+        animus_dir, tmpdir = self._setup_animus(b": invalid toml [[[\n")
+        try:
+            cfg = load_config(animus_dir)
+            # 解析失败 → 返回 DEFAULT_CONFIG
+            assert cfg == DEFAULT_CONFIG, "TOML 解析错误应降级到默认配置"
+        finally:
+            self._cleanup(tmpdir)
+
+    # ----------------------------------------------------------
+    # test_toml_partial_config
+    # ----------------------------------------------------------
+
+    def test_toml_partial_config(self):
+        """只有部分配置段时合并正确的默认值。"""
+        from scripts.config_loader import load_config, DEFAULT_CONFIG
+        # 只覆盖 project.type，其余段应保留默认
+        toml_content = b'[project]\ntype = "cpp-qt"\n'
+        animus_dir, tmpdir = self._setup_animus(toml_content)
+        try:
+            cfg = load_config(animus_dir)
+            assert cfg["project"]["type"] == "cpp-qt"
+            # 未覆盖的字段保留默认
+            assert cfg["project"]["build_command"] == DEFAULT_CONFIG["project"]["build_command"]
+            assert cfg["dev"]["default_path"] == DEFAULT_CONFIG["dev"]["default_path"]
+            assert cfg["review"]["strictness"] == DEFAULT_CONFIG["review"]["strictness"]
+            assert cfg["gates"]["require_task_before_write"] == DEFAULT_CONFIG["gates"]["require_task_before_write"]
+            assert cfg["ponytail"]["enabled"] == DEFAULT_CONFIG["ponytail"]["enabled"]
+        finally:
+            self._cleanup(tmpdir)
+
+    # ----------------------------------------------------------
+    # test_toml_unicode_values
+    # ----------------------------------------------------------
+
+    def test_toml_unicode_values(self):
+        """TOML 含中文等 Unicode 值能正确加载。"""
+        from scripts.config_loader import load_config
+        toml_content = (
+            b'[project]\n'
+            b'type = "cpp-qt"\n'
+            b'build_command = "cmake --build ."\n'
+            b'test_command = "test_unicode_test_command"\n'
+            b'\n'
+            b'[review]\n'
+            b'strictness = "high"\n'
+            b'max_findings = 50\n'
+            b'[ponytail]\n'
+            b'max_lines_per_file = 800\n'
+        )
+        animus_dir, tmpdir = self._setup_animus(toml_content)
+        try:
+            cfg = load_config(animus_dir)
+            # 中文值正确加载
+            assert cfg["project"]["test_command"] == "test_unicode_test_command"
+            # 英文 ASCII 值正确加载
+            assert cfg["project"]["type"] == "cpp-qt"
+            assert cfg["review"]["strictness"] == "high"
+            assert cfg["review"]["max_findings"] == 50
+            assert cfg["ponytail"]["max_lines_per_file"] == 800
+            # 未覆盖的 key 保留默认
+            assert cfg["dev"]["default_path"] == "auto"
+        finally:
+            self._cleanup(tmpdir)

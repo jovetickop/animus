@@ -190,6 +190,20 @@ class TestWriteGate(object):
         # 无 tasks 键
         assert mod.has_in_progress_tasks({}) is False
 
+    # ----------------------------------------------------------
+    # test_write_gate_memlog_only
+    # ----------------------------------------------------------
+
+    def test_write_gate_memlog_only(self, tmp_animus):
+        """只有 memlog 目录，没有 features.json 时通过（exit 0）。"""
+        mod = self._mod()
+        tmpdir, animus_dir = tmp_animus
+        # 创建 memlog/ 目录但不创建 features.json
+        memlog_dir = os.path.join(animus_dir, "memlog")
+        os.makedirs(memlog_dir)
+        code, _ = _run_main(mod, ["write-gate.py", tmpdir])
+        assert code == 0, "只有 memlog 没有 features.json 时应放行 (exit 0)"
+
 
 # ===================================================================
 # pre-tool-use.py 测试
@@ -313,6 +327,21 @@ class TestPreCompact(object):
         """直接测试 extract_tasks：无任务时返回空列表"""
         mod = self._mod()
         assert mod.extract_tasks({}) == []
+
+    # ----------------------------------------------------------
+    # test_pre_compact_empty_tasks
+    # ----------------------------------------------------------
+
+    def test_pre_compact_empty_tasks(self, tmp_animus):
+        """空任务列表不报错，静默 exit 0。"""
+        mod = self._mod()
+        tmpdir, animus_dir = tmp_animus
+        # 写入空的 tasks 列表
+        _write_features(animus_dir, {"tasks": []})
+        code, out = _run_main(mod, ["pre-compact.py", tmpdir])
+        assert code == 0, "空任务列表时 pre-compact 应 exit 0"
+        # 不应输出完成统计（因为没有任务）
+        assert "任务完成" not in out, "空任务列表不应输出完成统计"
 
 
 # ===================================================================
