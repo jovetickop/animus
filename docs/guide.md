@@ -422,7 +422,7 @@ python animus-engine.py transition T001 passed --evidence "test all pass"
 
 ### 5.3 核心原则
 
-- **append-only**：memlog 永不删除、永不归档
+- **当前迭代 append-only**：memlog 在当前迭代中只追加不修改，归档时整份复制到 `archive/iter-xxx/memlog/` 后清空原目录
 - **单一事件源**：features.json 由 memlog 派生，可删除重建
 - **重建命令**：`python animus-engine.py rebuild`
 
