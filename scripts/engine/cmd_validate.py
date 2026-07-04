@@ -7,6 +7,7 @@ from __future__ import print_function, unicode_literals
 import json
 import os
 import sys
+from collections import deque
 
 
 # ============================================================
@@ -38,12 +39,12 @@ def _get_tasks(data):
         if "tasks" in data:
             val = data["tasks"]
             if isinstance(val, dict):
-                return [{"id": tid, **tdata} for tid, tdata in val.items()]
+                return [dict({"id": tid}, **tdata) for tid, tdata in val.items()]
             return val
         if "initial_tasks" in data:
             val = data["initial_tasks"]
             if isinstance(val, dict):
-                return [{"id": tid, **tdata} for tid, tdata in val.items()]
+                return [dict({"id": tid}, **tdata) for tid, tdata in val.items()]
             return val
     return []
 
@@ -76,11 +77,11 @@ def _detect_circular_dependency(tasks, task_by_id):
                 in_degree[task_id] = in_degree.get(task_id, 0) + 1
 
     # Kahn 算法
-    queue = [tid for tid, deg in in_degree.items() if deg == 0]
+    queue = deque([tid for tid, deg in in_degree.items() if deg == 0])
     visited = 0
 
     while queue:
-        node = queue.pop(0)
+        node = queue.popleft()
         visited += 1
         for neighbor in adjacency.get(node, []):
             in_degree[neighbor] -= 1

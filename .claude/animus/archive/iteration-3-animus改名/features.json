@@ -1,0 +1,192 @@
+﻿[
+  {
+    "id": "T001",
+    "name": "插件清单改名",
+    "status": "pending",
+    "depends_on": [],
+    "priority": "high",
+    "last_error": "",
+    "updated_at": "2026-07-03T22:XX:00+08:00",
+    "acceptance_criteria": "plugin.json 和 marketplace.json 中 name 已改为 animus，JSON 语法正确"
+  },
+  {
+    "id": "T002",
+    "name": ".gitignore 路径更新",
+    "status": "pending",
+    "depends_on": ["T001"],
+    "priority": "high",
+    "last_error": "",
+    "updated_at": "2026-07-03T22:XX:00+08:00",
+    "acceptance_criteria": ".gitignore 中 .claude/animus/ → .claude/animus/"
+  },
+  {
+    "id": "T003",
+    "name": "安装脚本改名",
+    "status": "pending",
+    "depends_on": ["T001"],
+    "priority": "high",
+    "last_error": "",
+    "updated_at": "2026-07-03T22:XX:00+08:00",
+    "acceptance_criteria": "init-project.ps1 中无 animus 残留"
+  },
+  {
+    "id": "T004",
+    "name": "模板/运行时文件改名",
+    "status": "pending",
+    "depends_on": ["T001"],
+    "priority": "high",
+    "last_error": "",
+    "updated_at": "2026-07-03T22:XX:00+08:00",
+    "acceptance_criteria": "templates/animus/ 下无 animus 残留"
+  },
+  {
+    "id": "T005",
+    "name": "命令文件改名",
+    "status": "pending",
+    "depends_on": ["T001"],
+    "priority": "high",
+    "last_error": "",
+    "updated_at": "2026-07-03T22:XX:00+08:00",
+    "acceptance_criteria": "7 个命令 .md 和 3 个 .ps1 已重命名，内容无 animus 残留"
+  },
+  {
+    "id": "T006",
+    "name": "Hook 配置和脚本改名",
+    "status": "pending",
+    "depends_on": ["T001"],
+    "priority": "high",
+    "last_error": "",
+    "updated_at": "2026-07-03T22:XX:00+08:00",
+    "acceptance_criteria": "hooks/ 下无 animus 残留"
+  },
+  {
+    "id": "T007",
+    "name": "Agent 定义改名",
+    "status": "pending",
+    "depends_on": ["T001"],
+    "priority": "high",
+    "last_error": "",
+    "updated_at": "2026-07-03T22:XX:00+08:00",
+    "acceptance_criteria": "agents/ 下无 animus 残留"
+  },
+  {
+    "id": "T008",
+    "name": "技能文件改名",
+    "status": "pending",
+    "depends_on": ["T001"],
+    "priority": "medium",
+    "last_error": "",
+    "updated_at": "2026-07-03T22:XX:00+08:00",
+    "acceptance_criteria": "skills/ 下无 animus 残留"
+  },
+  {
+    "id": "T009",
+    "name": "Python 脚本改名",
+    "status": "pending",
+    "depends_on": ["T001"],
+    "priority": "medium",
+    "last_error": "",
+    "updated_at": "2026-07-03T22:XX:00+08:00",
+    "acceptance_criteria": "scripts/ 下无 animus 残留"
+  },
+  {
+    "id": "T010",
+    "name": "规则文件改名",
+    "status": "pending",
+    "depends_on": ["T001"],
+    "priority": "medium",
+    "last_error": "",
+    "updated_at": "2026-07-03T22:XX:00+08:00",
+    "acceptance_criteria": "rules/ 下无 animus 残留"
+  },
+  {
+    "id": "T011",
+    "name": "文档/README 改名",
+    "status": "pending",
+    "depends_on": ["T001", "T002", "T003", "T004", "T005", "T006", "T007", "T008", "T009", "T010"],
+    "priority": "medium",
+    "last_error": "",
+    "updated_at": "2026-07-03T22:XX:00+08:00",
+    "acceptance_criteria": "README.md 和 docs/ 下无 animus 残留"
+  },
+  {
+    "id": "T012",
+    "name": "CLAUDE.md 更新",
+    "status": "pending",
+    "depends_on": ["T001", "T002", "T003", "T004", "T005", "T006", "T007", "T008", "T009", "T010", "T011"],
+    "priority": "medium",
+    "last_error": "",
+    "updated_at": "2026-07-03T22:XX:00+08:00",
+    "acceptance_criteria": "CLAUDE.md 中无 animus 残留"
+  },
+  {
+    "id": "T013",
+    "name": "整体兜底扫描",
+    "status": "pending",
+    "depends_on": ["T001", "T002", "T003", "T004", "T005", "T006", "T007", "T008", "T009", "T010", "T011", "T012"],
+    "priority": "high",
+    "last_error": "",
+    "updated_at": "2026-07-03T22:XX:00+08:00",
+    "acceptance_criteria": "全库 grep 零残留，plugin-validator 通过，JSON 语法正确"
+  },
+  {
+    "id": "T014",
+    "name": "harness 概念词全局改名",
+    "status": "pending",
+    "depends_on": ["T001"],
+    "priority": "high",
+    "last_error": "",
+    "updated_at": "2026-07-04T00:00:00+08:00",
+    "acceptance_criteria": "所有文件中 animus-history.jsonl → animus-history.jsonl，harness 框架概念词全部替换"
+  },
+  {
+    "id": "T015",
+    "name": "templates/animus/ 目录重命名",
+    "status": "pending",
+    "depends_on": ["T004"],
+    "priority": "high",
+    "last_error": "",
+    "updated_at": "2026-07-04T00:00:00+08:00",
+    "acceptance_criteria": "templates/animus/ → templates/animus/，内部路径引用全部更新"
+  },
+  {
+    "id": "T016",
+    "name": ".claude/animus/ 运行时目录重命名",
+    "status": "pending",
+    "depends_on": ["T014"],
+    "priority": "high",
+    "last_error": "",
+    "updated_at": "2026-07-04T00:00:00+08:00",
+    "acceptance_criteria": ".claude/animus/ → .claude/animus/，含 docs/、archive/ 子目录"
+  },
+  {
+    "id": "T017",
+    "name": "Git 分支/工作空间清理",
+    "status": "pending",
+    "depends_on": ["T016"],
+    "priority": "medium",
+    "last_error": "",
+    "updated_at": "2026-07-04T00:00:00+08:00",
+    "acceptance_criteria": "worktree-animus-* 分支已重命名，worktree 目录已清理"
+  },
+  {
+    "id": "T018",
+    "name": "Archive 档案数据更新",
+    "status": "pending",
+    "depends_on": ["T001", "T017"],
+    "priority": "medium",
+    "last_error": "",
+    "updated_at": "2026-07-04T00:00:00+08:00",
+    "acceptance_criteria": "archive/iteration-1/2 中所有 animus 引用已更新"
+  },
+  {
+    "id": "T019",
+    "name": "GitHub URL 统一更新",
+    "status": "pending",
+    "depends_on": ["T001", "T003", "T011"],
+    "priority": "medium",
+    "last_error": "",
+    "updated_at": "2026-07-04T00:00:00+08:00",
+    "acceptance_criteria": "所有 animus → animus，URL 正确可访问"
+  }
+]

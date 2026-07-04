@@ -6,7 +6,7 @@ animus-engine.py — 统一 CLI 入口
 用法：
     python animus-engine.py status
     python animus-engine.py transition <task_id> <to> [--evidence <text>]
-    python animus-engine.py validate [--fix]
+    python animus-engine.py validate
     python animus-engine.py archive [--name <name>] [--discard]
     python animus-engine.py rebuild
 """

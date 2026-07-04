@@ -1,0 +1,2 @@
+[permissions]
+allow = ["Bash(cd D:/code/ty-qt-ai-plugin/docs && for f in task-*.md; do echo \"=== $f ===\"; head -3 \"$f\"; echo; done)", "Edit", "Bash(cd D:/code/ty-qt-ai-plugin && python scripts/temp-fix-roadmap.py)"]

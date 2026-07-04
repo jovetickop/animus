@@ -100,7 +100,7 @@ def write_event(event_type, content_dict):
     lines.append("")
     lines.append("# {type}：{title}".format(type=event_type, title=title or ""))
 
-    content = "\n".join(lines) + "\n"
+    content = os.linesep.join(lines) + os.linesep
 
     try:
         with open(filepath, "wb") as f:

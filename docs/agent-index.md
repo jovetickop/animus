@@ -2,18 +2,25 @@
 
 本文档从 CLAUDE.md 迁移而来，列出所有 Agent 的目录位置和职责。
 
-| 目录 | Agent | 职责 |
-|------|-------|------|
-| `agents/universal/` | `feature-planner` | PRD → features.json |
-| | `task-implementer` | 单任务最小闭环实现 |
-| | `test-engineer` | 通用测试设计 |
-| | `build-doctor` | 构建诊断 |
-| | `code-reviewer` | 通用代码审查 |
-| `agents/qt/` | `architect` / `task-implementer` / `test-engineer` / `ui-reviewer` | C++/Qt 4 件套 |
-| `agents/cpp-cmake/` | `architect` | 纯 C++ 架构（搭配 universal 实现/测试） |
-| `agents/python/` | `architect` / `test-engineer` | Python 2 件套 |
-| `agents/node/` | `architect` / `test-engineer` / `ui-reviewer` | Web 3 件套（含 a11y/性能审查） |
-| `agents/rust/` | `architect` / `test-engineer` | Rust 2 件套 |
+| 目录 | Agent | 显示名 | 副标题 | team | 职责 |
+|------|-------|--------|--------|------|------|
+| `agents/universal/` | `feature-planner` | 规划师 (Plan) | 任务拆解与进度编排 | universal | PRD → features.json |
+| | `task-implementer` | 实现者 (Impl) | 增量编码与构建修复 | universal | 单任务最小闭环实现 |
+| | `test-engineer` | 测试官 (Test) | 测试方案设计与验证 | universal | 通用测试设计 |
+| | `build-doctor` | 构建师 (Build) | 构建问题诊断与修复 | universal | 构建诊断 |
+| | `code-reviewer` | 审查官 (Review) | 代码质量门控审查 | universal | 通用代码审查 |
+| `agents/qt/` | `architect` | 架构师 (Qt) | Qt 类设计与架构决策 | qt | C++/Qt 架构 |
+| | `task-implementer` | 实现者 (Qt) | Qt 增量编码实现 | qt | Qt 实现 |
+| | `test-engineer` | 测试官 (Qt) | Qt 测试验证 | qt | Qt 测试 |
+| | `ui-reviewer` | UI 审查官 (Qt) | Qt 界面可用性审查 | qt | Qt UI 审查 |
+| `agents/cpp-cmake/` | `architect` | 架构师 (Cpp) | C++/CMake 构建方案设计 | cpp-cmake | 纯 C++ 架构 |
+| `agents/python/` | `architect` | 架构师 (Py) | Python 架构设计与选型 | python | Python 架构 |
+| | `test-engineer` | 测试官 (Py) | Python 测试方案 | python | Python 测试 |
+| `agents/node/` | `architect` | 架构师 (Node) | Node/Web 架构设计与选型 | node | Web 架构 |
+| | `test-engineer` | 测试官 (Node) | Node 测试方案 | node | Node 测试 |
+| | `ui-reviewer` | UI 审查官 (Web) | 前端界面可用性审查 | node | 前端 UI 审查 |
+| `agents/rust/` | `architect` | 架构师 (Rust) | Rust 架构设计与选型 | rust | Rust 架构 |
+| | `test-engineer` | 测试官 (Rust) | Rust 测试方案 | rust | Rust 测试 |
 
 ## 新增 Agent 规范
 

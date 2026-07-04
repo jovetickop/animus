@@ -12,7 +12,7 @@ import sys
 import os
 
 # 添加 scripts 目录到路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "scripts"))
+sys.path.insert(0, os.path.dirname(__file__))
 
 # 直接导入 memlog 模块
 try:

@@ -1,0 +1,75 @@
+{
+  "initial_tasks": [
+    {
+      "id": "T001",
+      "name": "用户登录功能",
+      "status": "completed",
+      "depends_on": [],
+      "priority": 100,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "2026-07-04T08:06:30Z",
+      "acceptance_criteria": [
+        "用户可以登录"
+      ]
+    },
+    {
+      "id": "T002",
+      "name": "数据导出模块",
+      "status": "in_progress",
+      "depends_on": [
+        "T001"
+      ],
+      "priority": 90,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "2026-06-01T08:30:00Z",
+      "acceptance_criteria": [
+        "支持 CSV 导出"
+      ]
+    },
+    {
+      "id": "T003",
+      "name": "用户权限管理",
+      "status": "pending",
+      "depends_on": [
+        "T001"
+      ],
+      "priority": 80,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "2026-05-31T09:57:43Z",
+      "acceptance_criteria": [
+        "管理员可分配角色"
+      ]
+    },
+    {
+      "id": "T004",
+      "name": "批量导入功能",
+      "status": "failed",
+      "depends_on": [
+        "T002"
+      ],
+      "priority": 70,
+      "test_command": "",
+      "last_error": "导入超过 1000 行时内存溢出",
+      "updated_at": "2026-06-02T14:15:00Z",
+      "acceptance_criteria": [
+        "支持 Excel 导入"
+      ]
+    },
+    {
+      "id": "T005",
+      "name": "邮件通知服务",
+      "status": "failed",
+      "depends_on": [],
+      "priority": 60,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "2026-07-04T08:06:30Z",
+      "acceptance_criteria": [
+        "发送 SMTP 邮件"
+      ]
+    }
+  ]
+}

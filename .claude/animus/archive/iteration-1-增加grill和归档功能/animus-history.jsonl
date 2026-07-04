@@ -1,0 +1,146 @@
+﻿---
+{
+  "message": "3语言回归测试全部通过(C++/CMake+Python+Rust)，所有验证脚本通过",
+  "task_id": "T015",
+  "timestamp": "2026-06-28 16:26:59",
+  "to": "passed",
+  "from": "in_progress",
+  "type": "state_transition",
+  "verification": {
+    "exit_code": 0
+  }
+}
+---
+{
+  "message": "开始删除",
+  "task_id": "T017",
+  "timestamp": "2026-06-28 17:04:52",
+  "to": "in_progress",
+  "from": "pending",
+  "type": "state_transition"
+}
+---
+{
+  "message": "文件已删除，验证通过",
+  "task_id": "T017",
+  "timestamp": "2026-06-28 17:05:08",
+  "to": "passed",
+  "from": "in_progress",
+  "type": "state_transition",
+  "verification": {
+    "exit_code": 0
+  }
+}
+---
+{
+  "message": "开始简化 format-log.py",
+  "task_id": "T018",
+  "timestamp": "2026-06-28 17:05:19",
+  "to": "in_progress",
+  "from": "pending",
+  "type": "state_transition"
+}
+---
+{
+  "message": "编码探测缩减+text_type内联+事件分支提取完成",
+  "task_id": "T018",
+  "timestamp": "2026-06-28 17:05:38",
+  "to": "passed",
+  "from": "in_progress",
+  "type": "state_transition",
+  "verification": {
+    "exit_code": 0
+  }
+}
+---
+{
+  "message": "开始简化 session-catchup.py",
+  "task_id": "T019",
+  "timestamp": "2026-06-28 17:05:53",
+  "to": "in_progress",
+  "from": "pending",
+  "type": "state_transition"
+}
+---
+{
+  "message": "limit参数+features降级key清理完成",
+  "task_id": "T019",
+  "timestamp": "2026-06-28 17:05:53",
+  "to": "passed",
+  "from": "in_progress",
+  "type": "state_transition",
+  "verification": {
+    "exit_code": 0
+  }
+}
+---
+{
+  "message": "开始验证+JSONL格式改造",
+  "task_id": "T020",
+  "timestamp": "2026-06-28 17:07:32",
+  "to": "in_progress",
+  "from": "pending",
+  "type": "state_transition"
+}
+---
+{"message":"JSONL split定界符全部修复(4文件)+CRLF兼容+session-catchup BOM修复+check-consistency通过","task_id":"T020","timestamp":"2026-06-28 17:25:22","to":"passed","from":"in_progress","type":"state_transition","verification":{"exit_code":0}}
+---
+{
+    "message":  "开始实现差距分析框架 4 层",
+    "type":  "state_transition",
+    "from":  "pending",
+    "timestamp":  "2026-06-28T19:37:55",
+    "task_id":  "T024",
+    "to":  "in_progress"
+}
+---
+{
+    "message":  "4 层差距分析框架 + feature-detail.md + RTK Rule 全部就位",
+    "type":  "state_transition",
+    "from":  "in_progress",
+    "timestamp":  "2026-06-28T19:48:25",
+    "task_id":  "T024",
+    "to":  "passed"
+}
+---
+{
+    "message":  "开始实现 Handoff（animus-handoff + animus-continue）",
+    "type":  "state_transition",
+    "from":  "pending",
+    "timestamp":  "2026-06-28T19:51:02",
+    "task_id":  "T025",
+    "to":  "in_progress"
+}
+---
+{
+    "message":  "实现完成",
+    "type":  "state_transition",
+    "from":  "in_progress",
+    "timestamp":  "2026-06-28T20:00:53",
+    "task_id":  "T025",
+    "verification":  {
+                         "exit_code":  0
+                     },
+    "to":  "passed"
+}
+---
+{
+    "message":  "开始",
+    "type":  "state_transition",
+    "from":  "pending",
+    "timestamp":  "2026-06-28T20:01:24",
+    "task_id":  "T026",
+    "to":  "in_progress"
+}
+---
+{
+    "message":  "Domain Lexicon + ADR + architect 指令全部完成",
+    "type":  "state_transition",
+    "from":  "in_progress",
+    "timestamp":  "2026-06-28T20:02:01",
+    "task_id":  "T026",
+    "verification":  {
+                         "exit_code":  0
+                     },
+    "to":  "passed"
+}

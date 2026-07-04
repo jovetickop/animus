@@ -116,7 +116,12 @@ def _get_tasks(data):
                 val = data[key]
                 # 如果是 dict 格式 {task_id: task_data}，转换为 list
                 if isinstance(val, dict):
-                    return [{"id": tid, **tdata} for tid, tdata in val.items()]
+                    result = []
+                    for tid, tdata in val.items():
+                        item = {"id": tid}
+                        item.update(tdata)
+                        result.append(item)
+                    return result
                 return val
         # 如果只有一个顶层任务对象（如 {"id":"T001",...}），包装成列表
         if "id" in data:
@@ -331,18 +336,19 @@ def run(task_id, to, evidence=""):
     # ----------------------------------------------------------
     verify_log = []
     if to == "passed":
+        verify_config = _get_verify_config(data, features_dir)
+
         # 优先检查任务级 verify_command
         verify_command = _text(task.get("verify_command", "") or "").strip()
 
         # 如果没有任务级 verify_command，检查全局配置
         if not verify_command:
-            verify_config = _get_verify_config(data, features_dir)
             verify_enabled = verify_config.get("verify_enabled", False)
             if verify_enabled in (True, "true", "True", 1, "1"):
                 verify_command = _text(verify_config.get("verify_command", "") or "").strip()
 
         if verify_command:
-            verify_timeout = int(verify_config.get("verify_timeout_seconds", 120)) if locals().get("verify_config") else 120
+            verify_timeout = int(verify_config.get("verify_timeout_seconds", 120)) if verify_config else 120
             verify_log.append("执行验证命令: {0}".format(verify_command))
 
             success, stdout_text, stderr_text = _exec_verify_command(

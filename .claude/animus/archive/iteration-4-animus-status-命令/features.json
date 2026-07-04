@@ -1,0 +1,65 @@
+[
+  {
+    "id": "T001",
+    "name": "创建 /animus-status 命令定义文件",
+    "status": "passed",
+    "depends_on": [],
+    "priority": 100,
+    "last_error": "",
+    "updated_at": "2026-07-04"
+  },
+  {
+    "id": "T002",
+    "name": "改造 show-status.py 增加依赖树引擎 + ASCII 渲染",
+    "status": "passed",
+    "depends_on": [],
+    "priority": 100,
+    "last_error": "",
+    "updated_at": "2026-07-04"
+  },
+  {
+    "id": "T003",
+    "name": "创建 animus-status.ps1 执行脚本",
+    "status": "passed",
+    "depends_on": ["T001"],
+    "priority": 90,
+    "last_error": "",
+    "updated_at": "2026-07-04"
+  },
+  {
+    "id": "T004",
+    "name": "更新 plugin.json 注册 /animus-status",
+    "status": "passed",
+    "depends_on": ["T001", "T003"],
+    "priority": 80,
+    "last_error": "",
+    "updated_at": "2026-07-04"
+  },
+  {
+    "id": "T005",
+    "name": "Mock 数据 + 边界条件测试验证",
+    "status": "passed",
+    "depends_on": ["T002", "T003"],
+    "priority": 70,
+    "last_error": "",
+    "updated_at": "2026-07-04"
+  },
+  {
+    "id": "T006",
+    "name": "全语言回归验证（C++/Rust/Python）",
+    "status": "passed",
+    "depends_on": ["T004", "T005"],
+    "priority": 60,
+    "last_error": "",
+    "updated_at": "2026-07-04"
+  },
+  {
+    "id": "T007",
+    "name": "状态变更后自动输出迭代看板（update-progress.ps1 集成）",
+    "status": "passed",
+    "depends_on": ["T002", "T003"],
+    "priority": 85,
+    "last_error": "",
+    "updated_at": "2026-07-04"
+  }
+]

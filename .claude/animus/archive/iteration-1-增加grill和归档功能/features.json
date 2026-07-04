@@ -1,0 +1,643 @@
+﻿{
+  "verify_config": {
+    "verify_enabled": false,
+    "verify_command": "",
+    "verify_timeout_seconds": 120
+  },
+  "tasks": [
+    {
+      "id": "T006",
+      "name": "实现 Grilling 追问阶段（commands/animus-plan.md）",
+      "description": "在 commands/animus-plan.md 头部增加 Grilling 追问阶段。包含 7 个问题模板（核心验收标准、前置依赖、异常流程、性能安全、架构约束、风险预估、测试策略），逐个提问并写入 plan-context.md。同时修改 agents/universal/feature-planner.md 增加读取 plan-context.md 的逻辑。",
+      "status": "passed",
+      "depends_on": [],
+      "parallel_group": "batch1",
+      "priority": 10,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "",
+      "acceptance_criteria": [
+        "commands/animus-plan.md 包含 Grilling 7 问模板",
+        "创建 templates/animus/plan-context.md 模板文件",
+        "agents/universal/feature-planner.md 增加读取 plan-context.md 指令"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T007",
+      "name": "新增 findings.md 知识积累模板",
+      "description": "创建 templates/animus/findings.md 模板，包含决策记录、错误经验、待办三部分。修改 agents/base/task-implementer-core.md 增加“遇到非显而易见修复时写入 findings.md”的指令。",
+      "status": "passed",
+      "depends_on": [],
+      "parallel_group": "batch1",
+      "priority": 10,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "",
+      "acceptance_criteria": [
+        "templates/animus/findings.md 存在且格式正确（决策记录/错误经验/待办）",
+        "agents/base/task-implementer-core.md 包含 findings.md 写入指令"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T008",
+      "name": "新增 task_plan.md 子步骤追踪模板",
+      "description": "创建 templates/animus/task_plan.md 模板，包含任务信息（ID、状态、验收标准）、子步骤 checklist（[x]/[ ] 打勾）、进度行。修改 agents/base/task-implementer-core.md 增加“步骤0：开始实现前创建 task_plan.md”的指令。",
+      "status": "passed",
+      "depends_on": [],
+      "parallel_group": "batch1",
+      "priority": 10,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "",
+      "acceptance_criteria": [
+        "templates/animus/task_plan.md 存在且包含子步骤 checklist 格式",
+        "agents/base/task-implementer-core.md 包含步骤0读取 task_plan.md 指令"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T009",
+      "name": "JSONL 日志统一：update-progress.ps1 新增 JSONL 写入",
+      "description": "在 templates/animus/update-progress.ps1 中新增 Append-HistoryJsonl 辅助函数。每次状态流转时同时写 JSONL 到 animus-history.jsonl。JSONL 格式包含 type/timestamp/task_id/from/to/message 字段。仅在双写阶段保留 claude-progress.txt 写入。",
+      "status": "passed",
+      "depends_on": [],
+      "parallel_group": "batch2",
+      "priority": 20,
+      "test_command": "powershell -NoProfile -Command \"$record = @{type='state_transition';timestamp='2026-06-28T10:00:00';task_id='T999';from='pending';to='in_progress';message='test'}; ($record | ConvertTo-Json -Compress) | Out-File -Encoding UTF8 -Append '.claude/animus/animus-history.jsonl'; python -c 'import json; json.loads(open(\".claude/animus/animus-history.jsonl\",\"rb\").read().strip().split(b\"\\n\")[-1])'\"",
+      "last_error": "",
+      "updated_at": "",
+      "acceptance_criteria": [
+        "update-progress.ps1 执行状态转换后 JSONL 追加一行",
+        "JSONL 行可用 python -m json.tool 解析",
+        "JSONL 包含 type/timestamp/task_id/from/to 字段"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T010",
+      "name": "JSONL 日志统一：pre-compact 钩子 JSONL + 自动同步",
+      "description": "修改 hooks/scripts/pre-compact.ps1 和 pre-compact.sh，增加: 1) 读取 features.json 与 task_plan.md 自动同步（features.json passed → task_plan.md 自动勾选 [x]）；2) 写入 compact 事件到 JSONL。冲突时 features.json 优先。",
+      "status": "passed",
+      "depends_on": [
+        "T009"
+      ],
+      "parallel_group": "batch2",
+      "priority": 20,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "",
+      "acceptance_criteria": [
+        "pre-compact.ps1 执行后 JSONL 追加 compact 事件",
+        "features.json 中 passed 任务对应的 task_plan.md checkbox 自动勾选",
+        "features.json 中 in_progress 但 task_plan.md 标 passed 时自动回退"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T011",
+      "name": "JSONL 日志统一：check-consistency.ps1 增加 JSONL 校验",
+      "description": "修改 commands/check-consistency.ps1，增加对 animus-history.jsonl 的一致性检查：1) JSONL 每行是否合法 JSON；2) features.json 中非 pending 任务在 JSONL 中是否有对应记录；3) 检测 JSONL 损坏行并报告行号。",
+      "status": "passed",
+      "depends_on": [
+        "T009"
+      ],
+      "parallel_group": "batch2",
+      "priority": 20,
+      "test_command": "powershell -NoProfile -File 'commands/check-consistency.ps1' -StateDir '.claude/animus'",
+      "last_error": "",
+      "updated_at": "",
+      "acceptance_criteria": [
+        "有合法 JSONL 时校验通过（exit 0）",
+        "JSONL 中有损坏行时检测并报告行号（exit 1）",
+        "features.json passed 任务在 JSONL 中无记录时报 WARN"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T012",
+      "name": "JSONL 日志统一：init-project.ps1 初始化 JSONL 文件",
+      "description": "修改 templates/init-project.ps1，在初始化时同时创建 animus-history.jsonl 空文件。新增 16 个 Agent 定义中“写入 claude-progress.txt”→“追加到 animus-history.jsonl”的文本替换。同时更新 rules/universal/testing.md、skills/tdd-workflow/SKILL.md、templates/existing_project/review-checklist.md 中的引用。",
+      "status": "passed",
+      "depends_on": [
+        "T009",
+        "T011"
+      ],
+      "parallel_group": "batch3",
+      "priority": 30,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "",
+      "acceptance_criteria": [
+        "init-project.ps1 初始化后创建 animus-history.jsonl",
+        "16 个 Agent 定义中不再引用 claude-progress.txt",
+        "rules/universal/testing.md 引用已更新",
+        "skills/tdd-workflow/SKILL.md 引用已更新",
+        "review-checklist.md 检查项已更新"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T013",
+      "name": "实现 5 问重启检查（session-catchup.py）",
+      "description": "重构 scripts/session-catchup.py：不再依赖 Claude Code session 文件解析。改为直接读 .claude/animus/ 下的 features.json、animus-history.jsonl、task_plan.md、findings.md，输出 5 问恢复检查。",
+      "status": "passed",
+      "depends_on": [
+        "T009",
+        "T010",
+        "T012"
+      ],
+      "parallel_group": "batch4",
+      "priority": 40,
+      "test_command": "python scripts/session-catchup.py --project-dir . 2>&1 | grep -q '【问题 1/5】' && echo 'OK' || echo 'FAIL'",
+      "last_error": "",
+      "updated_at": "",
+      "acceptance_criteria": [
+        "运行后输出 5 行【问题 N/5】",
+        "不依赖 ~/.claude/projects/ 目录",
+        "空项目输出‘暂无活跃任务’",
+        "包含 task_plan.md 子步骤进度信息"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T014",
+      "name": "实现 format-log.py JSONL 渲染器",
+      "description": "新增 scripts/format-log.py，从 JSONL 渲染人类可读的 Markdown 格式输出。支持 --recent N、--task Txxx、--type type、--markdown 参数。",
+      "status": "passed",
+      "depends_on": [
+        "T009"
+      ],
+      "parallel_group": "batch4",
+      "priority": 40,
+      "test_command": "python scripts/format-log.py --project-dir . --recent 3 2>&1 | head -5",
+      "last_error": "",
+      "updated_at": "",
+      "acceptance_criteria": [
+        "format-log.py 存在且可执行",
+        "--recent 3 输出最近 3 条事件",
+        "--markdown 输出 Markdown 表格格式",
+        "JSONL 不存在的项目输出友好提示"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T016",
+      "name": "强制 append-only：禁止 features.json 删除已有任务",
+      "description": "实现 4 层防护防止 features.json 中的历史任务被意外删除：1) check-consistency.ps1 集成 append-only 校验；2) pre-compact.ps1 增加任务 ID 对比检测；3) TaskImplementer/FeaturePlanner Agent 增加“写入 features.json 时必须保留所有已有任务 ID”硬约束；4) 创建 validate-append-only.ps1 独立验证脚本。",
+      "status": "passed",
+      "depends_on": [
+        "T010",
+        "T011"
+      ],
+      "parallel_group": "",
+      "priority": 25,
+      "test_command": "powershell -NoProfile -File 'commands/check-consistency.ps1' -StateDir '.claude/animus'",
+      "last_error": "",
+      "updated_at": "",
+      "acceptance_criteria": [
+        "check-consistency.ps1 运行时输出 'append-only check' 字样",
+        "pre-compact.ps1 检测到任务减少时输出红色警告",
+        "validate-append-only.ps1 存在且可运行",
+        "feature-planner.md 包含‘不得删除已有任务’规则",
+        "task-implementer-core.md 包含‘不得删除已有任务’规则"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T015",
+      "name": "更新所有指南文件 + 3 语言回归测试",
+      "description": "所有实施完成后更新指南文件：README.md、CLAUDE.md、templates/animus/README.md。然后进行 3 语言回归测试。",
+      "status": "passed",
+      "depends_on": [
+        "T013",
+        "T014"
+      ],
+      "parallel_group": "",
+      "priority": 50,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "2026-06-28T08:26:59Z",
+      "acceptance_criteria": [
+        "README.md 更新包含新功能说明",
+        "CLAUDE.md 文件结构描述更新",
+        "templates/animus/README.md 日志格式说明更新",
+        "C++/Qt 项目全流程通过",
+        "Python 项目全流程通过",
+        "Rust 项目全流程通过",
+        "validate-features.ps1 通过",
+        "check-consistency.ps1 通过"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T017",
+      "name": "删除 validate-append-only.ps1（yagni）",
+      "description": "commands/validate-append-only.ps1 是独立脚本，其 append-only 检查逻辑已内联在 pre-compact.ps1 和 check-consistency.ps1 中。删除此文件。",
+      "status": "passed",
+      "depends_on": [],
+      "parallel_group": "batch1",
+      "priority": 10,
+      "test_command": "if (Test-Path 'commands/validate-append-only.ps1') { exit 1 } else { exit 0 }",
+      "last_error": "",
+      "updated_at": "2026-06-28T09:05:08Z",
+      "acceptance_criteria": [
+        "commands/validate-append-only.ps1 文件已删除",
+        "check-consistency.ps1 的 append-only 检查不受影响",
+        "pre-compact.ps1 的 append-only 检查不受影响"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T018",
+      "name": "简化 format-log.py（编码探测+text_type+事件分支）",
+      "description": "三个精简项：1) 去掉 5 编码探测循环，只用 UTF-8（read_jsonl 中 encodings 列表只留 ['utf-8']）。2) 内联 text_type() 到 format_timestamp() 中唯一的调用点。3) 提取 format_plain() 和 format_markdown() 中重复的 5 路事件类型分支为共享函数。",
+      "status": "passed",
+      "depends_on": [],
+      "parallel_group": "batch1",
+      "priority": 10,
+      "test_command": "python -m py_compile scripts/format-log.py",
+      "last_error": "",
+      "updated_at": "2026-06-28T09:05:38Z",
+      "acceptance_criteria": [
+        "python -m py_compile scripts/format-log.py 通过",
+        "format-log.py --recent 3 正常输出",
+        "format-log.py --markdown 正常输出"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T019",
+      "name": "简化 session-catchup.py（limit参数+features降级key）",
+      "description": "两个精简项：1) get_recent_failed_events() 去掉 limit 参数，内部硬编码 3。2) read_features() 去掉 'features' 和 'items' 的降级查找 key。",
+      "status": "passed",
+      "depends_on": [],
+      "parallel_group": "batch1",
+      "priority": 10,
+      "test_command": "python -m py_compile scripts/session-catchup.py",
+      "last_error": "",
+      "updated_at": "2026-06-28T09:05:53Z",
+      "acceptance_criteria": [
+        "python -m py_compile scripts/session-catchup.py 通过",
+        "python scripts/session-catchup.py 输出 5 问报告"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T020",
+      "name": "ponytail-review 最终验证",
+      "description": "所有精简项完成后，运行 ponytail-review 确认无新的复杂度残留。",
+      "status": "passed",
+      "depends_on": [
+        "T017",
+        "T018",
+        "T019"
+      ],
+      "priority": 50,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "2026-06-28T09:25:22Z",
+      "acceptance_criteria": [
+        "ponytail-review 输出 'Lean already' 或 no findings",
+        "全部语法检查通过"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T021",
+      "name": "修复 Python 脚本代码审查问题（session-catchup.py + format-log.py）",
+      "description": "8 项修复: get_recent_failed_events 字段名/BOM utf-8-sig/argparse/sync 死代码/datetime 延迟导入/magic numbers",
+      "status": "passed",
+      "depends_on": [],
+      "priority": 10,
+      "test_command": "python -m py_compile scripts/format-log.py && python -m py_compile scripts/session-catchup.py",
+      "last_error": "",
+      "updated_at": "2026-06-28T09:51:00Z",
+      "acceptance_criteria": [
+        "session-catchup.py get_recent_failed_events 用 to_status",
+        "format-log.py+session-catchup.py 用 utf-8-sig",
+        "session-catchup.py 用 argparse",
+        "Magic numbers 提取为常量"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T022",
+      "name": "修复 PowerShell 代码审查问题（pre-compact.ps1/sh + 脚本 + testing.md）",
+      "description": "10 项修复: pre-compact.sh 同步/正则注入/timestamp/Resolve-Path/initial_tasks/progress.txt 清理/pending→failed",
+      "status": "passed",
+      "depends_on": [],
+      "priority": 10,
+      "test_command": "powershell -NoProfile -Command \"& ./commands/check-consistency.ps1\"",
+      "last_error": "",
+      "updated_at": "2026-06-28T09:52:00Z",
+      "acceptance_criteria": [
+        "pre-compact.sh 含 task_plan 同步",
+        "pre-compact.ps1 防注入+timestamp+T分隔+.Path",
+        "check-consistency.ps1 支持 initial_tasks",
+        "update-progress.ps1 无 progress.txt 写入",
+        "init-project.ps1 无 progress.txt 创建",
+        "testing.md 用 failed"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T023",
+      "name": "文档同步（README.md + CLAUDE.md + 模板文档）",
+      "description": "6 个文档补全: README.md 目录树/CLAUDE.md 根结构+持久化层/existing_project CLAUDE.md/harness README.md/review-checklist.md",
+      "status": "passed",
+      "depends_on": [],
+      "priority": 10,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "2026-06-28T09:48:00Z",
+      "acceptance_criteria": [
+        "README.md 目录树含 3 新模板",
+        "CLAUDE.md 根结构+持久化层已更新",
+        "existing_project CLAUDE.md 含 task_plan+findings",
+        "harness README.md 含 task_plan",
+        "review-checklist 含 4 文件"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T024",
+      "name": "差距分析框架（4 层：CLAUDE.md Rule + feature-planner Step0 + 规则文件 + 脚本）",
+      "description": "F1: 实现 4 层差距分析机制防止功能遗漏。Layer1: CLAUDE.md 追加 Gap Analysis 和 Sync Docs 规则。Layer2: feature-planner.md 新增 Step 0 差距分析。Layer3: 新建 rules/universal/requirements-tracking.md。Layer4: 新建 scripts/gap-analysis.py。",
+      "status": "passed",
+      "depends_on": [],
+      "priority": 10,
+      "test_command": "python -m py_compile scripts/gap-analysis.py",
+      "last_error": "",
+      "updated_at": "2026-06-28T11:48:24Z",
+      "acceptance_criteria": [
+        "CLAUDE.md 包含 Gap Analysis 和 Sync Docs 两条 Rule",
+        "feature-planner.md 步骤 0 为差距分析",
+        "rules/universal/requirements-tracking.md 存在",
+        "scripts/gap-analysis.py 存在且语法通过"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T025",
+      "name": "Handoff（/animus-handoff + /animus-continue）",
+      "description": "F2: 两个斜杠命令实现 session 上下文传递。animus-handoff 保存详细上下文快照到 handoff.json。animus-continue 读取并恢复，标记已加载防重复。session-catchup.py 自动检测 handoff.json。",
+      "status": "passed",
+      "depends_on": [
+        "T024"
+      ],
+      "priority": 20,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "2026-06-28T12:00:53Z",
+      "acceptance_criteria": [
+        "/animus-handoff 命令存在，生成 handoff.json",
+        "/animus-continue 命令存在，读取 handoff.json 恢复上下文",
+        "handoff 加载后标记 status=loaded 防重复",
+        "session-catchup.py 自动检测 handoff.json"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T026",
+      "name": "Domain Lexicon 领域术语表",
+      "description": "F3: 新建 templates/animus/domain-lexicon.md 模板。feature-planner 在规划时提取术语。task-implementer 在实现时追加。来源列使用 I{N}-T{NNN} 格式。",
+      "status": "passed",
+      "depends_on": [
+        "T024"
+      ],
+      "priority": 20,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "2026-06-28T12:02:01Z",
+      "acceptance_criteria": [
+        "templates/animus/domain-lexicon.md 存在",
+        "feature-planner.md 包含术语提取指令",
+        "task-implementer-core.md 包含术语追加指令",
+        "来源列使用 I{N}-T{NNN} 格式"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T027",
+      "name": "ADR 架构决策记录",
+      "description": "F4: 新建 templates/animus/adr/ 目录 + ADR 模板。task-implementer-core.md 要求架构级决策创建 ADR。各语言 architect agent 设计阶段创建 ADR。ADR 含迭代号、状态、关联任务。",
+      "status": "passed",
+      "depends_on": [
+        "T024"
+      ],
+      "priority": 20,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "2026-06-28T12:00:00Z",
+      "acceptance_criteria": [
+        "templates/animus/adr/ADR-000-模板.md 存在",
+        "task-implementer-core.md 含 ADR 指令",
+        "7 个 architect agent 含 ADR 指令"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T028",
+      "name": "Parallel design 并行设计规范",
+      "description": "F6: 补充并行任务开发规范。rules/universal/coding-style.md 追加并行规范。feature-planner.md 追加并行规划指令。animus-review.md 追加并行验收说明。",
+      "status": "passed",
+      "depends_on": [],
+      "priority": 30,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "2026-06-28T12:00:00Z",
+      "acceptance_criteria": [
+        "coding-style.md 含并行开发规范",
+        "feature-planner.md 含并行规划指令",
+        "animus-review.md 含并行验收说明"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T029",
+      "name": "推送后自动更新插件 + 配置开关",
+      "description": "F7: 新建 hooks/post-push.sh，project-config.json 新增 auto-update-plugin 开关（默认开），更新失败给提示。animus-setup 初始化时写入默认开关。",
+      "status": "passed",
+      "depends_on": [],
+      "priority": 30,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "2026-06-28T12:00:00Z",
+      "acceptance_criteria": [
+        "hooks/post-push.sh 存在且可执行",
+        "project-config.json 含 auto-update-plugin 字段（默认 true）",
+        "更新失败时输出提示信息"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T030",
+      "name": "Grillme-with-doc（基于文档自动生成追问）",
+      "description": "F8: 有 PRD/方案文档时自动读文档生成针对性追问，无文档时使用固定 7 问模板兜底。读文档时自动提取术语填充 Domain Lexicon。修改 animus-plan.md 和 feature-planner.md。",
+      "status": "passed",
+      "depends_on": [
+        "T024"
+      ],
+      "priority": 20,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "2026-06-28T12:00:00Z",
+      "acceptance_criteria": [
+        "有文档时自动读文档生成追问而非固定 7 问",
+        "无文档时使用固定 7 问兜底",
+        "自动提取术语写入 Domain Lexicon"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T031",
+      "name": "迭代归档",
+      "description": "F9: /animus-plan 中新增迭代判定（继续当前迭代或新开归档）。归档当前状态到 archive/iteration-N-<name>/，清空当前状态。生成 iteration-summary.md 含功能列表、代码统计、起止时间。findings.md 保留在工作区并标记迭代号。",
+      "status": "passed",
+      "depends_on": [],
+      "priority": 30,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "2026-06-28T12:00:00Z",
+      "acceptance_criteria": [
+        "feature-planner.md 含归档判定逻辑",
+        "scripts/archive-iteration.py 存在",
+        "templates/animus/iteration-summary.md 存在",
+        "归档内容含所有运行时状态文件",
+        "findings.md 保留在工作区并标记迭代号",
+        "新迭代 tasks 从空开始"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    },
+    {
+      "id": "T032",
+      "name": "verify_config 迁移到 project-config.json + features.json 拍平",
+      "description": "将 verify_config 从 features.json 移到 project-config.json。更新所有读取 verify_config 的脚本（oracle-runner/show-status/update-progress/validate-features/init/animus-setup）。简化 features.json 格式：去除深嵌套，2-space indent。",
+      "status": "passed",
+      "depends_on": [],
+      "priority": 25,
+      "test_command": "",
+      "last_error": "",
+      "updated_at": "2026-06-28T12:15:00Z",
+      "acceptance_criteria": [
+        "features.json 不含 verify_config",
+        "project-config.json 含 verify_config 字段",
+        "oracle-runner.ps1 从 project-config.json 读取",
+        "show-status.py 从 project-config.json 读取",
+        "update-progress.py 从 project-config.json 读取",
+        "animus-setup.ps1 写入 project-config.json"
+      ],
+      "metadata": {
+        "created_at": "",
+        "duration_seconds": 0,
+        "session_id": ""
+      }
+    }
+  ]
+}

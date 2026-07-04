@@ -9,6 +9,7 @@ import json
 import os
 import glob
 import re
+from datetime import datetime
 
 
 def _find_animus_dir():
@@ -22,6 +23,29 @@ def _find_animus_dir():
             break
         cwd = parent
     return None
+
+
+def _parse_frontmatter(raw):
+    """提取 memlog 文件 YAML frontmatter 中的 key-value 对。"""
+    result = {}
+    lines = raw.split("\n")
+    if not lines or lines[0].strip() != "---":
+        return result
+    idx = 1
+    while idx < len(lines) and lines[idx].strip() != "---":
+        line = lines[idx]
+        if ":" in line:
+            key, _, val = line.partition(":")
+            key = key.strip()
+            val = val.strip()
+            if val:
+                # 尝试解析为 JSON（支持列表和布尔值等）
+                try:
+                    result[key] = json.loads(val)
+                except (ValueError, TypeError):
+                    result[key] = val
+        idx += 1
+    return result
 
 
 def _write_json(path, data):
@@ -53,7 +77,7 @@ def run():
     features = {
         "metadata": {
             "rebuilt_from": "memlog",
-            "rebuilt_at": __import__("datetime").datetime.now().isoformat(),
+            "rebuilt_at": datetime.now().isoformat(),
             "event_count": len(events),
         },
         "tasks": {}
@@ -85,6 +109,7 @@ def run():
                         break
 
         content_lower = raw.lower()
+        frontmatter = _parse_frontmatter(raw)
 
         if "创建任务" in content_lower or "create-task" in content_lower:
             # 提取标题
@@ -96,16 +121,21 @@ def run():
 
             tid = task_id or "T{:03d}".format(len(features["tasks"]) + 1)
             if tid not in features["tasks"]:
-                features["tasks"][tid] = {
+                task_data = {
                     "id": tid,
-                    "title": title,
-                    "name": title,
-                    "status": "pending",
-                    "depends_on": [],
-                    "priority": 99,
+                    "title": frontmatter.get("title", title),
+                    "name": frontmatter.get("title", title),
+                    "status": frontmatter.get("status", "pending"),
+                    "depends_on": frontmatter.get("depends_on", []),
+                    "priority": frontmatter.get("priority", 99),
                     "last_error": "",
                     "updated_at": basename[:16],
                 }
+                # 复制 frontmatter 中其他未知字段
+                for k, v in frontmatter.items():
+                    if k not in ("type", "timestamp", "id", "title", "status", "depends_on", "priority", "last_error", "updated_at"):
+                        task_data[k] = v
+                features["tasks"][tid] = task_data
 
         elif "状态变更" in content_lower or "status-change" in content_lower:
             tid = task_id

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "T033",
+    "name": "归档脚本完善：命名冲突保护 + domain-lexicon.md 归档",
+    "status": "passed",
+    "depends_on": [],
+    "priority": 10,
+    "last_error": "",
+    "updated_at": "2026-06-28T21:15:00Z"
+  },
+  {
+    "id": "T034",
+    "name": "Domain Lexicon 初始化联动",
+    "status": "passed",
+    "depends_on": [],
+    "priority": 10,
+    "last_error": "",
+    "updated_at": "2026-06-28T21:15:00Z"
+  },
+  {
+    "id": "T035",
+    "name": "Grilling 互动式提问改造",
+    "status": "passed",
+    "depends_on": [],
+    "priority": 10,
+    "last_error": "",
+    "updated_at": "2026-06-28T21:15:00Z"
+  },
+  {
+    "id": "T036",
+    "name": "集成测试验收",
+    "status": "passed",
+    "depends_on": ["T033", "T034", "T035"],
+    "priority": 20,
+    "last_error": "",
+    "updated_at": "2026-06-28T21:15:00Z"
+  }
+]
