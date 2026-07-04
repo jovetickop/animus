@@ -6,58 +6,18 @@ from __future__ import print_function
 import json
 import os
 import sys
-import argparse
 
 
-# ---------------------------------------------------------------------------
-# Unicode 安全输出（处理 Windows GBK 终端无法打印 Unicode 的问题）
-# ---------------------------------------------------------------------------
-
+# ponytail: sys.stdout.reconfigure + bare print handles GBK, no wrapper needed
 if sys.version_info[0] >= 3 and hasattr(sys.stdout, 'reconfigure'):
     try:
         sys.stdout.reconfigure(encoding='utf-8', errors='replace')
     except Exception:
         pass
-
-def u_print(*args, **kwargs):
-    """安全的 Unicode 打印，遇到编码错误时降级为 replace。"""
-    try:
-        print(*args, **kwargs)
-    except UnicodeEncodeError:
-        # 逐个替换不可打印字符
-        texts = []
-        for a in args:
-            if isinstance(a, bytes):
-                texts.append(a.decode('utf-8', errors='replace'))
-            else:
-                texts.append(str(a))
-        text = u' '.join(texts)
-        # 尝试用 utf-8 编码后写入二进制缓冲区
-        try:
-            sys.stdout.buffer.write(text.encode('utf-8', errors='replace') + b'\n')
-            sys.stdout.buffer.flush()
-        except Exception:
-            # 最终降级
-            sys.stdout.write(text.encode('ascii', errors='replace') + b'\n')
+u_print = print  # ponytail: print() is fine after reconfigure
 
 
-# ---------------------------------------------------------------------------
-# ANSI 颜色辅助（仅 isatty 时启用）
-# ---------------------------------------------------------------------------
-
-def _c(text, color):
-    """为终端输出添加 ANSI 颜色；非终端时直接返回纯文本。"""
-    if not sys.stdout.isatty():
-        return text
-    codes = {
-        "green": "\033[92m",
-        "red": "\033[91m",
-        "yellow": "\033[93m",
-        "cyan": "\033[96m",
-        "reset": "\033[0m",
-    }
-    code = codes.get(color, codes["reset"])
-    return code + text + codes["reset"]
+# ponytail: _c() inlined below, only caller was render_summary count_parts
 
 
 # ---------------------------------------------------------------------------
@@ -335,12 +295,14 @@ def render_summary(tasks, total, passed, failed, in_progress, pending):
     title = u"{0} animus 迭代{1}".format(overall, u" - " + iteration_name if iteration_name != "animus" else u"")
     bar_line = u"进度: {0}  {1}% ({2}/{3})".format(bar, progress_pct, passed, total)
 
-    # 计数行（带颜色）
+    # 计数行（ansi color inline，ponytail: no separate _c() helper）
+    _is_tty = sys.stdout.isatty()
+    _gr = u"\033[92m" if _is_tty else u""; _re = u"\033[91m" if _is_tty else u""; _ye = u"\033[93m" if _is_tty else u""; _rst = u"\033[0m" if _is_tty else u""
     count_parts = []
-    count_parts.append(_c(u"✅ {0}".format(passed), "green"))
-    count_parts.append(_c(u"❌ {0}".format(failed), "red") if failed > 0 else u"❌ 0")
-    count_parts.append(_c(u"\U0001F7E1 {0}".format(1 if in_progress else 0), "yellow"))
-    count_parts.append(u"⏳ {0}".format(pending))  # ⏳
+    count_parts.append(u"{0}✅ {1}{2}".format(_gr, passed, _rst))
+    count_parts.append(u"{0}❌ {1}{2}".format(_re, failed, _rst) if failed > 0 else u"❌ 0")
+    count_parts.append(u"{0}\U0001F7E1 {1}{2}".format(_ye, 1 if in_progress else 0, _rst))
+    count_parts.append(u"⏳ {0}".format(pending))
 
     # 计算可见长度（去掉 ANSI 转义后的实际长度）
     import re
@@ -485,95 +447,41 @@ def render_tree(tree_nodes, status_by_id, task_map, indent=u"", is_last=True, vi
 
 
 # ---------------------------------------------------------------------------
-# 新增功能 5：render_compact - 一行浓缩摘要
-# ---------------------------------------------------------------------------
-
-def render_compact(tasks, total, passed, failed, in_progress, pending):
-    """生成一行简洁的摘要文本（用于嵌入其他工具输出）。"""
-    # 整体状态
-    if total > 0 and passed == total:
-        overall = u"\U0001F7E2"  # 🟢
-    elif failed > 0:
-        overall = u"\U0001F534"  # 🔴
-    elif in_progress is not None:
-        overall = u"\U0001F7E1"  # 🟡
-    elif pending == total:
-        overall = u"⚪"      # ⚪
-    else:
-        overall = u"\U0001F7E1"  # 🟡
-
-    progress_pct = int(float(passed) / total * 100) if total > 0 else 0
-
-    # next
-    if in_progress is not None:
-        next_id = str(in_progress.get("id", ""))
-    else:
-        status_by_id = {str(t.get("id", "")): str(t.get("status", "")) for t in tasks}
-        pending_tasks = [t for t in tasks if t.get("status") == "pending"]
-        executable_pending = [t for t in pending_tasks if can_run(t, status_by_id)]
-        executable_pending.sort(key=lambda t: (-get_priority(t), str(t.get("id", ""))))
-        if executable_pending:
-            next_id = str(executable_pending[0].get("id", ""))
-        else:
-            next_id = u"done"
-
-    line = u"[{0}] {1}/{2} {3}% ✅{4} ❌{5} \U0001F7E1{6} ⏳{7} | next: {8}".format(
-        overall,
-        passed, total, progress_pct,
-        passed,
-        failed,
-        (1 if in_progress else 0),
-        pending,
-        next_id,
-    )
-    u_print(line)
 
 
 # ---------------------------------------------------------------------------
 # 新增功能 1：CLI 参数解析 + 改造后的 main
 # ---------------------------------------------------------------------------
 
+# ponytail: sys.argv over argparse, 4 flags don't need a framework
+
 def parse_args(argv):
-    """解析命令行参数。"""
-    parser = argparse.ArgumentParser(
-        description=u"animus 任务状态显示工具",
-        add_help=True,
-    )
-    parser.add_argument(
-        "state_dir", nargs="?",
-        default=None,
-        help=u"状态目录路径（默认 .claude/animus/）",
-    )
-    parser.add_argument(
-        "--summary", action="store_true",
-        help=u"只输出数字摘要",
-    )
-    parser.add_argument(
-        "--tree", action="store_true",
-        help=u"只输出依赖树",
-    )
-    parser.add_argument(
-        "--json", action="store_true",
-        dest="json_output",
-        help=u"JSON 格式输出（用于脚本调用）",
-    )
-    parser.add_argument(
-        "--compact", action="store_true",
-        help=u"一行简洁摘要",
-    )
-    args, _ = parser.parse_known_args(argv)
-
-    # 处理 state_dir 默认值
-    if args.state_dir is None:
-        default_root = os.path.join(".claude", "animus")
-        if os.path.exists(default_root):
-            args.state_dir = default_root
+    """解析命令行参数。sys.argv 就够了。"""
+    state_dir = None
+    flags = {"summary": False, "tree": False, "json_output": False}
+    for a in argv:
+        if a == "--summary":
+            flags["summary"] = True
+        elif a == "--tree":
+            flags["tree"] = True
+        elif a == "--json":
+            flags["json_output"] = True
+        elif a.startswith("--"):
+            pass
+        elif state_dir is None:
+            state_dir = a
+    if state_dir is None:
+        d = os.path.join(".claude", "animus")
+        if os.path.exists(d):
+            state_dir = d
         else:
-            args.state_dir = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), "..", "state"
-            )
-
-    return args
+            state_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "state")
+    # 动态构造命名空间对象，兼容 Python 2/3
+    ns = type("Args", (object,), {})()
+    ns.state_dir = state_dir
+    for k, v in flags.items():
+        setattr(ns, k, v)
+    return ns
 
 
 def main():
@@ -684,10 +592,7 @@ def main():
         render_tree(tree, status_by_id, task_map)
         return 0
 
-    # --compact 模式
-    if args.compact:
-        render_compact(tasks, total, passed, len(failed_list), in_progress, len(pending_list))
-        return 0
+    # ponytail: --compact removed, --summary covers the use case
 
     # 默认模式：输出新格式看板（总览头 + 依赖树 + 阻塞链）
     render_summary(tasks, total, passed, len(failed_list), in_progress, len(pending_list))
