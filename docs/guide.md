@@ -1,48 +1,34 @@
 # Animus 详细指南
 
-> 本指南包含架构说明、命令详解、配置项、扩展开发等内容。
+> 本指南包含用户操作说明和底层机制解析两部分。
 
 ---
 
 ## 目录
 
-1. [架构总览](#1-架构总览)
-2. [命令详解](#2-命令详解)
-3. [配置系统](#3-配置系统)
-4. [状态机](#4-状态机)
-5. [Memlog 事件源](#5-memlog-事件源)
-6. [引擎 CLI](#6-引擎-cli)
-7. [测试](#7-测试)
-8. [审查门控](#8-审查门控)
-9. [Agent 体系](#9-agent-体系)
-10. [钩子系统](#10-钩子系统)
-11. [安装目录结构](#11-安装目录结构)
+1. [用户指南](#1-用户指南)
+   - 1.1 [命令详解](#11-命令详解)
+   - 1.2 [配置系统](#12-配置系统)
+   - 1.3 [测试](#13-测试)
+   - 1.4 [安装目录结构](#14-安装目录结构)
+2. [底层机制](#2-底层机制)
+   - 2.1 [架构总览](#21-架构总览)
+   - 2.2 [状态机](#22-状态机)
+   - 2.3 [Memlog 事件源](#23-memlog-事件源)
+   - 2.4 [引擎 CLI](#24-引擎-cli)
+   - 2.5 [审查门控](#25-审查门控)
+   - 2.6 [Agent 体系](#26-agent-体系)
+   - 2.7 [钩子系统](#27-钩子系统)
+
+---
+## 1. 用户指南
 
 ---
 
-## 1. 架构总览
 
-```
-插件入口 (.claude-plugin/plugin.json)
-  → 编排层 (commands/*.md)
-    → 引擎层 (scripts/animus-engine.py)
-      → 子命令模块 (scripts/engine/*.py)
-        → 持久化层 (features.json + memlog/)
-        → 配置层 (config.toml 两层覆盖)
-```
+### 1.1 命令详解
 
-### 1.1 核心设计
-
-- **状态机驱动**：任务状态流转严格校验，非法流转 exit 1
-- **单一事件源**：memlog 记录所有事件，features.json 由 memlog 派生重建
-- **两层配置**：defaults → config.toml
-- **分层 Agent**：base/ → universal/ → {lang}/ 继承机制
-
----
-
-## 2. 命令详解
-
-### 2.1 `/animus-init` — 项目初始化
+### 1.1.1 `/animus-init` — 项目初始化
 
 **原理：** 检测目标项目的技术栈类型（CMakeList.txt → cpp-qt/cpp-cmake、Cargo.toml → rust、go.mod → go、package.json → node、pyproject.toml → python）。如果根目录未检测到项目类型，会自动扫描一级子目录，识别多子项目。
 
@@ -56,7 +42,7 @@
 
 ---
 
-### 2.2 `/animus-dev` — 统一开发入口
+### 1.1.2 `/animus-dev` — 统一开发入口
 
 **原理：** 根据用户输入的意图描述，AI 自动判断改动范围和类型，选择最合适的开发路径。所有路径都会写入 memlog 和 features.json，确保任务全程可追溯。
 
@@ -111,7 +97,7 @@ autonomous = false       # true=AI全权决策，不询问
 
 ---
 
-### 2.3 `/animus-review` — 代码审查
+### 1.1.3 `/animus-review` — 代码审查
 
 **原理：** 并行启动 4 个审查 agent，分别从正确性、边界条件、验收标准、精简度四个维度审查代码。审查结果汇总后按严重度分级裁决。
 
@@ -158,7 +144,7 @@ max_findings = 20
 
 ---
 
-### 2.4 `/animus-party` — 辩论模式
+### 1.1.4 `/animus-party` — 辩论模式
 
 **原理：** 多 agent 并行辩论，从不同角度碰撞观点，暴露设计盲点。
 
@@ -177,7 +163,7 @@ max_findings = 20
 
 ---
 
-### 2.5 `/animus-status` — 状态看板
+### 1.1.5 `/animus-status` — 状态看板
 
 **原理：** 读取 features.json，统计任务状态分布，按优先级排序输出每个任务明细，底部推荐下一步命令。
 
@@ -212,7 +198,7 @@ max_findings = 20
 
 ---
 
-### 2.6 `/animus-help` — 帮助与导航
+### 1.1.6 `/animus-help` — 帮助与导航
 
 **原理：** 读取 `.claude/animus/` 目录状态，根据当前进度推荐最合适的命令。不需要记忆命令顺序，跟着推荐走即可。
 
@@ -228,15 +214,16 @@ max_findings = 20
 
 ---
 
-### 2.7 `/animus-archive` — 迭代归档
+### 1.1.7 `/animus-archive` — 迭代归档
 
 **原理：** 将当前迭代的完整状态打包到 `archive/iter-xxx-名称/` 目录下，清空 features.json 开始新的迭代。归档目录保留完整的任务历史、memlog 事件和迭代总结，可随时回溯。
 
 **归档内容：**
 
 | 内容 | 去向 | 原位置处理 |
-|------|------|-----------|
-| features.json（含全部任务历史） | 复制到 `archive/iter-xxx/` | 清空 tasks，保留 metadata |
+
+---
+
 | memlog 所有事件 | 复制到 `archive/iter-xxx/memlog/` | 清空（新迭代从零开始） |
 | iteration-summary.md（自动生成） | 创建到 `archive/iter-xxx/` | — |
 | config.toml | 不变 | 保留 |
@@ -256,13 +243,14 @@ max_findings = 20
 /animus-archive --name "迭代 3-UI重构"     # 直接归档
 ```
 
-## 3. 配置系统
+### 1.2 配置系统
+
 
 两层覆盖：`defaults（硬编码） ← config.toml`
 
 文件位置：`.claude/animus/config.toml`
 
-### 3.1 完整配置项
+#### 1.2.1 完整配置项
 
 ```toml
 # animus 配置文件
@@ -359,15 +347,71 @@ ask_before_start = true
 max_rounds = 3
 ```
 
-### 3.2 覆盖规则
+#### 1.2.2 覆盖规则
 
-文件不存在时回退硬编码默认值。配置中只写需要覆盖的段和字段，其余自动回退默认值。
 
 ---
 
-## 4. 状态机
 
-### 4.1 状态流转
+### 1.3 测试
+
+192 个单元测试，全部 Python 2/3 兼容，使用 tempfile 隔离文件系统。
+
+| 测试文件 | 覆盖 | 用例 |
+|----------|------|------|
+| `tests/test_config_loader.py` | 配置加载（默认值/合并/校验/兼容） | 34 |
+| `tests/test_engine.py` | 状态机流转/校验/DAG 检测 | 23 |
+| `tests/test_engine_extras.py` | 推荐引擎/归档/重建/memlog | 12 |
+| `tests/test_deferred_work.py` | deferred-work 读写/清空/Unicode | 10 |
+| `tests/test_hooks.py` | write-gate/pre-tool-use/pre-compact/stop-check/clang-format | 26 |
+| `tests/test_templates.py` | task_helpers/git_helper/report_generator/coding_session/init | 71 |
+| `tests/test_animus_init.py` | 项目类型检测/TOML 生成/目录创建/不覆盖 | 16 |
+
+
+---
+
+
+### 1.4 安装目录结构
+
+```
+项目根目录/
+├── .claude/
+│   └── animus/
+│       ├── config.toml           # 配置（git 跟踪）
+│       ├── features.json         # 任务状态（由 memlog 派生）
+│       ├── memlog/               # 事件源目录
+│       └── archive/              # 归档目录
+├── .claude-plugin/
+│   └── plugin.json               # 插件清单
+├── commands/                     # 斜杠命令
+├── agents/                       # Agent 定义
+
+## 2. 底层机制
+
+### 2.1 架构总览
+
+```
+插件入口 (.claude-plugin/plugin.json)
+  → 编排层 (commands/*.md)
+    → 引擎层 (scripts/animus-engine.py)
+      → 子命令模块 (scripts/engine/*.py)
+        → 持久化层 (features.json + memlog/)
+        → 配置层 (config.toml 两层覆盖)
+```
+
+#### 2.1.1 核心设计
+
+- **状态机驱动**：任务状态流转严格校验，非法流转 exit 1
+- **单一事件源**：memlog 记录所有事件，features.json 由 memlog 派生重建
+- **两层配置**：defaults → config.toml
+- **分层 Agent**：base/ → universal/ → {lang}/ 继承机制
+
+---
+
+
+### 2.2 状态机
+
+#### 2.2.1 状态流转
 
 ```
 pending → in_progress → passed → completed
@@ -380,24 +424,24 @@ pending → in_progress → passed → completed
 - `failed → in_progress`：重试
 - `completed`：终态（可重入 in_progress）
 
-### 4.2 限制
+#### 2.2.2 限制
 
 - 同时只能有一个 `in_progress` 任务
 - `depends_on` 构建 DAG，只能依赖直接前置任务
 - 非法流转 `exit 1`
 
-### 4.3 CLI 使用
+#### 2.2.3 CLI 使用
 
 ```bash
 python animus-engine.py transition T001 in_progress
 python animus-engine.py transition T001 passed --evidence "test all pass"
-```
 
 ---
 
-## 5. Memlog 事件源
 
-### 5.1 目录结构
+### 2.3 Memlog 事件源
+
+#### 2.3.1 目录结构
 
 ```
 .claude/animus/memlog/
@@ -409,7 +453,7 @@ python animus-engine.py transition T001 passed --evidence "test all pass"
 └── ...
 ```
 
-### 5.2 事件类型
+#### 2.3.2 事件类型
 
 | 类型 | 说明 |
 |------|------|
@@ -420,15 +464,15 @@ python animus-engine.py transition T001 passed --evidence "test all pass"
 | 归档 | 归档迭代时写入 |
 | 辩论 | Party Mode 辩论全量日志 |
 
-### 5.3 核心原则
+#### 2.3.3 核心原则
 
 - **当前迭代 append-only**：memlog 在当前迭代中只追加不修改，归档时整份复制到 `archive/iter-xxx/memlog/` 后清空原目录
 - **单一事件源**：features.json 由 memlog 派生，可删除重建
-- **重建命令**：`python animus-engine.py rebuild`
 
 ---
 
-## 6. 引擎 CLI
+
+### 2.4 引擎 CLI
 
 统一入口 `scripts/animus-engine.py`，子命令：
 
@@ -448,35 +492,17 @@ python animus-engine.py archive --name "迭代名称"
 python animus-engine.py rebuild
 ```
 
-### 6.1 其他脚本
+#### 2.4.1 其他脚本
 
 | 脚本 | 功能 |
 |------|------|
 | `scripts/animus_init.py` | 项目初始化（类型检测/创建目录/写配置） |
 | `scripts/deferred_work.py` | deferred-work 管理（read/append/clear） |
-| `scripts/memlog.py` | memlog 事件写入 |
 
 ---
 
-## 7. 测试
 
-192 个单元测试，全部 Python 2/3 兼容，使用 tempfile 隔离文件系统。
-
-| 测试文件 | 覆盖 | 用例 |
-|----------|------|------|
-| `tests/test_config_loader.py` | 配置加载（默认值/合并/校验/兼容） | 34 |
-| `tests/test_engine.py` | 状态机流转/校验/DAG 检测 | 23 |
-| `tests/test_engine_extras.py` | 推荐引擎/归档/重建/memlog | 12 |
-| `tests/test_deferred_work.py` | deferred-work 读写/清空/Unicode | 10 |
-| `tests/test_hooks.py` | write-gate/pre-tool-use/pre-compact/stop-check/clang-format | 26 |
-| `tests/test_templates.py` | task_helpers/git_helper/report_generator/coding_session/init | 71 |
-| `tests/test_animus_init.py` | 项目类型检测/TOML 生成/目录创建/不覆盖 | 16 |
-
-运行：`python -m pytest tests/`
-
----
-
-## 8. 审查门控
+### 2.5 审查门控
 
 | 门控 | 级别 | 说明 |
 |------|------|------|
@@ -485,13 +511,13 @@ python animus-engine.py rebuild
 | 并行审查 | HARD | 4 agent 审查，high 阻塞 |
 | 循环回退 | HARD | 最多 3 轮，超限终止 |
 | 超时等待 | SOFT | 超时自动延长等待，不中断；仅报错重试 3 次 |
-| SPEC 法则 | SOFT | 4 条法则校验，违规警告 |
 
 ---
 
-## 9. Agent 体系
 
-### 9.1 分组
+### 2.6 Agent 体系
+
+#### 2.6.1 分组
 
 | 组 | 数量 | Agent |
 |----|------|-------|
@@ -505,7 +531,7 @@ python animus-engine.py rebuild
 | frontend | 1 | 规划师 |
 | base | 2 | 核心模板（实现者/测试官）|
 
-### 9.2 命名规则
+#### 2.6.2 命名规则
 
 每个 agent frontmatter 包含：
 ```yaml
@@ -515,11 +541,9 @@ title: 代码质量门控审查
 team: universal
 persona: 你叫审查官 (Review)。一行不放过...
 ---
-```
 
----
 
-## 10. 钩子系统
+### 2.7 钩子系统
 
 | 钩子 | 触发时机 | 作用 | 超时 |
 |------|---------|------|------|
@@ -528,53 +552,5 @@ persona: 你叫审查官 (Review)。一行不放过...
 | PreCompact | 上下文压缩前 | JSONL compact 事件 + 状态看板同步 | 10s |
 | Stop | 会话结束时 | 检查未完成任务，输出恢复提示 | 10s |
 
-优先级：bash → Python → exit 0（失败安全不阻塞主流程）。
 
 ---
-
-## 11. 安装目录结构
-
-```
-项目根目录/
-├── .claude/
-│   └── animus/
-│       ├── config.toml           # 配置（git 跟踪）
-│       ├── features.json         # 任务状态（由 memlog 派生）
-│       ├── memlog/               # 事件源目录
-│       └── archive/              # 归档目录
-├── .claude-plugin/
-│   └── plugin.json               # 插件清单
-├── commands/                     # 斜杠命令
-├── agents/                       # Agent 定义
-├── hooks/                        # 运行时钩子（Python 版）
-│   └── scripts/
-│       ├── write-gate.py         # 写代码门控拦截
-│       ├── pre-tool-use.py       # 备份 + 编码转码
-│       ├── clang-format.py       # C++ 格式化 + GBK 转码
-│       ├── pre-compact.py        # 状态同步
-│       ├── stop-check.py         # 会话结束检查
-│       └── encoding-bridge.py    # GBK↔UTF-8 桥接
-├── scripts/                      # Python 引擎脚本
-│   ├── animus-engine.py          # 统一 CLI 入口
-│   ├── animus_init.py            # 项目初始化
-│   ├── engine/                   # 子命令模块
-│   │   ├── cmd_status.py         # 状态看板
-│   │   ├── cmd_transition.py     # 状态机流转
-│   │   ├── cmd_validate.py       # 校验
-│   │   ├── cmd_archive.py        # 归档
-│   │   └── cmd_rebuild.py        # memlog 重建
-│   ├── config_loader.py          # 配置加载器
-│   ├── deferred_work.py          # deferred-work 管理
-│   └── memlog.py                 # 事件源写入
-├── tests/                        # 192 个单元测试
-│   ├── test_config_loader.py     # 配置测试
-│   ├── test_engine.py            # 状态机测试
-│   ├── test_engine_extras.py     # 扩展功能测试
-│   ├── test_deferred_work.py     # deferred-work 测试
-│   ├── test_hooks.py             # 钩子模块测试
-│   ├── test_templates.py         # 模板模块测试
-│   └── test_animus_init.py       # 初始化测试
-└── skills/                       # 技能定义
-    ├── party-mode/               # 辩论模式
-    └── brainstorming/            # 头脑风暴
-```
