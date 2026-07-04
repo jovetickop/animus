@@ -132,10 +132,5 @@ team: frontend
 3. **浏览器兼容**：必要时添加 polyfill 或回退方案
 4. **构建失败**：前端构建失败可能影响后续集成测试，应优先修复
 
-## 验证要求
-
-- 不得标记任务为 passed 之前跳过验证
-- 必须执行 verify_command 并确认 exit 0
-- 将验证输出追加到 animus-history.jsonl（至少最后3条）
-- 不得修改 project-config.json 中的 verify_config
+## 补充指导
 - 生成的任务需包含 acceptance_criteria

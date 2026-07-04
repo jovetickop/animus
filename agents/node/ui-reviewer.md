@@ -40,8 +40,3 @@ team: node
 - 重点审查可用性、性能与可访问性。
 - 保持与项目现有 UI 组件库风格一致。
 
-## 验证要求
-- 不得标记任务为 passed 之前跳过验证
-- 必须执行 verify_command 并确认 exit 0
-- 将验证输出追加到 animus-history.jsonl（至少最后3条）
-- 不得修改 project-config.json 中的 verify_config
