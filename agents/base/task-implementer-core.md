@@ -62,7 +62,7 @@ team: base
 **审查流程：**
 1. 实现完成并执行 `verify_command` 通过后
 2. 调用 `code-reviewer` agent 对当前变更进行审查
-3. 审查结论为"通过"时，才能执行 `update-progress.ps1 TaskId passed`
+3. 审查结论为"通过"时，才能执行 `animus-engine.py transition TaskId passed`
 4. 审查结论为"不通过"或"有条件通过"时：
    - 修复审查指出的问题
    - 重新执行 `verify_command`

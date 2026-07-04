@@ -167,7 +167,7 @@
 ### 1. 状态机驱动的工作流
 
 - 任务状态严格限定：`pending | in_progress | passed | failed | completed`
-- 状态流转由 `update-progress.ps1` 强制执行，非法流转 `exit 1`
+- 状态流转由 `animus-engine.py transition` 强制执行，非法流转 `exit 1`
 - `depends_on` 构建 DAG，只能依赖直接前置任务
 - 并行组 (`parallel_group`) 支持不同组并发执行
 

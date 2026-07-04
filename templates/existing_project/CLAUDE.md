@@ -26,12 +26,12 @@ python "${CLAUDE_PLUGIN_ROOT}/scripts/format-log.py" --project-dir . --recent 20
 
 - 优先继续 `in_progress` 任务。
 - 若无 `in_progress`，选择依赖已满足且优先级最高的 `pending` 任务。
-- 开始任务：`& "${CLAUDE_PLUGIN_ROOT}\templates\animus\update-progress.ps1" <TaskId> in_progress "说明"`
-- 完成任务：`& "${CLAUDE_PLUGIN_ROOT}\templates\animus\update-progress.ps1" <TaskId> passed "完成说明"`
-- 任务受阻：`& "${CLAUDE_PLUGIN_ROOT}\templates\animus\update-progress.ps1" <TaskId> failed "失败原因与下一步"`
+- 开始任务：`& "${CLAUDE_PLUGIN_ROOT}\templates\animus\animus-engine.py transition" <TaskId> in_progress "说明"`
+- 完成任务：`& "${CLAUDE_PLUGIN_ROOT}\templates\animus\animus-engine.py transition" <TaskId> passed "完成说明"`
+- 任务受阻：`& "${CLAUDE_PLUGIN_ROOT}\templates\animus\animus-engine.py transition" <TaskId> failed "失败原因与下一步"`
 
 状态仅允许：`pending | in_progress | passed | failed`。
-- `.claude/animus/features.json` 任务字段需包含：`depends_on`、`priority`、`last_error`、`updated_at`（后两项由 `update-progress.ps1` 自动维护）。
+- `.claude/animus/features.json` 任务字段需包含：`depends_on`、`priority`、`last_error`、`updated_at`（后两项由 `animus-engine.py transition` 自动维护）。
 
 ## 开发与验收（MUST）
 

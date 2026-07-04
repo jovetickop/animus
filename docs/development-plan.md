@@ -75,7 +75,7 @@
 | G0.2.5 | ◎ | `python animus-engine.py validate` | 检查 features.json 结构 + 循环依赖 |
 | G0.2.6 | ◎ | `python animus-engine.py archive --name "测试迭代"` | 归档目录创建，features.json 已清空 |
 | G0.2.7 | ○ | 对所有合法和非法流转组合执行 | 合法通过、非法拒绝 |
-| G0.2.8 | ○ | PS 版 `update-progress.ps1` 与 Python 版输出对比 | 100% 一致 |
+| G0.2.8 | ○ | PS 版 `animus-engine.py transition` 与 Python 版输出对比 | 100% 一致 |
 
 ### Phase 0 通过门控（整体）
 

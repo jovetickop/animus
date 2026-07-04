@@ -148,12 +148,12 @@ python "$SkillRoot/scripts/show-status.py"
 
 ### 更新任务状态
 ```
-powershell -File "$SkillRoot/templates/animus/update-progress.ps1" <TaskId> <status> "描述"
+powershell -File "$SkillRoot/scripts/animus-engine.py transition" <TaskId> <status> "描述"
 ```
 
 ### 运行回归测试
 ```
-powershell -File "$SkillRoot/templates/animus/run-regression.ps1"
+powershell -File "$SkillRoot/scripts/run-regression.py"
 ```
 
 ### 状态说明

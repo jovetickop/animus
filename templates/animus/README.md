@@ -21,7 +21,7 @@
 - 每次任务状态流转后，必须自动更新 `.claude/animus/docs/<任务编号>-任务描述.md`，沉淀“功能描述 + 最新验证结果”。
 - 失败任务默认保持 `failed`，不要自动回退到 `pending`。
 - `depends_on` 只写直接依赖；依赖任务必须先 `passed`，当前任务才能进入 `in_progress`。
-- `updated_at` 与 `last_error` 由 `update-progress.ps1` 自动维护，不要手工批量改写。
+- `updated_at` 与 `last_error` 由 `animus-engine.py transition` 自动维护，不要手工批量改写。
 
 ---
 
@@ -63,7 +63,7 @@
 
 | 脚本 | 用途 |
 |------|------|
-| `update-progress.ps1` | 状态机引擎 |
+| `animus-engine.py transition` | 状态机引擎 |
 | `show-status.py` | 状态概览显示 |
 | `init.ps1` | 首次初始化引导 |
 | `coding-session.ps1` | 会话入口 |
