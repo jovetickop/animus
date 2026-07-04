@@ -9,9 +9,9 @@
 
 ```
 Phase 0 (基础设施)       Phase 1 (核心体验)       Phase 2 (能力增强)       Phase 3 (深度建设)
-├── ⑨ 三层定制与配置     ├── ① 命名 Agent        ├── ④ 工作流地图        ├── ⑩ SPEC 内核
+├── ⑨ 配置系统（两层）     ├── ① 命名 Agent        ├── ④ 工作流地图        ├── ⑩ SPEC 内核
 ├── ⑥ 引擎脚本化         ├── ② Memlog 持久化     ├── ⑦ 对抗性审查
-                        ├── ③ 命令别名          ├── Party Mode
+                        ├── Party Mode
                         └── ⑤ Quick Dev        └── ⑧ 头脑风暴
 ```
 
@@ -21,32 +21,32 @@ Phase 0 (基础设施)       Phase 1 (核心体验)       Phase 2 (能力增强)
 
 > **依赖关系：** Phase 0 是 Phase 1-3 的基础依赖。配置体系和 engine CLI 不完成，后续所有模块无法正常工作。
 
-### 0.1 三层定制与团队配置
+### 0.1 配置系统（两层） [✅ 已完成 2026-07-04]
 
 **现状：** 所有行为硬编码。用户想改审查严格度或添加自定义规则要 fork 插件。
 
-**目标：** `.claude/animus/config.toml` 三层配置（defaults → team → user），控制全部行为。
+**目标：** `.claude/animus/config.toml` 两层配置（defaults[硬编码] ← config.toml），控制全部行为。
 
 **实施步骤：**
 
 | 步骤 | 内容 | 涉及文件 |
 |------|------|---------|
 | 0.1.1 | 创建 `.claude/animus/config.toml` 默认配置（全配置段） | 新建 `.claude/animus/config.toml` |
-| 0.1.2 | 创建 `.claude/animus/config.user.toml`（gitignored） | 新建 `.claude/animus/config.user.toml` |
-| 0.1.3 | 实现 Python `load_config()` 三层覆盖合并 | `scripts/config_loader.py` |
-| 0.1.4 | 新增 `/animus-config` 命令管理配置 | 新建 `commands/animus-config.md` |
+| 0.1.2 | 实现 Python `load_config()` 两层覆盖合并 | `scripts/config_loader.py` |
+| 0.1.3 | 实现 Python `load_config()` 两层覆盖合并 | `scripts/config_loader.py` |
+| 0.1.4 | 合并 `project-config.json` 进 config.toml | `.claude/animus/config.toml` |
 
 **配置段：** `[dev]` `[review]` `[gates]` `[ponytail]` `[party_mode]`
 
 **工作量估算：** 中
 **预期效果：** 所有后续模块的配置统一入口，无需 fork 插件
-**详见：** `task-09-三层定制与团队配置.md`
+**详见：** `task-09-配置系统（两层）.md`
 
 ---
 
-### 0.2 引擎脚本化（animus-engine.py）
+### 0.2 引擎脚本化（animus-engine.py） [✅ 已完成 2026-07-04]
 
-**现状：** 核心逻辑分散在 .ps1 和 .py 脚本中。
+**现状：** 核心逻辑使用 Python 脚本。
 
 **目标：** `scripts/animus-engine.py` 统一 CLI + `scripts/engine/` 子命令模块。
 
@@ -68,7 +68,7 @@ Phase 0 (基础设施)       Phase 1 (核心体验)       Phase 2 (能力增强)
 
 ### Phase 1：核心体验（第 3-4 周）
 
-### 1.1 命名 Agent 角色系统
+### 1.1 命名 Agent 角色系统 [✅ 已完成 2026-07-04]
 
 **现状：** 22 个 agent 按功能路径命名，用户看到的是文件路径不是协作者。
 
@@ -90,7 +90,7 @@ Phase 0 (基础设施)       Phase 1 (核心体验)       Phase 2 (能力增强)
 
 ---
 
-### 1.2 Memlog 模式状态持久化
+### 1.2 Memlog 模式状态持久化 [✅ 已完成 2026-07-04]
 
 **现状：** 状态分散在 `features.json`、`animus-history.jsonl`、`task_plan.md`、`handoff.json`。互相同步靠 PreCompact hook，容易不一致。
 
@@ -103,7 +103,7 @@ Phase 0 (基础设施)       Phase 1 (核心体验)       Phase 2 (能力增强)
 | 1.2.1 | 定义 memlog 格式：`YYYY-MM-DD-HHmm-{event-type}.md`，append-only | 新建 `.claude/animus/memlog/` 目录 |
 | 1.2.2 | 事件类型定义：「创建任务」「状态变更」「决策」「交接」「归档」「辩论」 | `docs/architecture.md` 更新 |
 | 1.2.3 | 修改 `scripts/update-progress.py` 支持从 memlog 重建 features.json | `scripts/update-progress.py` |
-| 1.2.4 | 修改 PreCompact hook：新增 memlog 事件追加 | `hooks/scripts/pre-compact.ps1`、`.sh` |
+| 1.2.4 | 修改 PreCompact hook：新增 memlog 事件追加 | `hooks/scripts/pre-compact.py`、`.sh` |
 | 1.2.5 | 删除 `/animus-handoff` 和 `/animus-continue`（已移除，memlog 自动接管） | 删除 `commands/animus-handoff.md` `commands/animus-continue.md` |
 | 1.2.6 | 添加 `scripts/rebuild-from-memlog.py` 恢复脚本 | 新建 `scripts/rebuild-from-memlog.py` |
 
@@ -118,41 +118,12 @@ Phase 0 (基础设施)       Phase 1 (核心体验)       Phase 2 (能力增强)
 
 ---
 
-### 1.3 命令别名 / 认知入口优化
-
-**现状：** 所有命令以 `animus-` 为前缀，长且不够直观。新用户看到 8 个命令不知道该用哪个。
-
-**目标：** 给高频命令加简短别名，新增 `/help` 命令展示场景→命令映射。
-
-**实施步骤：**
-
-| 步骤 | 内容 | 涉及文件 |
-|------|------|---------|
-| 1.3.1 | 在 `plugin.json` 为高频命令加 `aliases` | `.claude-plugin/plugin.json` |
-| 1.3.2 | 新增 `/animus-help` 命令（场景→命令映射表） | 新建 `commands/animus-help.md` |
-| 1.3.3 | 在 `docs/README.md` 加"常见场景→使用哪个命令"快速指南 | `docs/README.md` |
-| 1.3.4 | 每个命令的 `SearchPhrases` 加 3-5 个自然语言触发词 | 所有 command 文件 |
-
-**别名建议：**
-
-| 当前命令 | 建议别名 | 触发场景 |
-|---------|---------|---------|
-| `/animus-dev` | `/dev` | "我要做这个功能"、修 bug |
-| `/animus-status` | `/status`、`/progress` | "现在到哪了" |
-| `/animus-review` | `/review` | "帮我检查" |
-
-`/animus-plan` 已直接删除，老用户改用 `/animus-dev --full`。
-`/animus-handoff` 和 `/animus-continue` 已移除，功能由 memlog + `/animus-dev` 自动接管。
-`/animus-debug` 已移除，功能合并入 `/animus-dev` 的 debug-path（系统性修复流程）。
-
-**工作量估算：** 小（2 个文件新建 + 8 个文件修改）
-**预期效果：** 新手首次使用成功率提升，命令记忆成本降低
 
 ---
 
 ## Phase 2：能力增强（第 5-8 周）
 
-### 2.1 工作流地图 / 智能导航
+### 2.1 工作流地图 / 智能导航 [✅ 已完成 2026-07-04]
 
 **现状：** 用户只能自己判断"下一步做什么"。缺乏类似 BMAD `bmad-help` 的上下文感知推荐。
 
@@ -197,7 +168,7 @@ commands:
 
 ---
 
-### 2.2 Quick Dev 快速通道
+### 2.2 Quick Dev 快速通道 [✅ 已完成 2026-07-04]
 
 **现状：** 即使 5 行代码的 bug fix，也要走完 Grilling 7 问 + feature-planner，太重。
 
@@ -210,7 +181,7 @@ commands:
 | 2.2.1 | 新建 `/animus-dev` 命令，五路路由（含 debug-path）| 新建 `commands/animus-dev.md` |
 | 2.2.2 | 智能路由逻辑 + 路径确认机制 | 同上 |
 | 2.2.3 | 删除 `/animus-plan`（不留 deprecated） | 删除 `commands/animus-plan.md` |
-| 2.2.4 | 配合 write-gate hook 硬拦截 | `hooks/scripts/write-gate.ps1`、`.sh` |
+| 2.2.4 | 配合 write-gate hook 硬拦截 | `hooks/scripts/write-gate.py`、`.sh` |
 
 **路由决策树：**
 
@@ -227,7 +198,7 @@ commands:
 
 ---
 
-### 2.3 对抗性审查系统
+### 2.3 对抗性审查系统 [✅ 已完成 2026-07-04]
 
 **现状：** `/animus-review` 单 agent 审查，缺少盲点覆盖。
 
@@ -278,7 +249,7 @@ commands:
 
 ## Phase 3：深度建设（第 9-10 周）
 
-### 3.1 头脑风暴与产品发现
+### 3.1 头脑风暴与产品发现 [⏳ 待实现]
 
 **现状：** 零 ideation 能力。用户要么已经想清楚，要么没法帮用户想清楚。
 
@@ -297,14 +268,14 @@ commands:
 
 ---
 
-### 3.2 三层定制模型 — 已提前至 Phase 0
+### 3.2 配置系统 — 已提前至 Phase 0
 
-> **已迁移：** 三层定制与团队配置已作为基础设施，提前至 Phase 0 完成。
-> 详见 `task-09-三层定制与团队配置.md`
+> **已迁移：** 配置系统（两层）已作为基础设施，提前至 Phase 0 完成。
+> 详见 `task-09-配置系统（两层）.md`
 
 ---
 
-### 3.3 SPEC 内核 / 任务质量契约
+### 3.3 SPEC 内核 / 任务质量契约 [⏳ 待实现]
 
 **现状：** `features.json` 任务描述格式自由，缺少结构化的 Why / Success Signal。
 
@@ -333,7 +304,7 @@ commands:
 **触发条件：** Phase 1-2 全部上线，用户群足够
 **估算效益：** LLM 成本降低 90%（从按量到包月）
 
-### F.2 自举（Animus 开发 Animus）
+### F.2 自举（Animus 开发 Animus） [◐ 部分完成]
 
 用 animus 自身的状态机来管理 animus 插件的开发迭代。目前 `.claude/animus/` 已有目录但未实际用于开发。
 
@@ -347,9 +318,9 @@ commands:
 ```
 Phase 0（第 1-2 周）      Phase 1（第 3-4 周）      Phase 2（第 5-8 周）      Phase 3（第 9-10 周）
 ┌─────────────────────┐   ┌─────────────────────┐   ┌─────────────────────┐   ┌─────────────────────┐
-│ ⑨ 三层定制与配置    │   │ ① 命名 Agent        │   │ ④ 工作流地图        │   │ ⑩ SPEC 内核         │
+│ ⑨ 配置系统（两层）    │   │ ① 命名 Agent        │   │ ④ 工作流地图        │   │ ⑩ SPEC 内核         │
 │ ⑥ 引擎脚本化         │   │ ② Memlog 持久化     │   │ ⑦ 对抗性审查        │   │                     │
-│                    │   │ ③ 命令别名          │   │ Party Mode          │   │                     │
+│                    │   │ Party Mode [⏳]          │   │                     │
 │                    │   │ ⑤ Quick Dev        │   │ ⑧ 头脑风暴          │   │                     │
 └─────────────────────┘   └─────────────────────┘   └─────────────────────┘   └─────────────────────┘
 注：⑥ 多 IDE 引擎已在 Phase 0 完成（引擎脚本化），Phase 2 的多 IDE 适配仅为文档和验证
