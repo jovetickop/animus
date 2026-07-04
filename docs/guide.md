@@ -6,21 +6,21 @@
 
 ## 目录
 
-1. [架构总览](#架构总览)
-2. [命令详解](#命令详解)
-3. [配置系统](#配置系统)
-4. [状态机](#状态机)
-5. [Memlog 事件源](#memlog-事件源)
-6. [引擎 CLI](#引擎-cli)
-7. [测试](#测试)
-8. [审查门控](#审查门控)
-9. [Agent 体系](#agent-体系)
-10. [钩子系统](#钩子系统)
-11. [安装目录结构](#安装目录结构)
+1. [架构总览](#1-架构总览)
+2. [命令详解](#2-命令详解)
+3. [配置系统](#3-配置系统)
+4. [状态机](#4-状态机)
+5. [Memlog 事件源](#5-memlog-事件源)
+6. [引擎 CLI](#6-引擎-cli)
+7. [测试](#7-测试)
+8. [审查门控](#8-审查门控)
+9. [Agent 体系](#9-agent-体系)
+10. [钩子系统](#10-钩子系统)
+11. [安装目录结构](#11-安装目录结构)
 
 ---
 
-## 架构总览
+## 1. 架构总览
 
 ```
 插件入口 (.claude-plugin/plugin.json)
@@ -31,7 +31,7 @@
         → 配置层 (config.toml 两层覆盖)
 ```
 
-### 核心设计
+### 1.1 核心设计
 
 - **状态机驱动**：任务状态流转严格校验，非法流转 exit 1
 - **单一事件源**：memlog 记录所有事件，features.json 由 memlog 派生重建
@@ -40,9 +40,9 @@
 
 ---
 
-## 命令详解
+## 2. 命令详解
 
-### `/animus-dev` — 统一开发入口
+### 2.1 `/animus-dev` — 统一开发入口
 
 **原理：** 根据用户输入的意图描述，AI 自动判断改动范围和类型，选择最合适的开发路径。所有路径都会写入 memlog 和 features.json，确保任务全程可追溯。
 
@@ -95,7 +95,7 @@ autonomous = false       # true=AI全权决策，不询问
 
 ---
 
-### `/animus-review` — 代码审查
+### 2.2 `/animus-review` — 代码审查
 
 **原理：** 并行启动 4 个审查 agent，分别从正确性、边界条件、验收标准、精简度四个维度审查代码。审查结果汇总后按严重度分级裁决。
 
@@ -142,7 +142,7 @@ max_findings = 20
 
 ---
 
-### `/animus-status` — 状态看板
+### 2.3 `/animus-status` — 状态看板
 
 **原理：** 读取 features.json，统计任务状态分布，按优先级排序输出每个任务明细，底部推荐下一步命令。
 
@@ -177,7 +177,7 @@ max_findings = 20
 
 ---
 
-### `/animus-help` — 帮助与导航
+### 2.4 `/animus-help` — 帮助与导航
 
 **原理：** 读取 `.claude/animus/` 目录状态，根据当前进度推荐最合适的命令。不需要记忆命令顺序，跟着推荐走即可。
 
@@ -193,7 +193,7 @@ max_findings = 20
 
 ---
 
-### `/animus-init` — 项目初始化
+### 2.5 `/animus-init` — 项目初始化
 
 **原理：** 检测目标项目的技术栈类型（CMakeList.txt → cpp-qt/cpp-cmake、Cargo.toml → rust、go.mod → go、package.json → node、pyproject.toml → python），创建 `.claude/animus/` 运行时目录，写入默认配置。
 
@@ -206,7 +206,7 @@ max_findings = 20
 
 ---
 
-### `/animus-archive` — 迭代归档
+### 2.6 `/animus-archive` — 迭代归档
 
 **原理：** 将当前迭代的完整状态打包到 `archive/iter-xxx-名称/` 目录下，清空 features.json 开始新的迭代。归档目录保留完整的任务历史、memlog 事件和迭代总结，可随时回溯。
 
@@ -234,17 +234,57 @@ max_findings = 20
 /animus-archive --name "迭代 3-UI重构"     # 直接归档
 ```
 
+### 2.7 `/animus-party` — 辩论模式
+
+**原理：** 多 agent 并行辩论，从不同角度碰撞观点，暴露设计盲点。
+
+**模板：**
+
+| 模板 | 角色 | 人数 |
+|------|------|------|
+| `arch-review` | 架构师+审查官+测试官+构建师+规划师 | 5 |
+| `code-review` | 审查官+边界猎手+验收审计官+精简审查官 | 4 |
+
+**运行模式：** session / subagent（推荐）/ auto / agent-team
+
+**触发方式：**
+- 自动：`config.toml` 中 `[party_mode].auto_trigger` 配置
+- 手动：`/animus-party [--template arch-review] [--mode subagent]`
+
 ---
 
-## 配置系统
+## 3. 配置系统
 
 两层覆盖：`defaults（硬编码） ← config.toml`
 
 文件位置：`.claude/animus/config.toml`
 
-### 完整配置项
+### 3.1 完整配置项
 
 ```toml
+# animus 配置文件
+# 项目根目录 .claude/animus/config.toml
+# git 跟踪，团队共享
+# 文件不存在时回退到硬编码默认值
+
+[project]
+# 项目类型（由 /animus-init 自动检测填入）
+type = "generic"
+# 构建命令
+build_command = ""
+# 测试命令
+test_command = ""
+# 运行命令
+run_command = ""
+# 启动时自动检查插件更新
+auto_update_plugin = true
+
+[project.verify]
+# Oracle 验证门控配置
+command = ""
+enabled = false
+timeout_seconds = 120
+
 [dev]
 # 默认行为路径：AI 自动检测时的倾向
 #   auto  - AI 根据意图描述自动判断（推荐）
@@ -253,7 +293,7 @@ max_findings = 20
 #   full  - 强制 full-path，走完整 7 问，适用于跨模块/架构级改动
 default_path = "auto"
 # 自主模式：是否跳过用户确认环节
-#   false - AI 选路后先输出「将使用 XX 路径」，等待用户确认（推荐）
+#   false - AI 选路后先输出「将使用 XX 路径」，等待用户确认（推荐，适合有人值守）
 #   true  - AI 全权决策，直接执行，不再询问用户（适合无人值守/批量任务）
 autonomous = false
 
@@ -267,11 +307,17 @@ strictness = "normal"
 #   []               - 全部检查（推荐）
 #   ["naming"]       - 跳过命名规范检查
 #   ["formatting"]   - 跳过代码格式检查
+#   ["performance"]  - 跳过性能检查
+#   ["security"]     - 跳过安全检查
+#   例: ["naming", "formatting"] — 仅检查性能和安全性
+skip_categories = []
+# 每次审查最多输出多少条问题
+#   值越小审查越精简，但可能漏掉问题；推荐 15-30
 max_findings = 20
 
 [gates]
 # 写代码前必须要有 in_progress 任务
-#   true  - PreToolUse hook 拦截无任务写操作（推荐）
+#   true  - PreToolUse hook 拦截无任务写操作，返回提示信息（推荐）
 #   false - 允许直接写代码，不做拦截
 require_task_before_write = true
 
@@ -280,7 +326,8 @@ require_task_before_write = true
 #   true  - 审查 agent 会检查过度工程、冗余抽象、死代码（推荐）
 #   false - 只做功能审查，不检查精简度
 enabled = true
-# 文件超过此行数建议拆分；设为 0 表示不限制
+# 文件超过此行数建议拆分
+#   设为 0 表示不限制；推荐 300-800
 max_lines_per_file = 500
 
 [party_mode]
@@ -297,25 +344,27 @@ default_party = "arch-review"
 # 自动触发场景
 #   ["dev-full"]            - 执行 full-path 开发时自动触发
 #   ["review-controversial"] - 审查中发现争议时自动触发
+#   ["dev-full", "review-controversial"] - 两者都触发（推荐）
 #   []                      - 不自动触发，仅手动调用
 auto_trigger = ["dev-full", "review-controversial"]
 # 触发前是否询问用户
-#   true  - 触发前询问用户是否启动辩论（推荐）
+#   true  - 触发前输出「检测到 XX，是否启动辩论？」让用户选择（推荐）
 #   false - 自动开始辩论
 ask_before_start = true
-# 最大辩论轮数，超过此轮数自动终止输出结论
+# 最大辩论轮数
+#   设 1-3 轮快速收敛，5+ 适合深度讨论。超过此轮数自动终止输出结论
 max_rounds = 3
 ```
 
-### 覆盖规则
+### 3.2 覆盖规则
 
 文件不存在时回退硬编码默认值。配置中只写需要覆盖的段和字段，其余自动回退默认值。
 
 ---
 
-## 状态机
+## 4. 状态机
 
-### 状态流转
+### 4.1 状态流转
 
 ```
 pending → in_progress → passed → completed
@@ -328,13 +377,13 @@ pending → in_progress → passed → completed
 - `failed → in_progress`：重试
 - `completed`：终态（可重入 in_progress）
 
-### 限制
+### 4.2 限制
 
 - 同时只能有一个 `in_progress` 任务
 - `depends_on` 构建 DAG，只能依赖直接前置任务
 - 非法流转 `exit 1`
 
-### CLI 使用
+### 4.3 CLI 使用
 
 ```bash
 python animus-engine.py transition T001 in_progress
@@ -343,9 +392,9 @@ python animus-engine.py transition T001 passed --evidence "test all pass"
 
 ---
 
-## Memlog 事件源
+## 5. Memlog 事件源
 
-### 目录结构
+### 5.1 目录结构
 
 ```
 .claude/animus/memlog/
@@ -357,7 +406,7 @@ python animus-engine.py transition T001 passed --evidence "test all pass"
 └── ...
 ```
 
-### 事件类型
+### 5.2 事件类型
 
 | 类型 | 说明 |
 |------|------|
@@ -368,7 +417,7 @@ python animus-engine.py transition T001 passed --evidence "test all pass"
 | 归档 | 归档迭代时写入 |
 | 辩论 | Party Mode 辩论全量日志 |
 
-### 核心原则
+### 5.3 核心原则
 
 - **append-only**：memlog 永不删除、永不归档
 - **单一事件源**：features.json 由 memlog 派生，可删除重建
@@ -376,7 +425,7 @@ python animus-engine.py transition T001 passed --evidence "test all pass"
 
 ---
 
-## 引擎 CLI
+## 6. 引擎 CLI
 
 统一入口 `scripts/animus-engine.py`，子命令：
 
@@ -396,7 +445,7 @@ python animus-engine.py archive --name "迭代名称"
 python animus-engine.py rebuild
 ```
 
-### 其他脚本
+### 6.1 其他脚本
 
 | 脚本 | 功能 |
 |------|------|
@@ -406,7 +455,7 @@ python animus-engine.py rebuild
 
 ---
 
-## 测试
+## 7. 测试
 
 192 个单元测试，全部 Python 2/3 兼容，使用 tempfile 隔离文件系统。
 
@@ -424,7 +473,7 @@ python animus-engine.py rebuild
 
 ---
 
-## 审查门控
+## 8. 审查门控
 
 | 门控 | 级别 | 说明 |
 |------|------|------|
@@ -437,9 +486,9 @@ python animus-engine.py rebuild
 
 ---
 
-## Agent 体系
+## 9. Agent 体系
 
-### 分组
+### 9.1 分组
 
 | 组 | 数量 | Agent |
 |----|------|-------|
@@ -453,7 +502,7 @@ python animus-engine.py rebuild
 | frontend | 1 | 规划师 |
 | base | 2 | 核心模板（实现者/测试官）|
 
-### 命名规则
+### 9.2 命名规则
 
 每个 agent frontmatter 包含：
 ```yaml
@@ -467,7 +516,7 @@ persona: 你叫审查官 (Review)。一行不放过...
 
 ---
 
-## 钩子系统
+## 10. 钩子系统
 
 | 钩子 | 触发时机 | 作用 | 超时 |
 |------|---------|------|------|
@@ -480,7 +529,7 @@ persona: 你叫审查官 (Review)。一行不放过...
 
 ---
 
-## 安装目录结构
+## 11. 安装目录结构
 
 ```
 项目根目录/

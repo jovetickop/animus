@@ -56,6 +56,11 @@ WORKFLOW_GRAPH = {
         "post": [],
         "next": [],
     },
+    "animus-party": {
+        "pre": [],
+        "post": [],
+        "next": [],
+    },
 }
 
 
