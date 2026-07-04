@@ -24,7 +24,6 @@ import re
 import subprocess
 import sys
 from datetime import datetime
-import importlib.util
 
 # 导入 memlog 模块
 _script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -32,7 +31,8 @@ _plugin_root = os.path.abspath(os.path.join(_script_dir, "..", ".."))
 _memlog_path = os.path.join(_plugin_root, "scripts", "memlog.py")
 if os.path.isfile(_memlog_path):
     try:
-        spec = importlib.util.spec_from_file_location("memlog_mod", _memlog_path)
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("_precompact_memlog", _memlog_path)
         memlog_mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(memlog_mod)
     except Exception:
