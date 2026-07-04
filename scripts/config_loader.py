@@ -11,6 +11,18 @@ import copy
 # ---------- 默认值（硬编码底层） ----------
 
 DEFAULT_CONFIG = {
+    "project": {
+        "type": "generic",
+        "build_command": "",
+        "test_command": "",
+        "run_command": "",
+        "auto_update_plugin": True,
+        "verify": {
+            "command": "",
+            "enabled": False,
+            "timeout_seconds": 120,
+        },
+    },
     "dev": {
         "default_path": "auto",
         "autonomous": False,

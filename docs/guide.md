@@ -509,7 +509,6 @@ persona: 你叫审查官 (Review)。一行不放过...
 │       ├── config.toml           # 配置（git 跟踪）
 │       ├── features.json         # 任务状态（由 memlog 派生）
 │       ├── memlog/               # 事件源目录
-│       ├── project-config.json   # 项目类型配置
 │       └── archive/              # 归档目录
 ├── .claude-plugin/
 │   └── plugin.json               # 插件清单

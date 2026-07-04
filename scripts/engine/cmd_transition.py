@@ -147,7 +147,17 @@ def _find_task_by_id(task_id, tasks):
 
 
 def _get_verify_config(data, features_dir):
-    """获取验证配置。优先从 project-config.json 读取，降级到 features.json。"""
+    """获取验证配置。优先从 config.toml 读取，降级到旧 project-config.json。"""
+    # 优先：从 config.toml 读取 project.verify
+    try:
+        from scripts.config_loader import load_config, get_config_value
+        cfg = load_config()
+        vc = get_config_value(cfg, "project.verify", {})
+        if vc and vc.get("command"):
+            return vc
+    except Exception:
+        pass
+    # 降级：从旧的 project-config.json 读取（迁移期兼容）
     config_path = os.path.join(features_dir, "project-config.json")
     if os.path.isfile(config_path):
         try:
@@ -159,7 +169,7 @@ def _get_verify_config(data, features_dir):
                     return vc
         except Exception:
             pass
-    # 降级：从 features.json 读取（向后兼容）
+    # 二次降级：从 features.json 读取（向后兼容）
     if isinstance(data, dict):
         vc = data.get("verify_config")
         if vc:

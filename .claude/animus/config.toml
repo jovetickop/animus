@@ -1,7 +1,25 @@
-# animus 团队配置文件
-# 在项目根目录 .claude/animus/config.toml
+# animus 配置文件
+# 项目根目录 .claude/animus/config.toml
 # git 跟踪，团队共享
 # 文件不存在时回退到硬编码默认值
+
+[project]
+# 项目类型（由 /animus-init 自动检测填入）
+type = "generic"
+# 构建命令
+build_command = ""
+# 测试命令
+test_command = ""
+# 运行命令
+run_command = ""
+# 启动时自动检查插件更新
+auto_update_plugin = true
+
+[project.verify]
+# Oracle 验证门控配置
+command = ""
+enabled = false
+timeout_seconds = 120
 
 [dev]
 # 默认行为路径：AI 自动检测时的倾向

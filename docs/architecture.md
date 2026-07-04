@@ -37,7 +37,7 @@
 | PowerShell | ~45% | 核心状态机引擎、项目初始化编排、会话管理、回归测试运行器、hook 脚本 |
 | Python | ~30% | 状态显示、状态机替代实现、编码桥接（GBK/UTF-8）、多语言格式化分发、会话恢复、验证脚本 |
 | Markdown | ~20% | Agent 定义（22 个）、插件清单（plugin.json）、编码规范规则、命令文档 |
-| JSON | ~5% | 配置（hooks.json、settings.local.json、project-config.json、features.json） |
+| JSON | ~5% | 配置（hooks.json、settings.local.json、features.json） |
 | Shell (Bash) | ~3% | 跨平台 hook 降级脚本（clang-format、pre-tool-use、pre-compact、stop-check） |
 | YAML / TOML | 无 | 不在本仓库中使用 |
 
@@ -74,14 +74,12 @@
 |------|------|
 | `.claude/settings.local.json` | Claude Code 本地权限白名单（此仓库也保留在 `.claude/` 下）（Bash/Read/MCP/skill 调用） |
 | `hooks/hooks.json` | 注册 PostToolUse/PreToolUse/PreCompact/Stop 四个钩子 |
-| `templates/animus/project-config.json` | 目标项目类型配置（frontend/backend/verify 字段） |
-| `templates/.clang-format` | C++ 格式化规则模板 |
 | `.claude-plugin/plugin.json` | 插件清单，声明元信息、斜杠命令和自动发现组件 |
-| `.claude/animus/config.toml` | 三层团队配置（defaults → team → user 层覆盖），控制 dev/review/party_mode 等行为 |
-| `.claude/animus/config.user.toml` | 用户个人配置（gitignored），覆盖 team 层 |
-| `scripts/config_loader.py` | 三层配置加载合并工具，支持 `load_config()`、`get_config_value()`、`validate_config()` |
-| `.claude/animus/memlog/` | 单一事件源目录，每事件一个中文 Markdown 文件（append-only，永不删除） |
-| `.gitignore` | 排除 CLAUDE.md、settings.local.json、worktrees、.codegraph/ |
+| `templates/.clang-format` | C++ 格式化规则模板 |
+| `.claude/animus/config.toml` | 统一配置文件，含项目元信息和行为配置 |
+| `scripts/config_loader.py` | 配置加载合并工具 |
+| `.claude/animus/memlog/` | 单一事件源目录 |
+| `.gitignore` | 排除 CLAUDE.md、settings.local.json、worktrees |
 
 ## 构建系统
 
@@ -152,7 +150,7 @@
 - `run-regression.ps1` — 一键构建+测试
 - `init.ps1` — 首次初始化引导
 - `coding-session.ps1` — 会话入口
-- `project-config.json` — 项目类型与构建命令配置
+- `config.toml` 中 `[project]` 段 — 项目类型与构建命令配置（由 `/animus-init` 自动填入）
 - `validate-features.ps1` — 结构校验 + 循环依赖检测 (Kahn 算法)
 
 ### 7. 持久化层 (State)
@@ -217,7 +215,7 @@
 | 状态分片 (active/archive) | 缩减 Token 消耗约 78%，长项目更友好 | `.claude/animus/` 目录 |
 | 双平台钩子脚本 | Windows/Linux 开发环境都需支持 | `hooks/scripts/*.ps1 + *.sh` |
 | 项目类型自动检测 | 零配置上手，按项目文件判定语言栈 | `init-project.ps1` 步骤 5 |
-| 空命令值保持空 | 不硬编码默认值，由用户首次运行时填写 | `project-config.json` |
+| 空命令值保持空 | 不硬编码默认值，由用户首次运行时填写 | `config.toml [project]` 段 |
 
 ## 架构质量属性
 
