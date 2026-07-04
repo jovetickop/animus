@@ -249,9 +249,9 @@ commands:
 
 ## Phase 3：深度建设（第 9-10 周）
 
-### 3.1 头脑风暴与产品发现 [⏳ 待实现]
+### 3.1 头脑风暴与产品发现 [✅ 已完成]
 
-**现状：** 零 ideation 能力。用户要么已经想清楚，要么没法帮用户想清楚。
+**现状：** 6 个独立技法文件已从 BMAD 参考改编，集成到 `/animus-dev --full` 的 7 问之前。
 
 **目标：** 集成到 `/animus-dev --full` 的 7 问之前，6 个技法覆盖不同场景。
 
@@ -275,7 +275,7 @@ commands:
 
 ---
 
-### 3.3 SPEC 内核 / 任务质量契约 [⏳ 待实现]
+### 3.3 SPEC 内核 / 任务质量契约 [✅ 已完成]
 
 **现状：** `features.json` 任务描述格式自由，缺少结构化的 Why / Success Signal。
 
@@ -285,8 +285,8 @@ commands:
 
 | 步骤 | 内容 | 涉及文件 |
 |------|------|---------|
-| 3.3.1 | 扩展 `features.json` schema 加 spec 字段 | `.claude/animus/features.json` schema |
-| 3.3.2 | 修改 `/animus-dev` 的 Grilling 输出包含 SPEC 5 字段 | `commands/animus-dev.md` |
+| 3.3.1 | 已完成—— spec 5 字段（why/capabilities/constraints/non_goals/success） | `templates/animus/features.json` |
+| 3.3.2 | 已完成—— 实现 4 法则校验（why/capabilities/constraints/success） | `scripts/engine/cmd_validate.py` |
 | 3.3.3 | 修改 accept-auditor 验证 Spec.Success 是否满足 | `agents/universal/acceptance-auditor.md` |
 | 3.3.4 | 在 `domain-lexicon.md` 中维护 Spec 中出现的术语 | `.claude/animus/domain-lexicon.md` |
 
@@ -318,9 +318,9 @@ commands:
 ```
 Phase 0（第 1-2 周）      Phase 1（第 3-4 周）      Phase 2（第 5-8 周）      Phase 3（第 9-10 周）
 ┌─────────────────────┐   ┌─────────────────────┐   ┌─────────────────────┐   ┌─────────────────────┐
-│ ⑨ 配置系统（两层）    │   │ ① 命名 Agent        │   │ ④ 工作流地图        │   │ ⑩ SPEC 内核         │
+│ ⑨ 配置系统（两层）    │   │ ① 命名 Agent        │   │ ④ 工作流地图        │   │ ⑩ SPEC 内核 [✅]  │
 │ ⑥ 引擎脚本化         │   │ ② Memlog 持久化     │   │ ⑦ 对抗性审查        │   │                     │
-│                    │   │ Party Mode [⏳]          │   │                     │
+│                    │   │ Party Mode [✅]          │   │                     │
 │                    │   │ ⑤ Quick Dev        │   │ ⑧ 头脑风暴          │   │                     │
 └─────────────────────┘   └─────────────────────┘   └─────────────────────┘   └─────────────────────┘
 注：⑥ 多 IDE 引擎已在 Phase 0 完成（引擎脚本化），Phase 2 的多 IDE 适配仅为文档和验证

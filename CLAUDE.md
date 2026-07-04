@@ -47,7 +47,7 @@ animus/
 ├── hooks/                          运行时钩子
 ├── rules/                          13 个编码规范文件
 ├── scripts/                        Python 工具脚本
-├── skills/                          子技能（brainstorming/party-mode/systematic-debugging/tdd-workflow）
+├── skills/                          子技能（辩论模式/头脑风暴/系统性调试/TDD工作流）
 └── templates/                      安装模板
     ├── animus/                     状态机脚本 + 状态文件（10+ 文件）
     ├── existing_project/           已有工程模板
@@ -131,7 +131,7 @@ python -m json.tool templates/animus/features.json > /dev/null
 | Git 工作流 | `rules/universal/git-workflow.md` |
 | 代码审查标准 | `commands/animus-review.md` |
 | 状态机验收硬规则 | `commands/animus-review.md` |
-| Project Skills | `skills/`（brainstorming/party-mode/systematic-debugging/tdd-workflow） |
+| Project Skills | `skills/`（辩论模式/头脑风暴/系统性调试/TDD） |
 
 
 
