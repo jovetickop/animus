@@ -303,22 +303,76 @@ animus 配置（两层覆盖结果）
 
 两层覆盖：`defaults（硬编码） ← config.toml`
 
-文件位置：`.claude/animus/`
+文件位置：`.claude/animus/config.toml`
 
-| 段 | 字段 | 说明 |
-|----|------|------|
-| `[dev]` | `default_path` | 默认路径（auto/fast/light/full） |
-| | `autonomous` | 自主模式（true 时 AI 全权决策） |
-| `[review]` | `strictness` | 严格度（low/normal/high） |
-| | `max_findings` | 最多输出问题数 |
-| `[gates]` | `require_task_before_write` | 写代码门控 |
-| `[ponytail]` | `enabled` / `max_lines_per_file` | 精简审查 |
-| `[party_mode]` | `default_mode` / `default_party` / `auto_trigger` / `ask_before_start` / `max_rounds` | 辩论配置 |
+### 完整配置项
 
-文件不存在时回退硬编码默认值。配置读取路径：
-```python
-python animus-engine.py validate  # 也可以验证配置
+```toml
+[dev]
+# 默认行为路径：AI 自动检测时的倾向
+#   auto  - AI 根据意图描述自动判断（推荐）
+#   fast  - 强制 fast-path，1 句确认后直接做，适用于改动范围明确（1-2 文件）
+#   light - 强制 light-path，3 问后拆任务，适用于新增功能（3-10 文件）
+#   full  - 强制 full-path，走完整 7 问，适用于跨模块/架构级改动
+default_path = "auto"
+# 自主模式：是否跳过用户确认环节
+#   false - AI 选路后先输出「将使用 XX 路径」，等待用户确认（推荐）
+#   true  - AI 全权决策，直接执行，不再询问用户（适合无人值守/批量任务）
+autonomous = false
+
+[review]
+# 审查严格度
+#   low    - 仅检查 HIGH 级问题，MEDIUM/LOW 全部通过
+#   normal - 检查 HIGH + MEDIUM 级问题，LOW 自动通过（推荐）
+#   high   - 所有级别问题都要求修复才能通过
+strictness = "normal"
+# 跳过的审查类别（数组，可多个）
+#   []               - 全部检查（推荐）
+#   ["naming"]       - 跳过命名规范检查
+#   ["formatting"]   - 跳过代码格式检查
+max_findings = 20
+
+[gates]
+# 写代码前必须要有 in_progress 任务
+#   true  - PreToolUse hook 拦截无任务写操作（推荐）
+#   false - 允许直接写代码，不做拦截
+require_task_before_write = true
+
+[ponytail]
+# 启用精简审查（Ponytail 原则：能删则删）
+#   true  - 审查 agent 会检查过度工程、冗余抽象、死代码（推荐）
+#   false - 只做功能审查，不检查精简度
+enabled = true
+# 文件超过此行数建议拆分；设为 0 表示不限制
+max_lines_per_file = 500
+
+[party_mode]
+# 默认运行模式
+#   session    - 同 session 内多 agent 轮流发言（适合快速辩论）
+#   subagent   - 每个 agent 在独立 subagent 中运行（推荐，适合深度辩论）
+#   auto       - 根据复杂度自动选择 session 或 subagent
+#   agent-team - 多 agent 并行输出后汇总（适合快速达成共识）
+default_mode = "subagent"
+# 默认模板 ID
+#   arch-review - 架构评审模板（检查模块边界、依赖方向、长期可维护性）
+#   code-review - 代码审查模板（检查正确性、边界条件、验收标准、精简度）
+default_party = "arch-review"
+# 自动触发场景
+#   ["dev-full"]            - 执行 full-path 开发时自动触发
+#   ["review-controversial"] - 审查中发现争议时自动触发
+#   []                      - 不自动触发，仅手动调用
+auto_trigger = ["dev-full", "review-controversial"]
+# 触发前是否询问用户
+#   true  - 触发前询问用户是否启动辩论（推荐）
+#   false - 自动开始辩论
+ask_before_start = true
+# 最大辩论轮数，超过此轮数自动终止输出结论
+max_rounds = 3
 ```
+
+### 覆盖规则
+
+文件不存在时回退硬编码默认值。配置中只写需要覆盖的段和字段，其余自动回退默认值。
 
 ---
 
