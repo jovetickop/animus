@@ -249,7 +249,7 @@ max_findings = 20
 
 **触发方式：**
 - 自动：`config.toml` 中 `[party_mode].auto_trigger` 配置
-- 手动：`/animus-party [--template arch-review] [--mode subagent]`
+- 手动：`/animus-party`（默认）/ `/animus-party 架构评审` / `/animus-party 代码审查 session`
 
 ---
 
