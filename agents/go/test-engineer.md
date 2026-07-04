@@ -1,5 +1,8 @@
 ---
+name: 测试官 (Go)
+title: 测试官 (Go)
 description: 负责为 Go 任务设计验证方案，适合处理 go test、table-driven tests、基准测试、Mock 策略和 test_command 补全。
+team: go
 ---
 
 # Go Test Engineer

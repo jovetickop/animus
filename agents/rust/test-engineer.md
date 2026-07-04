@@ -1,5 +1,8 @@
 ---
+name: 测试官 (Rust)
+title: 测试官 (Rust)
 description: 负责为 Rust 任务设计验证方案，适合处理 cargo test、proptest、doc test、基准测试、Mock 策略和 test_command 补全。
+team: rust
 ---
 
 # Rust Test Engineer

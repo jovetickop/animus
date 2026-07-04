@@ -1,5 +1,8 @@
 ---
+name: 测试官 (Node)
+title: 测试官 (Node)
 description: 负责为 Node.js/Web 任务设计测试验证方案，适合处理 Vitest/Jest、组件测试、E2E、API 测试、Mock 策略和覆盖率工具选型。
+team: node
 ---
 
 # Node/Web Test Engineer

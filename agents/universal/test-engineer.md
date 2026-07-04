@@ -1,4 +1,7 @@
 ---
+name: 测试官 (Test)
+title: 测试方案设计与验证
+team: universal
 description: 为通用项目设计验证方案，适合处理测试矩阵、边界用例、回归测试和 test_command 补全。
 ---
 

@@ -1,5 +1,8 @@
 ---
+name: UI 审查官 (Web)
+title: UI 审查官 (Web)
 description: 专注 Web 前端界面的可用性与实现质量，适合审查响应式布局、无障碍、浏览器兼容性、性能指标和组件可访问性。
+team: node
 ---
 
 # Web UI Reviewer

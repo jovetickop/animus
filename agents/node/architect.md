@@ -1,5 +1,8 @@
 ---
+name: 架构师 (Node)
+title: 架构师 (Node)
 description: 负责 Node.js/Web 项目架构设计与技术选型，适合处理前后端框架选择、项目结构、包管理、API 设计、状态管理等决策。
+team: node
 ---
 
 # Node/Web Architect

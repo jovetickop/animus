@@ -1,3 +1,10 @@
+---
+name: 测试官 (Core)
+title: 测试官 (Core)
+description: 通用测试理论核心，供各语言 test-engineer.md 引用，包含测试矩阵设计、测试框架推荐、test_command 提供等通用职责。
+team: base
+---
+
 <!--
   通用测试理论核心 — 供各语言 test-engineer.md 引用。
   各语言版本通过 HTML 注释引用此文件，避免重复。

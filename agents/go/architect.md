@@ -1,5 +1,8 @@
 ---
+name: 架构师 (Go)
+title: 架构师 (Go)
 description: 负责 Go 方案设计与风险拆解，适合处理模块划分、接口设计、并发模型、错误处理等问题。
+team: go
 ---
 
 # Go Architect

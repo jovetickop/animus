@@ -1,4 +1,7 @@
 ---
+name: 架构师 (Cpp)
+title: 架构师 (Cpp)
+team: cpp-cmake
 description: 负责 C++/CMake 方案设计与风险拆解，适合处理类职责、内存管理、CMake 构建、模块划分和 C++ 标准选型等问题。
 ---
 

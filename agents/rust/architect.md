@@ -1,5 +1,8 @@
 ---
+name: 架构师 (Rust)
+title: 架构师 (Rust)
 description: 负责 Rust 方案设计与风险拆解，适合处理所有权/借用、生命周期、crate 划分、错误处理、异步架构等问题。
+team: rust
 ---
 
 # Rust Architect
