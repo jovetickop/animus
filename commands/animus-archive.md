@@ -1,6 +1,6 @@
 ---
 command: /animus-archive
-description: 归档当前迭代，打包所有状态文件到 archive/iteration-N-<name>/，清空并开始新迭代
+description: 归档当前迭代状态，打包到 archive/，清空并开始新迭代
 ---
 
 # /animus-archive 归档迭代

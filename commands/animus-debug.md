@@ -1,6 +1,6 @@
 ---
 command: /animus-debug
-description: 系统化调试工作流——根因调查→模式分析→假设验证→实施修复，结合任务规划编排与自动审查
+description: 系统化调试：根因调查→模式分析→假设验证→实施修复，衔接任务编排与自动审查
 ---
 
 # /animus-debug

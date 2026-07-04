@@ -1,5 +1,5 @@
 ---
-description: 围绕当前 harness 任务实现最小闭环，适合处理单个 Txxx 任务的 C++/Qt 编码、文件修改、构建修复与状态同步。
+description: 围绕当前 animus 任务实现最小闭环，适合处理单个 Txxx 任务的 C++/Qt 编码、文件修改、构建修复与状态同步。
 ---
 
 # Qt Task Implementer

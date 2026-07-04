@@ -13,16 +13,6 @@ $projectRoot = if ($env:CLAUDE_PROJECT_ROOT) {
 # 统一路径查找：features.json 固定在 .claude/animus/
 $featuresPath = Join-Path $projectRoot ".claude" "animus" "features.json"
 
-# 旧路径 deprecated 警告（同时检查 .claude/state/ 和 .claude/harness/）
-$oldStatePath = Join-Path $projectRoot ".claude" "state" "features.json"
-$oldHarnessPath = Join-Path $projectRoot ".claude" "harness" "features.json"
-if (Test-Path -LiteralPath $oldStatePath) {
-    Write-Host "[animus] WARNING: features.json 在旧路径 .claude/state/ (deprecated). 请迁移到 .claude/animus/" -ForegroundColor Yellow
-}
-if (Test-Path -LiteralPath $oldHarnessPath) {
-    Write-Host "[animus] WARNING: features.json 在旧路径 .claude/harness/ (deprecated). 请迁移到 .claude/animus/" -ForegroundColor Yellow
-}
-
 $historyPath = Join-Path $projectRoot ".claude" "animus" "animus-history.jsonl"
 
 # 1) 如果 features.json 存在，统计任务完成情况并输出摘要

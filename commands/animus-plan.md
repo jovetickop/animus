@@ -1,5 +1,5 @@
 ---
-description: 将 PRD 或方案文档转为 harness 任务列表，并更新 .claude/animus/features.json
+description: 将 PRD 或方案文档转为 animus 任务列表，并更新 .claude/animus/features.json
 ---
 
 # /animus-plan

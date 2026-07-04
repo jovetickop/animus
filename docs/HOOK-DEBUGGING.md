@@ -32,12 +32,12 @@ echo '{"tool_name":"Write","tool_input":{"file_path":"test.cpp"}}' | hooks/scrip
 
 ## 调试模式
 
-设置环境变量 `HARNESS_DEBUG=true` 启用调试输出：
+设置环境变量 `ANIMUS_DEBUG=true` 启用调试输出：
 
 ```bash
-export HARNESS_DEBUG=true
+export ANIMUS_DEBUG=true
 # 或 PowerShell:
-$env:HARNESS_DEBUG = "true"
+$env:ANIMUS_DEBUG = "true"
 ```
 
 调试模式下会输出：

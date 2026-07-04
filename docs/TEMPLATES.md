@@ -10,9 +10,6 @@ templates/
 └── init-project.ps1     # 项目初始化脚本（入口）
 ```
 
-**说明：** 旧版 `state/` 目录已合并到 `animus/`，不再单独存放状态模板。
-安装目标路径统一为 `.claude/animus/`（不再使用 `.claude/harness/` 和 `.claude/state/`）。
-
 ## animus/ 脚本文件
 
 | 文件 | 用途 |

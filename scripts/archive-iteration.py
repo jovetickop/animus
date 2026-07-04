@@ -92,6 +92,14 @@ def main():
     if os.path.isdir(docs_src):
         shutil.copytree(docs_src, docs_dst, dirs_exist_ok=True)
         print(u"  归档: docs/")
+        # 清理 docs/（归档后副本只在 archive 中保留）
+        for fname in os.listdir(docs_src):
+            fpath = os.path.join(docs_src, fname)
+            if os.path.isfile(fpath):
+                os.remove(fpath)
+            elif os.path.isdir(fpath):
+                shutil.rmtree(fpath)
+        print(u"  清理: docs/")
 
     # 生成总结
     git_stats = get_git_stats(project_dir)
