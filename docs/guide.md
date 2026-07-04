@@ -13,9 +13,11 @@
 5. [状态机](#状态机)
 6. [Memlog 事件源](#memlog-事件源)
 7. [引擎 CLI](#引擎-cli)
-8. [审查门控](#审查门控)
-9. [Agent 体系](#agent-体系)
-10. [钩子系统](#钩子系统)
+8. [测试](#测试)
+9. [审查门控](#审查门控)
+10. [Agent 体系](#agent-体系)
+11. [钩子系统](#钩子系统)
+12. [安装目录结构](#安装目录结构)
 
 ---
 
@@ -200,7 +202,7 @@ max_findings = 20
 1. 检测项目根目录
 2. 按文件列表判定语言栈
 3. 创建 `.claude/animus/` 目录
-4. 写入默认 `project-config.json`
+4. 写入默认 `config.toml`（含 `[project]` 段）
 5. 生成初始 `features.json`
 
 ---
@@ -442,6 +444,32 @@ python animus-engine.py archive --name "迭代名称"
 python animus-engine.py rebuild
 ```
 
+### 其他脚本
+
+| 脚本 | 功能 |
+|------|------|
+| `scripts/animus_init.py` | 项目初始化（类型检测/创建目录/写配置） |
+| `scripts/deferred_work.py` | deferred-work 管理（read/append/clear） |
+| `scripts/memlog.py` | memlog 事件写入 |
+
+---
+
+## 测试
+
+192 个单元测试，全部 Python 2/3 兼容，使用 tempfile 隔离文件系统。
+
+| 测试文件 | 覆盖 | 用例 |
+|----------|------|------|
+| `tests/test_config_loader.py` | 配置加载（默认值/合并/校验/兼容） | 34 |
+| `tests/test_engine.py` | 状态机流转/校验/DAG 检测 | 23 |
+| `tests/test_engine_extras.py` | 推荐引擎/归档/重建/memlog | 12 |
+| `tests/test_deferred_work.py` | deferred-work 读写/清空/Unicode | 10 |
+| `tests/test_hooks.py` | write-gate/pre-tool-use/pre-compact/stop-check/clang-format | 26 |
+| `tests/test_templates.py` | task_helpers/git_helper/report_generator/coding_session/init | 71 |
+| `tests/test_animus_init.py` | 项目类型检测/TOML 生成/目录创建/不覆盖 | 16 |
+
+运行：`python -m pytest tests/`
+
 ---
 
 ## 审查门控
@@ -496,7 +524,7 @@ persona: 你叫审查官 (Review)。一行不放过...
 | PreCompact | 上下文压缩前 | JSONL compact 事件 + 状态看板同步 | 10s |
 | Stop | 会话结束时 | 检查未完成任务，输出恢复提示 | 10s |
 
-所有钩子双平台（bash + PowerShell），失败 `exit 0` 不阻塞。
+优先级：bash → Python → exit 0（失败安全不阻塞主流程）。
 
 ---
 
@@ -514,11 +542,34 @@ persona: 你叫审查官 (Review)。一行不放过...
 │   └── plugin.json               # 插件清单
 ├── commands/                     # 斜杠命令
 ├── agents/                       # Agent 定义
-├── hooks/                        # 运行时钩子
-├── scripts/                      # Python 脚本
+├── hooks/                        # 运行时钩子（Python 版）
+│   └── scripts/
+│       ├── write-gate.py         # 写代码门控拦截
+│       ├── pre-tool-use.py       # 备份 + 编码转码
+│       ├── clang-format.py       # C++ 格式化 + GBK 转码
+│       ├── pre-compact.py        # 状态同步
+│       ├── stop-check.py         # 会话结束检查
+│       └── encoding-bridge.py    # GBK↔UTF-8 桥接
+├── scripts/                      # Python 引擎脚本
 │   ├── animus-engine.py          # 统一 CLI 入口
+│   ├── animus_init.py            # 项目初始化
 │   ├── engine/                   # 子命令模块
-│   └── config_loader.py          # 配置加载器
+│   │   ├── cmd_status.py         # 状态看板
+│   │   ├── cmd_transition.py     # 状态机流转
+│   │   ├── cmd_validate.py       # 校验
+│   │   ├── cmd_archive.py        # 归档
+│   │   └── cmd_rebuild.py        # memlog 重建
+│   ├── config_loader.py          # 配置加载器
+│   ├── deferred_work.py          # deferred-work 管理
+│   └── memlog.py                 # 事件源写入
+├── tests/                        # 192 个单元测试
+│   ├── test_config_loader.py     # 配置测试
+│   ├── test_engine.py            # 状态机测试
+│   ├── test_engine_extras.py     # 扩展功能测试
+│   ├── test_deferred_work.py     # deferred-work 测试
+│   ├── test_hooks.py             # 钩子模块测试
+│   ├── test_templates.py         # 模板模块测试
+│   └── test_animus_init.py       # 初始化测试
 └── skills/                       # 技能定义
     ├── party-mode/               # 辩论模式
     └── brainstorming/            # 头脑风暴
