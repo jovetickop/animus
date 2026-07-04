@@ -27,14 +27,14 @@
     → 引擎层 (scripts/animus-engine.py)
       → 子命令模块 (scripts/engine/*.py)
         → 持久化层 (features.json + memlog/)
-        → 配置层 (config.toml 三层覆盖)
+        → 配置层 (config.toml 两层覆盖)
 ```
 
 ### 核心设计
 
 - **状态机驱动**：任务状态流转严格校验，非法流转 exit 1
 - **单一事件源**：memlog 记录所有事件，features.json 由 memlog 派生重建
-- **三层配置**：defaults → team config.toml → user config.user.toml
+- **两层配置**：defaults → config.toml
 - **分层 Agent**：base/ → universal/ → {lang}/ 继承机制
 
 ---
@@ -291,8 +291,7 @@ persona: 你叫审查官 (Review)。一行不放过...
 项目根目录/
 ├── .claude/
 │   └── animus/
-│       ├── config.toml           # 团队配置（git 跟踪）
-│       ├── config.user.toml      # 用户配置（gitignored）
+│       ├── config.toml           # 配置（git 跟踪）
 │       ├── features.json         # 任务状态（由 memlog 派生）
 │       ├── memlog/               # 事件源目录
 │       ├── project-config.json   # 项目类型配置
