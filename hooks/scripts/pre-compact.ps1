@@ -35,6 +35,20 @@ if (Test-Path -LiteralPath $featuresPath) {
             $doneCount = ($tasks | Where-Object { $_.status -in @("passed", "completed") }).Count
             Write-Host "[animus] PreCompact: $doneCount/$totalCount 任务完成"
 
+            # 调用 show-status.py --summary 输出详细状态看板
+            $statusScript = Join-Path $PSScriptRoot ".." ".." "templates" "animus" "show-status.py"
+            if (Test-Path $statusScript) {
+                try {
+                    $pythonCmd = if (Get-Command "python" -ErrorAction SilentlyContinue) { "python" } else { "python3" }
+                    $statusOutput = & $pythonCmd $statusScript (Join-Path $projectRoot ".claude" "animus") "--summary" 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Host $statusOutput
+                    }
+                } catch {
+                    # 静默失败，不阻塞压缩流程
+                }
+            }
+
             # 3) 写入 JSONL compact 事件
             if (Test-Path -LiteralPath $historyPath) {
                 try {

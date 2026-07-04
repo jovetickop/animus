@@ -36,6 +36,13 @@ if [ -f "$features_path" ] && command -v jq >/dev/null 2>&1; then
 
     if [ -n "$stats" ]; then
         echo "[animus] PreCompact: $stats 任务完成"
+
+        # 调用 show-status.py --summary 输出详细状态看板
+        status_script="$script_dir/../../templates/animus/show-status.py"
+        if [ -f "$status_script" ]; then
+            python "$status_script" "$project_root/.claude/animus" "--summary" 2>/dev/null || true
+        fi
+
         # 3) 写入 JSONL compact 事件
         if [ -f "$history_path" ]; then
             timestamp=$(date "+%Y-%m-%dT%H:%M:%S")

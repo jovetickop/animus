@@ -57,4 +57,16 @@ $reportPath = Write-TaskReport -Task $targetTask -ProjectRoot $ProjectRoot -Curr
 Write-Host ("已将 " + ($TaskId) + " 从 " + ($currentStatus) + " 更新为 " + ($finalStatus))
 Write-Host ("已输出任务报告: " + ($reportPath))
 
+# 状态变更后自动输出全量迭代看板
+$statusPy = Join-Path $PSScriptRoot 'show-status.py'
+$stateDir = Join-Path $ClaudeRoot 'animus'
+if (Test-Path $statusPy -and (Test-Path (Join-Path $stateDir 'features.json'))) {
+    Write-Host ""
+    try {
+        & python $statusPy $stateDir 2>$null
+    } catch {
+        # 不阻塞主流程
+    }
+}
+
 if ($AutoPush) { Invoke-GitCommit -FeaturesPath $FeaturesPath -ReportPath $reportPath -TaskId $TaskId -Status $finalStatus }

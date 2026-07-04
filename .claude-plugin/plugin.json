@@ -15,6 +15,7 @@
     "./commands/animus-handoff.md",
     "./commands/animus-continue.md",
     "./commands/animus-archive.md",
-    "./commands/animus-debug.md"
+    "./commands/animus-debug.md",
+    "./commands/animus-status.md"
   ]
 }
