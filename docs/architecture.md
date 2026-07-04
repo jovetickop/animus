@@ -113,7 +113,7 @@
 | 命令 | 职责 | 文件 |
 |------|------|------|
 | `/animus-setup` | 项目初始化 + 类型检测 + 创建 `.claude/animus/` 运行时目录 | `commands/animus-setup.md` |
-| `/animus-dev` | 统一开发入口（五路路由：debug/oneshot/fast/light/full） | `commands/animus-dev.md` |
+| `/animus-dev` | 统一开发入口（四路路由：debug/fast/light/full） | `commands/animus-dev.md` |
 | ~~`/animus-plan`~~ | ~~已移除，改用 `/animus-dev --full`~~ | — |
 | `/animus-review` | 通用验收 + 语言专项验收 | `commands/animus-review.md` |
 | ~~`/animus-debug`~~ | ~~已移除，功能合并入 `/animus-dev` 的 debug-path~~ | — |

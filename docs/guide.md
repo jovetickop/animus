@@ -45,13 +45,12 @@
 
 **原理：** 根据用户输入的意图描述，AI 自动判断改动范围和类型，选择最合适的开发路径。所有路径都会写入 memlog 和 features.json，确保任务全程可追溯。
 
-**五路自动分流：**
+**四路自动分流：**
 
 | 路径 | 触发条件 | 流程 | 用途示例 |
 |------|---------|------|---------|
 | debug | bug 报告/异常/回归 | 3 问（复现→根因→修复策略）→ features.json → implement → review | "PDF 导出崩溃" |
-| oneshot | 零爆炸半径（改颜色值） | 1 句确认 → implement → review | "把按钮改成红色" |
-| fast | 1-2 文件/小改动 | 1 句确认 → implement → review | "加一个 tooltip" |
+| fast | 1-2 文件/小改动 | 1 句确认 → implement → review | "改按钮颜色" |
 | light | 3-10 文件/新增功能 | 3 问 → features.json → 拆任务 → implement → review | "加导出功能" |
 | full | 跨模块/架构改动 | 7 问 + 可选脑暴 → 拆任务队列 → implement → review | "重构数据层" |
 
@@ -235,7 +234,6 @@ animus 配置（两层覆盖结果）
 ```
 用户输入 → AI 检测意图类型
   ├── bug 报告/异常 → debug-path（3 问调试专用）
-  ├── 零爆炸半径 → oneshot（1 句确认）
   ├── 1-2 文件/小改动 → fast-path（1 句确认）
   ├── 3-10 文件/新增 → light-path（3 问）
   └── 跨模块/架构改动 → full-path（7 问 + 可选脑暴）
@@ -267,7 +265,7 @@ animus 配置（两层覆盖结果）
 
 | 段 | 字段 | 说明 |
 |----|------|------|
-| `[dev]` | `default_path` | 默认路径（auto/fast/light/full/oneshot） |
+| `[dev]` | `default_path` | 默认路径（auto/fast/light/full） |
 | | `autonomous` | 自主模式（true 时 AI 全权决策） |
 | `[review]` | `strictness` | 严格度（low/normal/high） |
 | | `max_findings` | 最多输出问题数 |

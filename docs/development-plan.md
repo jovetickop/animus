@@ -167,7 +167,7 @@
 
 | # | 任务 | 涉及文件 | 验收条件 |
 |---|------|---------|---------|
-| 1.4.1 | 新建 `commands/animus-dev.md`（五路路由） | `animus-dev.md`（新建） | 5 条路由（debug/oneshot/fast/light/full） |
+| 1.4.1 | 新建 `commands/animus-dev.md`（四路路由） | `animus-dev.md`（新建） | 4 条路由（debug/fast/light/full） |
 | 1.4.2 | 实现路径确认提示 | 同上 | AI 选路后问用户确认 |
 | 1.4.3 | 删除 `animus-plan.md` 和 `animus-debug.md` | 删除 2 个文件 | 命令不可用 |
 | 1.4.4 | 实现 write-gate hook | `write-gate.sh/.ps1`（新建） | 无任务时拦截 Write/Edit |
@@ -181,7 +181,6 @@
 | G1.4.1 | ◎ | 场景矩阵测试（每路由至少 2 个场景） | 五路路由全部走通 |
 | **场景矩阵：** |
 | | debug | "PDF 导出崩溃" + "按钮点不动" | 走 debug-path，3 问调试专用 Grilling | 2/2 |
-| | oneshot | "改个颜色" + "修个 typo" | 1 句确认后实施 | 2/2 |
 | | fast | "改按钮间距" + "加个 tooltip" | 1 问确认 | 2/2 |
 | | light | "加导出功能" + "重构 sidebar" | 3 问 | 2/2 |
 | | full | "重构数据层" + "加 User 系统" | 7 问 | 2/2 |
@@ -354,7 +353,6 @@
 每次 Phase 通过后，在 C++/Qt、Rust、Python 三个目标工程上执行：
 
 ```
-1. /animus-dev --oneshot 改个颜色值
 2. /animus-dev 修个 bug（debug-path）
 3. /animus-dev --full 加个小功能（含脑暴 + Party Mode）
 4. /animus-review 审查

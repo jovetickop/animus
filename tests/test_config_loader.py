@@ -168,12 +168,12 @@ class TestFallbackDefault:
         """user config.user.toml 非法 -> 忽略 user -> 仅 team + 默认。"""
         write_toml(
             os.path.join(animus_dir, "config.toml"),
-            {"dev": {"default_path": "oneshot"}},
+            {"dev": {"default_path": "full"}},
         )
         with open(os.path.join(animus_dir, "config.user.toml"), "w") as f:
             f.write("bad data [[[\n")
         cfg = load_config(animus_dir)
-        assert cfg["dev"]["default_path"] == "oneshot"
+        assert cfg["dev"]["default_path"] == "full"
 
     def test_team_section_missing(self, animus_dir):
         """team 配置缺少某个 section -> 该 section 保留默认。"""
@@ -269,7 +269,7 @@ class TestValidateConfigValid:
 
     def test_all_valid_variants(self):
         """dev.default_path 每个合法值都应通过。"""
-        for path in ("auto", "fast", "light", "full", "oneshot"):
+        for path in ("auto", "fast", "light", "full"):
             cfg = copy.deepcopy(DEFAULT_CONFIG)
             cfg["dev"]["default_path"] = path
             valid, errors = validate_config(cfg)

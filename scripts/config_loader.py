@@ -143,8 +143,8 @@ def validate_config(config):
 
     # dev.default_path
     dp = get_config_value(config, "dev.default_path", "")
-    if dp not in ("auto", "fast", "light", "full", "oneshot"):
-        errors.append("dev.default_path 必须为 auto/fast/light/full/oneshot")
+    if dp not in ("auto", "fast", "light", "full"):
+        errors.append("dev.default_path 必须为 auto/fast/light/full")
 
     # dev.autonomous
     auto = get_config_value(config, "dev.autonomous", None)

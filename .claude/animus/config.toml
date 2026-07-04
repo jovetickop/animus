@@ -5,7 +5,7 @@
 
 [dev]
 # 默认行为路径：AI 自动检测时的倾向
-default_path = "auto"         # auto / fast / light / full / oneshot
+default_path = "auto"         # auto / fast / light / full
 # 自主模式：true 时 AI 全权决策，不询问用户
 autonomous = false
 
