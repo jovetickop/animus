@@ -19,6 +19,7 @@ from scripts.config_loader import (
     DEFAULT_CONFIG,
     load_config,
     get_config_value,
+    get_current_sub_project,
     validate_config,
     _deep_merge,
     _try_load_toml,
@@ -401,3 +402,52 @@ class TestTryLoadToml:
         write_toml(path, {"dev": {"default_path": "fast"}})
         result = _try_load_toml(path)
         assert result == {"dev": {"default_path": "fast"}}
+
+
+class TestGetCurrentSubProject:
+    """测试 get_current_sub_project() 子项目检测"""
+
+    def test_no_sub_projects(self):
+        """无 sub_projects 时返回 None"""
+        assert get_current_sub_project({"project": {}}) is None
+
+    def test_empty_sub_projects(self):
+        """sub_projects 为空时返回 None"""
+        cfg = {"project": {"sub_projects": []}}
+        assert get_current_sub_project(cfg) is None
+
+    def test_matches_current_dir(self):
+        """当前在子项目目录内时返回 (dir, type)"""
+        import tempfile
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            sub = os.path.join(tmp, "frontend")
+            os.makedirs(sub)
+            cfg = {"project": {"sub_projects": [{"dir": "frontend", "type": "node"}]}}
+            result = get_current_sub_project(cfg, sub)
+            assert result is not None
+            assert result[0] == "frontend"
+            assert result[1] == "node"
+
+    def test_not_in_sub_project(self):
+        """不在任何子项目内时返回 None"""
+        import tempfile
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            unrelated = os.path.join(tmp, "other")
+            os.makedirs(unrelated)
+            cfg = {"project": {"sub_projects": [{"dir": "frontend", "type": "node"}]}}
+            result = get_current_sub_project(cfg, unrelated)
+            assert result is None
+
+    def test_sub_dir_in_path(self):
+        """在子项目的深层子目录内也能识别"""
+        import tempfile
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            deep = os.path.join(tmp, "frontend", "src", "components")
+            os.makedirs(deep)
+            cfg = {"project": {"sub_projects": [{"dir": "frontend", "type": "node"}]}}
+            result = get_current_sub_project(cfg, deep)
+            assert result is not None
+            assert result[0] == "frontend"

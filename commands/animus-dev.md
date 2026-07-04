@@ -23,7 +23,8 @@ description: 统一开发入口（四路路由：debug/fast/light/full）
 
 1. 检测 memlog 是否有事件 → 有则自动重建 features.json，输出「检测到上次进度，已恢复」
 2. 检测 features.json 是否有 in_progress 任务 → 有则直接继续实施
-3. 根据用户输入自动判断意图类型，选路
+3. **检测子项目** → 调用 `python -c "from scripts.config_loader import load_config, get_current_sub_project; print(get_current_sub_project(load_config()))"`，如果当前在子项目目录（如 `frontend/`）内，输出「检测到当前在 frontend/（node）目录」，使用对应语言的 agent 和规则
+4. 根据用户输入自动判断意图类型，选路
 4. 输出「检测到 XX，将使用 XX 路径」，等待用户确认
 5. 用户确认后进入对应路径的 Grilling 流程
 6. 所有路径结束后写入 features.json，走 implement → review

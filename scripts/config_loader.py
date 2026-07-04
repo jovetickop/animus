@@ -147,6 +147,36 @@ def get_config_value(config, key_path, default=None):
     return val
 
 
+def get_current_sub_project(config, cwd=None):
+    """
+    检测当前工作目录是否在某个子项目内。
+    
+    返回 (sub_dir, project_type) 或 None。
+    """
+    if cwd is None:
+        cwd = os.getcwd()
+    cwd = os.path.abspath(cwd)
+
+    sub_projects = get_config_value(config, "project.sub_projects", [])
+    if not sub_projects:
+        return None
+
+    # 从 cwd 向上查找，匹配最近的子项目
+    for sub in sub_projects:
+        sub_dir = sub.get("dir", "") if isinstance(sub, dict) else ""
+        sub_type = sub.get("type", "") if isinstance(sub, dict) else ""
+        if not sub_dir or not sub_type:
+            continue
+        
+        # 检查 cwd 是否以 sub_dir 开头或是其子目录
+        # 相对于项目根（config.toml 所在目录的父目录的父目录）
+        # 简化：直接匹配路径中是否包含 sub_dir
+        if sub_dir in cwd.split(os.sep):
+            return (sub_dir, sub_type)
+
+    return None
+
+
 def validate_config(config):
     """
     验证配置的合法性。返回 (is_valid, errors_list)。
