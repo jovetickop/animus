@@ -59,6 +59,59 @@ def _read_json(path):
 # cmd_status — run()
 # ====================================================================
 
+class TestCountDeferred:
+    """测试 _count_deferred() 函数"""
+
+    def test_no_deferred_file(self):
+        """deferred-work.md 不存在时返回 0"""
+        with tempfile.TemporaryDirectory() as tmp:
+            count = cmd_status._count_deferred(tmp)
+            assert count == 0
+
+    def test_empty_deferred_file(self):
+        """deferred-work.md 为空时返回 0"""
+        with tempfile.TemporaryDirectory() as tmp:
+            p = os.path.join(tmp, "deferred-work.md")
+            with open(p, "w", encoding="utf-8") as f:
+                f.write("# 延迟工作记录\n\n")
+            count = cmd_status._count_deferred(tmp)
+            assert count == 0
+
+    def test_deferred_with_items(self):
+        """有未完成的 defer 条目时返回正确数量"""
+        with tempfile.TemporaryDirectory() as tmp:
+            p = os.path.join(tmp, "deferred-work.md")
+            with open(p, "w", encoding="utf-8") as f:
+                f.write("# 延迟工作记录\n\n")
+                f.write("## 2026-07-04\n")
+                f.write("- [ ] src/a.cpp:1 问题A\n")
+                f.write("- [ ] src/b.cpp:2 问题B\n")
+            count = cmd_status._count_deferred(tmp)
+            assert count == 2
+
+    def test_deferred_with_mixed_items(self):
+        """完成的条目（[x]）不计入待办"""
+        with tempfile.TemporaryDirectory() as tmp:
+            p = os.path.join(tmp, "deferred-work.md")
+            with open(p, "w", encoding="utf-8") as f:
+                f.write("# 延迟工作记录\n\n")
+                f.write("## 2026-07-04\n")
+                f.write("- [ ] src/a.cpp:1 未完成\n")
+                f.write("- [x] src/b.cpp:2 已完成\n")
+                f.write("- [ ] src/c.cpp:3 未完成\n")
+            count = cmd_status._count_deferred(tmp)
+            assert count == 2
+
+    def test_deferred_read_error(self):
+        """读取失败时不抛异常，返回 0"""
+        with tempfile.TemporaryDirectory() as tmp:
+            p = os.path.join(tmp, "deferred-work.md")
+            # 创建不可读的文件（取决于权限）
+            with open(p, "w", encoding="utf-8") as f:
+                f.write("- [ ] 测试\n")
+            count = cmd_status._count_deferred(tmp)
+            assert count >= 1
+
 class TestCmdStatusRun:
     """测试 cmd_status.run() 主流程"""
 
